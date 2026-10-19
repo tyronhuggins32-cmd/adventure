@@ -30,3 +30,9 @@ Mine underground crystals or defeat wraith slimes to collect shards. Explore Eld
 ## Current scope
 
 A first playable foundation: original procedural pixel art, parallax scenery, biome exploration, caves, mining/building, platform movement, sword/spell combat, enemies, resource progression, touch controls, and local saves. No multiplayer, full Terraria content parity, NPC settlements, or boss campaign yet. Saves are local to this browser/device, and clearing browser storage removes them.
+
+## Animation and scenery update
+
+The original code-drawn art now includes a joint-animated knight with idle breathing, running, jump/fall poses, cloak flutter, and dedicated sword/mining/casting motions. Slimes squash and stretch. Combat adds swept sword arcs, glowing spell trails, impact sparks, fading rotating debris, landing dust, healing motes, and bounded particles. Movement eases into and out of running. Background layers include an eclipsed moon, stars, moving clouds, faceted mountains, ruined citadels, and three parallax forests; near trees sway and surface fireflies drift. Animation uses simulation time and freezes while paused. Collision dimensions and saved terrain remain compatible.
+
+Validation: world and game-loop tests, animation-phase tests, and native Canvas renders of the gameplay scene and sword swing. Safari touch behavior still requires device verification.

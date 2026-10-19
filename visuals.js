@@ -1,0 +1,37 @@
+// Original code-drawn fantasy art. All animation phases use simulation time.
+const TAU=Math.PI*2;
+function poly(g,points,color){g.fillStyle=color;g.beginPath();points.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.fill();}
+function box(g,x,y,w,h,c){g.fillStyle=c;g.fillRect(x,y,w,h);}
+function glow(g,x,y,r,color){let gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,color);gr.addColorStop(1,'transparent');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);}
+export function animationPose(p,t,action){let run=Math.min(1,Math.abs(p.vx)/175),air=!p.ground;return {stride:air?0:Math.sin(t*16)*run,bob:air?0:Math.abs(Math.cos(t*16))*run*1.3+Math.sin(t*3)*.5,air,attack:action&&action.age<action.duration?Math.sin(Math.PI*action.age/action.duration):0};}
+export function drawHero(g,p,camera,t,action,forged){if(p.invuln>0&&Math.floor(t*18)%2)return;let pose=animationPose(p,t,action);g.save();g.translate(p.x-camera.x+8,p.y-camera.y+31);g.scale(p.face,1);let bob=pose.bob,air=pose.air;
+ // Art extends outside the unchanged 15x31 collision body.
+ let flutter=Math.sin(t*10)*2+Math.abs(p.vx)*.018;
+ poly(g,[[-3,-25],[-11,-23],[-14-flutter,-6],[-7,-9],[-4,0],[2,-9]],'#352336');
+ poly(g,[[-4,-24],[-9,-22],[-11-flutter,-7],[-5,-10],[-2,-3],[2,-12]],'#9b4e62');
+ box(g,-4,-23,2,14,'#d88678');
+ for(let side of [-1,1]){let stride=pose.stride*side;g.save();g.translate(side*3,-10-bob);g.rotate(air?side*.3:stride*.55);box(g,-3,-1,6,10,'#172b3e');box(g,-2,1,4,7,'#526574');box(g,-3,7,8,3,'#b1a58b');g.restore();}
+ g.save();g.translate(0,-bob);box(g,-7,-23,14,13,'#172b3e');box(g,-6,-23,12,10,'#668d97');box(g,-4,-22,4,9,'#b5c6b7');box(g,1,-22,4,9,'#83a9ad');box(g,-7,-12,15,3,'#463838');box(g,1,-12,3,3,'#e0c18a');
+ box(g,-6,-32,12,11,'#1c2939');box(g,-5,-32,10,8,'#9faeb0');box(g,-3,-34,7,3,'#cbd1bc');box(g,3,-33,3,5,'#c9d7ca');box(g,-5,-27,12,4,'#203546');box(g,3,-27,3,2,'#b7eced');box(g,-5,-22,11,2,'#d5c3a0');box(g,-8,-23,5,5,'#c4c5ae');
+ // Shoulder pivot produces a full weapon arc, with anticipation and follow-through.
+ g.save();g.translate(5,-20);let angle=action?.kind==='spell'?-.9:pose.attack?(-1.5+3.2*action.age/action.duration):.12+pose.stride*.15;g.rotate(angle);box(g,-2,0,5,9,'#456675');box(g,-2,7,5,4,'#d5b59a');
+ if(action?.kind==='mine'){box(g,0,-10,3,24,'#82664a');poly(g,[[-10,-10],[10,-14],[15,-5],[7,-9],[-9,-6]],'#b3c8c5');}
+ else if(action?.kind==='spell'){glow(g,1,11,18,'#70e4ff88');box(g,-2,7,5,5,'#e3ffff');}
+ else {box(g,0,-20,3,28,forged?'#bcffff':'#dce0cb');box(g,0,-19,1,23,'#ffffff');poly(g,[[0,-20],[1,-25],[3,-20]],'#fff1cd');box(g,-4,3,11,3,'#b49c6c');box(g,0,6,3,7,'#594746');}g.restore();g.restore();g.restore();}
+export function drawEnemy(g,e,camera,t){let air=!e.ground,sx=air?.88:1.12+Math.sin(t*8+e.x)*.06,sy=air?1.18:.85;g.save();g.translate(e.x-camera.x+e.w/2,e.y-camera.y+e.h);g.scale(sx,sy);poly(g,[[-13,0],[-13,-8],[-10,-15],[-5,-20],[5,-20],[11,-14],[14,-5],[12,0]],'#352943');poly(g,[[-10,-2],[-11,-9],[-6,-17],[4,-18],[10,-11],[11,-2]],'#8c76ad');box(g,-5,-17,7,2,'#c4a7da');box(g,-6,-11,3,4,'#f6e6b3');box(g,4,-11,3,4,'#f6e6b3');box(g,-2,-5,4,2,'#3d3055');g.restore();box(g,e.x-camera.x,e.y-camera.y-7,e.w*e.hp/60,2,'#cfb0ef');}
+export function drawAction(g,p,camera,a,forged){if(!a||a.age>=a.duration||a.kind!=='sword')return;let u=a.age/a.duration;g.save();g.translate(p.x-camera.x+8,p.y-camera.y+15);g.scale(p.face,1);g.globalAlpha=Math.sin(u*Math.PI)*.8;g.strokeStyle=forged?'#a3f5ff':'#ffde9b';g.lineWidth=6;g.beginPath();g.arc(0,0,42,-1.5+u*1.8,-.4+u*1.8);g.stroke();g.globalAlpha*=.4;g.lineWidth=13;g.stroke();g.restore();}
+export function drawBolt(g,b,camera,t){let x=b.x-camera.x,y=b.y-camera.y;g.save();g.globalCompositeOperation='lighter';glow(g,x,y,25,'#55b4ef66');g.strokeStyle='#78c9f8';g.lineWidth=5;g.beginPath();g.moveTo(x-b.vx*.035,y-b.vy*.035);g.lineTo(x,y);g.stroke();g.fillStyle='#edffff';g.beginPath();g.arc(x,y,4+Math.sin(t*25),0,TAU);g.fill();g.restore();}
+export function drawParticle(g,p,camera){g.save();g.globalAlpha=Math.max(0,p.life/.6);g.translate(p.x-camera.x,p.y-camera.y);g.rotate(p.life*7);box(g,-p.size/2,-p.size/2,p.size,p.size,p.color);g.restore();}
+export function drawBackground(g,W,H,camera,t,world,biome){let purple=biome.name==='Amethyst Reach',ash=biome.name==='Ashen March';let sky=g.createLinearGradient(0,0,0,H);sky.addColorStop(0,purple?'#24243e':ash?'#302938':'#152e46');sky.addColorStop(.6,purple?'#8c739c':ash?'#b28c82':'#789eaa');sky.addColorStop(1,'#d6c8a4');g.fillStyle=sky;g.fillRect(0,0,W,H);
+ // Distant stars and an eclipsed moon above the cloud banks.
+ for(let i=0;i<38;i++){let x=(world.random(i,290)*W-camera.x*.015%W+W)%W,y=world.random(i,291)*H*.38;g.globalAlpha=.2+.4*(.5+.5*Math.sin(t+i));box(g,x,y,1.5,1.5,'#e4e6dc');}g.globalAlpha=1;
+ let mx=W*.78-camera.x*.012%W,my=H*.2-camera.y*.025;glow(g,mx,my,85,'#ecdcbc22');g.fillStyle='#e6ddbc';g.beginPath();g.arc(mx,my,29,0,TAU);g.fill();g.fillStyle=purple?'#38334e':'#30465a';g.beginPath();g.arc(mx+12,my-9,27,0,TAU);g.fill();
+ for(let i=0;i<7;i++){let x=((i*283-camera.x*.04-t*3)%(W+400)+W+400)%(W+400)-200,y=H*.18+(i%3)*28;g.globalAlpha=.09;for(let j=0;j<5;j++)box(g,x+j*34,y+Math.sin(j)*6,100,8,'#f7e5d0');}g.globalAlpha=1;
+ // Jagged peaks with illuminated facets and snow-capped ridgelines.
+ for(let layer=0;layer<2;layer++){let scale=.08+layer*.08,span=260,origin=Math.floor(camera.x*scale/span);for(let i=origin-1;i<origin+Math.ceil(W/span)+2;i++){let x=i*span-camera.x*scale,y=H*.54+layer*65-camera.y*.05,h=95+world.random(i,700+layer)*120;poly(g,[[x-110,y+160],[x+70,y-h],[x+260,y+160]],layer?'#3b5969':'#53687b');poly(g,[[x+70,y-h],[x+100,y+20],[x+260,y+160]],layer?'#304c60':'#465c71');poly(g,[[x+70,y-h],[x+35,y-h+64],[x+68,y-h+49],[x+86,y-h+70]],'#bcc8c347');}}
+ // Distant citadels, broken bridges and narrow towers.
+ let base=H*.66-camera.y*.07;for(let i=Math.floor(camera.x*.22/700)-1;i<Math.floor(camera.x*.22/700)+Math.ceil(W/700)+2;i++){let x=i*700-camera.x*.22+130;box(g,x,base-53,130,105,'#334e60');for(let j=0;j<4;j++){let xx=x+j*34,hh=j===1?119:75;box(g,xx,base-hh,20,hh,'#334e60');poly(g,[[xx-4,base-hh],[xx+10,base-hh-24],[xx+24,base-hh]],'#2b4657');box(g,xx+8,base-hh+15,3,9,'#d4ba8366');}poly(g,[[x+130,base-15],[x+235,base+7],[x+235,base+16],[x+130,base]],'#334e60');}
+ // Three independent forest layers anchored in world coordinates.
+ for(let layer=0;layer<3;layer++){let speed=.28+layer*.15,span=65-layer*10,origin=Math.floor(camera.x*speed/span),baseY=H*.75+layer*65-camera.y*.12;for(let i=origin-1;i<origin+Math.ceil(W/span)+2;i++){let x=i*span-camera.x*speed,h=70+world.random(i,811+layer)*110,col=layer===0?'#304b58':layer===1?'#28474d':purple?'#34394b':'#23423f';box(g,x,baseY-h,5,h+150,col);for(let k=0;k<4;k++)poly(g,[[x+2,baseY-h-22+k*24],[x-26-k*5,baseY-h+35+k*26],[x+31+k*5,baseY-h+35+k*26]],col);}}
+}
+export function drawTree(g,x,y,height,color,t,phase){g.save();g.translate(x,y);let sway=Math.sin(t*1.3+phase)*2.2;poly(g,[[-9,0],[-5,-height*.7],[-13,-height],[2,-height-15],[7,-height*.5],[13,0]],'#303938');poly(g,[[-3,0],[-2,-height],[2,-height-9],[5,0]],'#76614b');for(let i=0;i<6;i++){let a=i*2.4,xx=Math.cos(a)*29+sway,yy=-height+Math.sin(a)*27;poly(g,[[0,-height+48],[xx-19,yy+17],[xx-31,yy-6],[xx-16,yy-23],[xx+5,yy-31],[xx+33,yy-4],[xx+27,yy+19]],color);poly(g,[[xx-19,yy+17],[xx-31,yy-6],[xx-16,yy+1],[xx+5,yy-2],[xx+27,yy+19]],'#101f222b');poly(g,[[xx-16,yy-23],[xx+5,yy-31],[xx+22,yy-12],[xx+3,yy-17]],'#c4d39a19');box(g,xx-10,yy-17,17,3,'#c4d39a22');box(g,xx+9,yy+2,8,3,'#112c2922');}g.restore();}
