@@ -1,23 +1,35 @@
-# Kingdom Clash
+# Kingdom Clash — The Living Table
 
-A browser card battler inspired by four-lane landscape games. Choose Farm, Ice, Beach, or Medieval; each commander founds four matching landscapes and brings a 28-card deck with three creature types, three kingdom buildings, and a spell.
+A four-lane browser card battler with illustrated terrain, creature and building miniatures, live placement reactions, and an AI opponent.
 
-## Play
+## Start a battle
 
-Select a kingdom, select a hand card, and choose a friendly lane. Each turn grants 2 AP. A lane holds one creature and one building. Floop exchanges a creature's attack for its kingdom ability. Fight resolves all ready creatures, with simultaneous creature damage and direct hero damage through empty lanes. The first player cannot fight or Floop on their first turn. The opposing kingdom is controlled by the bot. Reduce its hero from 30 HP to zero; drawing from an empty deck inflicts fatigue damage.
+1. Choose a **Territory Card**: Corn Field, Snowy Lands, The Beach, or The Knight Kingdom. This determines your scenery.
+2. Choose one of that territory’s three **Commander Cards**. Read its passive, creature Floop power, and army preview. You can go back and change territory.
+3. Place the commander on one of your four landscapes. The bot places its own commander. Both placements unlock the battle hands.
+4. Play your commander’s **Battle Deck**: 28 cards made from four copies each of three creatures, three buildings, and one spell. Commanders occupy a separate rear slot and share the hero’s 30 HP; damage through any empty enemy lane hits the opposing commander.
 
-Buildings heal the hero, increase lane attack, or reduce incoming direct damage. Cards are drawn from a shuffled deck; the hand filters expose creatures, buildings, and spells without providing free extra cards.
+## Commanders
 
-## Local
+| Territory | Commanders |
+| --- | --- |
+| Corn Field | The Farmer, Scarecrow, The Corn Druid |
+| Snowy Lands | Hearthkeeper, Frost Witch, Glacier Shepherd |
+| The Beach | Castaway Captain, Reef Oracle, Tide Collector |
+| The Knight Kingdom | Banner Knight, Royal Castellan, Exiled Prince |
 
-`npm start` serves the game at http://localhost:8000. `npm test` runs Node tests, including automated complete matches for all 16 kingdom combinations. The older grid engine is retained as unused source; the website imports lanes.js.
+Every commander has a distinct seven-card roster, creature stats, passive, and Floop ability. Play styles include summon healing, fear, plant growth, freezing, large beasts, salvage draws, draining, rallying, fortifications, and risky attack boosts. The rival uses a valid randomly chosen territory and commander.
 
-GitHub Pages publishes main through the existing workflow. No external dependencies or assets are required. Card illustrations use CSS landscapes and animated emoji figures; this is an original kingdom adaptation, not a complete reproduction of the licensed Card Wars game.
+## Rules and controls
 
-## Living tabletop update
+Receive 2 AP each turn. Select a hand card, then a highlighted landscape. Each lane holds one creature and one building in addition to its commander marker. Floop exhausts a creature to activate its ability instead of attacking. Fight resolves all ready creatures: opposed creatures exchange damage; empty enemy lanes expose the commander. The first player cannot fight or Floop on their first turn. Frozen creatures miss their next turn.
 
-The battlefield now uses raised illustrated landscapes on a green felt table, with original SVG creatures and buildings shared between cards and miniatures. Farm crops sway, ice crystals shimmer, coastal water drifts, and windmills turn. Cards show readable ability rules, AP cost, kingdom, and combat stats. Click a miniature to inspect its full card.
+The first empty-deck draw inflicts 2 fatigue damage, the next 4, then 6, and so on. Increasing fatigue prevents healing decks from stalling indefinitely. The Frost Witch’s first spell per turn is free; its current cost is displayed in hand. All passive bonuses apply in the rules engine.
 
-Successful placements emit typed, sequential visual events: creature summons, building construction, spells, Floop powers, attacks, and defeated-unit fades. The bot publishes intermediate snapshots so its card plays animate separately. Filtering or selecting a card does not replay events. New Battle cancels any pending bot playback. Sound is off by default and can be enabled with the Sound button. Reduced-motion preferences disable ambient movement and shorten bot playback.
+Tap battlefield miniatures to inspect cards. Sound is off by default. Reduced-motion preferences disable ambient animation and shorten bot playback. On phones, scroll inside the table to see all lanes; the hand scrolls separately.
 
-On narrow screens, the table scrolls horizontally inside its frame while cards scroll in a separate hand, keeping four lanes and text readable. No external asset requests are needed for the artwork.
+## Development
+
+`npm start` serves http://localhost:8000. `npm test` runs the rule tests, including all 144 commander pairings. GitHub Pages deploys main through the existing workflow.
+
+`commanders.js` defines rosters and passives; `lanes.js` runs combat and emits sequential events; `art.js` draws original SVG illustrations; `app.js` presents the setup stages and live table. The older grid engine remains unused legacy source. No external art assets or runtime dependencies are required.
