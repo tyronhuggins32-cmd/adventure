@@ -1,38 +1,44 @@
-# Adventure — Elderwild
+# Kingdom Clash ⚔️
 
-A playable original 2D side-view fantasy sandbox inspired by Terraria's exploration format. Runs entirely in a browser with no dependencies, external art, or network requests.
+A free-to-play-in-your-browser fantasy tactical card battler. Battle against the Crimson Empire AI with a Kingdom Deck on a 16×16 battlefield. No account, installation, backend, or paid services needed.
 
-## Play locally
+## Play
 
-Run `npm start` (Python 3 required), then open http://localhost:8000. Serve this directory on any static host to play online. This repository does not automatically publish a public website.
+**Website (after GitHub Pages is enabled and deployed):** https://tyronhuggins32-cmd.github.io/adventure/
 
-Enter a text or numeric world seed. The same seed reproduces terrain, biomes, caves, ore, crystals, trees, and ruins. Saved edits and progress are stored separately per seed in this browser. Continue resumes them; choose a different seed to start another world.
+Open the website on desktop or mobile. To run locally: run `npm start`, then open http://localhost:8000. Run `npm test` to check core strategy rules. Files are static HTML, CSS, and vanilla JavaScript modules, so no build step is required.
 
-## Controls
+## How to play
 
-- A/D or left/right arrows: move. Space/W/up: jump.
-- 1: sword; 2: pickaxe; 3: place earth; 4: mana bolt; 5: healing potion.
-- Aim with the pointer, hold left click to use. Right click places earth.
-- E: forge the Starblade using 8 crystals, doubling sword damage.
-- Escape or Pause: pause and save. Saves also run every 10 seconds.
-- Touch: movement/jump buttons, tap the world to aim, hold Use. Tap hotbar to select tools.
+1. Pick Farm, Ice, Beach, or Medieval Kingdom from the Kingdom Deck. Your chosen commander changes your half of the battlefield's terrain.
+2. Tap a free square in the **bottom four rows** to place your Commander. The AI deploys its Commander on the other side, and each side gets a kingdom building.
+3. Every turn, you have **two actions**. Select a character card to deploy a unit near your Commander or surviving building, or select a warrior already on the board to move or attack.
+4. Each card costs gold; every turn you gain gold. Your Hay Field, Ice House, Dock, or Knight House provides income and unlocks tier 2 and 3 cards when upgraded. Protect it! You can rebuild a destroyed building when its square becomes clear.
+5. Attacks fill the energy meter. At 100 energy, select a warrior and click **Power Attack** to hit a nearby enemy with a charged strike.
+6. Defeat the enemy Commander to win. Your own Commander must survive.
 
-Mine underground crystals or defeat wraith slimes to collect shards. Explore Elderwood, Amethyst Reach, and Ashen March. Death returns you to the starting shrine with your inventory preserved.
+| Kingdom | Commander | Building |
+| --- | --- | --- |
+| Farm | Harvest King | Hay Field |
+| Ice | Frost Queen | Ice House |
+| Beach | Tide Monarch | Dock |
+| Medieval | Iron King | Knight House |
 
-## World engine
+Each battlefield unit is displayed as a small animated character, while the full-size playable cards remain in the deck.
 
-`world.js` uses a string seed hash and coordinate-based smooth noise. Generation is order independent, including negative coordinates. Terrain streams lazily in 16×16 tile chunks; only visible chunk canvases are rendered. Far chunks and their render caches are evicted while a sparse edit map preserves changes. Tile art is cached until its chunk is edited. Horizontal travel is unbounded; depth is 180 tiles with an indestructible floor. Generation is synchronous and viewport bounded, not worker based.
+## Publishing on GitHub Pages
 
-## Checks
+This repository includes `.github/workflows/pages.yml`, which deploys the website from `main` every time code is pushed.
 
-`npm test` runs Node's built-in tests for determinism, seed variation, negative coordinates, chunk eviction/edit persistence, depth limits, and underground resources.
+**One-time setup (repo owner):**
+
+1. Go to **Settings → Pages** in this repository.
+2. Under **Build and deployment → Source**, select **GitHub Actions**.
+3. Open **Actions → Deploy Kingdom Clash** and check the latest deployment. If necessary, use **Run workflow**.
+4. When the workflow succeeds, open https://tyronhuggins32-cmd.github.io/adventure/.
+
+If Pages was not enabled before the workflow ran, selecting GitHub Actions and rerunning the workflow completes setup. GitHub may need a few minutes to publish the first deployment.
 
 ## Current scope
 
-A first playable foundation: original procedural pixel art, parallax scenery, biome exploration, caves, mining/building, platform movement, sword/spell combat, enemies, resource progression, touch controls, and local saves. No multiplayer, full Terraria content parity, NPC settlements, or boss campaign yet. Saves are local to this browser/device, and clearing browser storage removes them.
-
-## Animation and scenery update
-
-The original code-drawn art now includes a joint-animated knight with idle breathing, running, jump/fall poses, cloak flutter, and dedicated sword/mining/casting motions. Slimes squash and stretch. Combat adds swept sword arcs, glowing spell trails, impact sparks, fading rotating debris, landing dust, healing motes, and bounded particles. Movement eases into and out of running. Background layers include an eclipsed moon, stars, moving clouds, faceted mountains, ruined citadels, and three parallax forests; near trees sway and surface fireflies drift. Animation uses simulation time and freezes while paused. Collision dimensions and saved terrain remain compatible.
-
-Validation: world and game-loop tests, animation-phase tests, and native Canvas renders of the gameplay scene and sword swing. Safari touch behavior still requires device verification.
+This is a playable single-player prototype with local browser AI, not online PvP. Animations are lightweight CSS, artwork is native emoji character sprites, and each half of the battlefield matches its commander's kingdom. More elaborate character animations, art, sound, and online multiplayer can be added later.
