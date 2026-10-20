@@ -4,14 +4,14 @@ A free-to-play-in-your-browser fantasy tactical card battler. Battle against the
 
 ## Play
 
-**Website (after GitHub Pages is enabled and deployed):** https://tyronhuggins32-cmd.github.io/adventure/
+**Play online:** https://tyronhuggins32-cmd.github.io/adventure/
 
 Open the website on desktop or mobile. To run locally: run `npm start`, then open http://localhost:8000. Run `npm test` to check core strategy rules. Files are static HTML, CSS, and vanilla JavaScript modules, so no build step is required.
 
 ## How to play
 
-1. Pick Farm, Ice, Beach, or Medieval Kingdom from the Kingdom Deck. Your chosen commander changes your half of the battlefield's terrain.
-2. Tap a free square in the **bottom four rows** to place your Commander. The AI deploys its Commander on the other side, and each side gets a kingdom building.
+1. **Deck 01: Kingdom Deck** opens first with four full-size Commander cards: Farm, Ice, Beach, and Medieval. Select one to choose your Commander and terrain.
+2. Tap a highlighted square in the **bottom four rows** to place your Commander. The AI deploys its own Commander automatically, and both sides get a matching kingdom building. **Deck 02: Warrior Deck** unlocks when both Commanders are placed.
 3. Every turn, you have **two actions**. Select a character card to deploy a unit near your Commander or surviving building, or select a warrior already on the board to move or attack.
 4. Each card costs gold; every turn you gain gold. Your Hay Field, Ice House, Dock, or Knight House provides income and unlocks tier 2 and 3 cards when upgraded. Protect it! You can rebuild a destroyed building when its square becomes clear.
 5. Attacks fill the energy meter. At 100 energy, select a warrior and click **Power Attack** to hit a nearby enemy with a charged strike.
