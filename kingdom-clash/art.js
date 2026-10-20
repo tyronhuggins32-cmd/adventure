@@ -1,6 +1,6 @@
 // Code-native illustrations: shared visual vocabulary for cards and live miniatures.
 export const PALETTES={farm:['#efc550','#8ead44','#ffe6a1','#71552d'],ice:['#b5ecff','#76b5d2','#eefcff','#456283'],beach:['#f1d193','#44b8ae','#b5efe0','#376d71'],medieval:['#a8b67c','#617d56','#d5c0e9','#5c506c']};
-const wrap=(body,cls='',box='0 0 200 200')=>`<svg class="illustration ${cls}" viewBox="${box}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><g stroke="#293b35" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${body}</g></svg>`;
+const wrap=(body,cls='',box='0 0 200 200')=>`<svg class="illustration ${cls}" viewBox="${box}" preserveAspectRatio="${cls==='terrain'?'none':'xMidYMid meet'}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><g stroke="#293b35" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${body}</g></svg>`;
 const eyes=(x=88,y=96)=>`<ellipse cx="${x}" cy="${y}" rx="4" ry="6" fill="#25352b" stroke="none"/><ellipse cx="${x+25}" cy="${y}" rx="4" ry="6" fill="#25352b" stroke="none"/><path d="M${x+6} ${y+14}q7 7 14 0" fill="none"/>`;
 export function figure(k,id='u0'){
  let [gold,land,light,dark]=PALETTES[k],tier=+id.slice(-1)||0,body='';
