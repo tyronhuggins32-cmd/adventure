@@ -21,14 +21,7 @@ test("every Kingdom Commander creates its own building and starts a match only a
   }
 });
 
-test("website begins at Kingdom Deck with Warrior Deck locked",()=>{
-  const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
-  const js=readFileSync(new URL("../kingdom-clash/app.js",import.meta.url),"utf8");
-  assert.match(html,/id="kingdomSection"/);
-  assert.match(html,/id="kingdoms"/);
-  assert.match(html,/id="warriorStage" class="deck-step locked"/);
-  assert.match(html,/id="layout" hidden/);
-  assert.match(js,/if\(!chosenRealm\)return/);
-  assert.match(js,/s\.phase==="battle"/);
-  assert.match(js,/for\(const \[key,realm\] of Object\.entries\(REALMS\)\)/);
+test("website starts at kingdom selection with lane battle hidden",()=>{
+const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
+assert.match(html,/id="setup"/);assert.match(html,/id="game" hidden/);assert.match(html,/id="kingdoms"/);assert.match(html,/id="hand"/);
 });

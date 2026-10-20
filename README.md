@@ -1,44 +1,15 @@
-# Kingdom Clash ⚔️
+# Kingdom Clash
 
-A free-to-play-in-your-browser fantasy tactical card battler. Battle against the Crimson Empire AI with a Kingdom Deck on a 16×16 battlefield. No account, installation, backend, or paid services needed.
+A browser card battler inspired by four-lane landscape games. Choose Farm, Ice, Beach, or Medieval; each commander founds four matching landscapes and brings a 28-card deck with three creature types, three kingdom buildings, and a spell.
 
 ## Play
 
-**Play online:** https://tyronhuggins32-cmd.github.io/adventure/
+Select a kingdom, select a hand card, and choose a friendly lane. Each turn grants 2 AP. A lane holds one creature and one building. Floop exchanges a creature's attack for its kingdom ability. Fight resolves all ready creatures, with simultaneous creature damage and direct hero damage through empty lanes. The first player cannot fight or Floop on their first turn. The opposing kingdom is controlled by the bot. Reduce its hero from 30 HP to zero; drawing from an empty deck inflicts fatigue damage.
 
-Open the website on desktop or mobile. To run locally: run `npm start`, then open http://localhost:8000. Run `npm test` to check core strategy rules. Files are static HTML, CSS, and vanilla JavaScript modules, so no build step is required.
+Buildings heal the hero, increase lane attack, or reduce incoming direct damage. Cards are drawn from a shuffled deck; the hand filters expose creatures, buildings, and spells without providing free extra cards.
 
-## How to play
+## Local
 
-1. **Deck 01: Kingdom Deck** opens first with four full-size Commander cards: Farm, Ice, Beach, and Medieval. Select one to choose your Commander and terrain.
-2. Tap a highlighted square in the **bottom four rows** to place your Commander. The AI deploys its own Commander automatically, and both sides get a matching kingdom building. **Deck 02: Warrior Deck** unlocks when both Commanders are placed.
-3. Every turn, you have **two actions**. Select a character card to deploy a unit near your Commander or surviving building, or select a warrior already on the board to move or attack.
-4. Each card costs gold; every turn you gain gold. Your Hay Field, Ice House, Dock, or Knight House provides income and unlocks tier 2 and 3 cards when upgraded. Protect it! You can rebuild a destroyed building when its square becomes clear.
-5. Attacks fill the energy meter. At 100 energy, select a warrior and click **Power Attack** to hit a nearby enemy with a charged strike.
-6. Defeat the enemy Commander to win. Your own Commander must survive.
+`npm start` serves the game at http://localhost:8000. `npm test` runs Node tests, including automated complete matches for all 16 kingdom combinations. The older grid engine is retained as unused source; the website imports lanes.js.
 
-| Kingdom | Commander | Building |
-| --- | --- | --- |
-| Farm | Harvest King | Hay Field |
-| Ice | Frost Queen | Ice House |
-| Beach | Tide Monarch | Dock |
-| Medieval | Iron King | Knight House |
-
-Each battlefield unit is displayed as a small animated character, while the full-size playable cards remain in the deck.
-
-## Publishing on GitHub Pages
-
-This repository includes `.github/workflows/pages.yml`, which deploys the website from `main` every time code is pushed.
-
-**One-time setup (repo owner):**
-
-1. Go to **Settings → Pages** in this repository.
-2. Under **Build and deployment → Source**, select **GitHub Actions**.
-3. Open **Actions → Deploy Kingdom Clash** and check the latest deployment. If necessary, use **Run workflow**.
-4. When the workflow succeeds, open https://tyronhuggins32-cmd.github.io/adventure/.
-
-If Pages was not enabled before the workflow ran, selecting GitHub Actions and rerunning the workflow completes setup. GitHub may need a few minutes to publish the first deployment.
-
-## Current scope
-
-This is a playable single-player prototype with local browser AI, not online PvP. Animations are lightweight CSS, artwork is native emoji character sprites, and each half of the battlefield matches its commander's kingdom. More elaborate character animations, art, sound, and online multiplayer can be added later.
+GitHub Pages publishes main through the existing workflow. No external dependencies or assets are required. Card illustrations use CSS landscapes and animated emoji figures; this is an original kingdom adaptation, not a complete reproduction of the licensed Card Wars game.
