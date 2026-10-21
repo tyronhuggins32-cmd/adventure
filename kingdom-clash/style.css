@@ -11,3 +11,23 @@
 /* The battlefield is a single continuous isometric diorama; lane strips remain keyboard controls. */
 #livingField{display:block;width:100%;height:auto;aspect-ratio:2;cursor:pointer;touch-action:pan-x;filter:drop-shadow(0 6px 3px #1c352366)}#arena{max-width:1040px;min-width:660px}.lanes .landscape{height:40px;aspect-ratio:auto!important;background:transparent;box-shadow:none;border:0}.lanes .landscape>.terrain,.lanes .ambient{display:none}.lanes .structure-slot{top:-15px;width:65px;height:55px;right:0}.lanes .unit-slot{top:-8px;width:55px;height:55px;left:15%}.lanes .commander-slot{top:-10px;left:55%;width:35px;height:50px}.lane-info{min-height:68px;padding-top:4px}.field-stats{display:block;font-size:9px;color:#e1dab1}.lane-info .empty-label{font-size:9px}.enemy .lane-info{min-height:55px}.lanes{gap:10px}.land-label{padding:6px 3px 2px;border-top:1px solid #aabf9166}.battle-line{height:10px}.targetable .landscape{box-shadow:none}.card .rules{min-height:145px}.card .rules p{font-size:11px;line-height:1.5}.card .card-title b{font-size:16px}#hand .card{flex-basis:220px}.commander .rules{min-height:215px}#inspectCard .rules{min-height:0}
 @media(max-width:767px){#arena{min-width:660px}.arena-scroll{padding-top:0}#hand .card{flex-basis:205px}.table-label{margin-bottom:0}.lanes .landscape{height:35px}.commander-grid .rules{min-height:0}}
+
+/* Building cards: tactical micro-details and playful structure reactions. */
+.housing-card .building-extra{display:grid;gap:3px;margin:8px 2px 2px;padding:7px 8px;border:1px dashed #a18e60;border-radius:6px;background:#fff7dc;min-height:48px}
+.housing-card .building-extra b{font-size:8px;letter-spacing:1px;color:var(--deep)}
+.housing-card .building-extra span{font-size:10px;line-height:1.35;color:#526451}
+.mini-building{position:relative;overflow:visible!important}
+.mini-building .illustration{overflow:visible}
+.building-gag{position:absolute;right:-3px;top:-8px;font-size:15px;line-height:1;filter:drop-shadow(0 1px 1px #263b2e);animation:gag-pop 2.8s ease-in-out infinite;pointer-events:none}
+.motion-sway .illustration{transform-origin:50% 85%;animation:house-sway 3.5s ease-in-out infinite}
+.motion-spin .illustration{transform-origin:50% 55%;animation:house-spin 8s linear infinite}
+.motion-bob .illustration{animation:house-bob 2.6s ease-in-out infinite}
+.motion-shiver .illustration{animation:house-shiver 3.4s ease-in-out infinite}
+.motion-spark .illustration{filter:drop-shadow(0 0 4px #ffe58a);animation:house-spark 2.2s ease-in-out infinite}
+@keyframes gag-pop{0%,75%,100%{transform:translateY(0) rotate(0)}82%{transform:translateY(-5px) rotate(-12deg)}90%{transform:translateY(0) rotate(12deg)}}
+@keyframes house-sway{0%,100%{transform:rotate(0)}50%{transform:rotate(3deg)}}
+@keyframes house-spin{to{transform:rotate(360deg)}}
+@keyframes house-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes house-shiver{0%,88%,100%{transform:translateX(0)}90%{transform:translateX(-2px)}94%{transform:translateX(2px)}}
+@keyframes house-spark{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25) drop-shadow(0 0 5px #fff2a1)}}
+@media(prefers-reduced-motion:reduce){.housing-card *, .mini-building *, .building-gag{animation:none!important;transition:none!important}}
