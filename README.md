@@ -1,6 +1,6 @@
 # Kingdom Clash — 3D living table
 
-A browser card battler with a real WebGL 2 mesh battlefield. Pick a territory, choose its commander, deploy that commander, and play a 56-card battle deck. [Play on GitHub Pages](https://tyronhuggins32-cmd.github.io/adventure/).
+A browser card battler with a real WebGL 2 mesh battlefield. Pick a territory, choose its commander, deploy that commander, build recruitment schools, and unlock veteran spells through surviving battles. [Play on GitHub Pages](https://tyronhuggins32-cmd.github.io/adventure/).
 
 ## Actual 3D models
 
@@ -19,7 +19,7 @@ The 3D scene uses a locally bundled Three.js 0.186.1 (MIT, license in `kingdom-c
 - Select a card and tap its target landscape, or use the lane's Place button. Raycasting follows camera rotation and zoom.
 - Tap a roaming model to inspect its own card. Buildings, creatures, and commanders remain selectable from the lane controls too.
 
-The four territories are Corn Field, Snowy Lands, The Beach, and Knight Kingdom. Each has three commanders. All twelve commanders have 14 unique designs with four copies per design: 168 designs total, 56 cards per deck. The opening hand includes that commander's first expansion card. Each lane holds one combat creature and one building, in addition to its commander marker. Each building design may be placed only once per player; buildings can absorb attacks and be destroyed.
+The four territories are Corn Field, Snowy Lands, The Beach, and Knight Kingdom. Each has three commanders. Each commander has 14 core designs plus 180 territory roster entries and a mythic catalog option. New browser matches open with building choices; each school offers an exclusive selection of up to five recruits. The legacy card-deck API remains available separately. Each lane holds one combat creature and one building, in addition to its commander marker. Each building design may have only one live copy per player; destroyed buildings can be rebuilt, and buildings can absorb attacks and be destroyed.
 
 ## Battle-world simulation
 
@@ -42,7 +42,7 @@ World animations include articulated marching, wing beats, aiming, attack swings
 
 ## Development
 
-`npm start` serves http://localhost:8000. `npm test` runs 66 tests, including all 144 commander matchups, all expansion-card effects, entity bounds/state/lifetimes, all 180 mesh builds, volumetric bounds, joint animation, windmill machinery, and spell geometry.
+`npm start` serves http://localhost:8000. `npm test` runs 84 tests, including all 144 commander matchups, all expansion-card effects, entity bounds/state/lifetimes, all 2,352 commander/card mesh builds, volumetric bounds, joint animation, windmill machinery, and spell geometry.
 
 `model-3d.js` builds and animates geometry; `preview-3d.js` renders card thumbnails; `field-3d.js` owns the WebGL viewport/camera/raycasting. `entity-programs.js` and `entity-world.js` own independent behavior. `lanes.js`, `living-rules.js`, `commanders.js`, and `expansion.js` own battle state. The old canvas renderer/grid engine are unused legacy sources.
 
@@ -53,6 +53,20 @@ Browser verification covers 375/768/1280 layouts, WebGL 2 rendering, model card 
 Drag to pan, or select **Orbit** to rotate and tilt. Two fingers move, pinch to zoom, and twist to rotate; a multi-touch gesture never places a card. Mouse wheel zooms toward the pointer and right-drag or Shift-drag orbits. The zoom slider, holdable movement/rotation buttons, Full map, My army, Rival army, Top view, and Follow battle work on touch and desktop. Manual movement releases battle follow. Expand opens a fullscreen battlefield with an in-page expanded view where fullscreen is unavailable.
 
 With the battlefield focused: WASD/arrows move, Q/E rotate, R/F tilt, +/− zoom, Home resets the full map, and Escape exits expanded view. Camera transitions are smoothed and respect reduced motion.
+
+### Farmer livestock deck
+
+Farm and Barn replace Hay Field and Orchard Tower. Farm grows food and repairs its field every 4 seconds and at wave end. Barn heals nearby livestock and offers a refuge for frightened animals. Pasture Sheep, Dairy Cow, and Barnyard Bull replace Truffle Hound, Living Compost, and Supper Bell in the Farmer’s core deck, preserving its 14 core designs. Sheep flock and graze, cows heal the herd, and bulls charge with a six-second bonus cooldown. Truffle Pigs automatically consume enemy food-based creatures at contact for zero AP (four-second cooldown); non-food threats within seven meters make them flee. Food identity accepts an explicit `foodBased: true` tag or recognizable crop/fruit names. Allied creatures are never eaten.
+
+Validation: all 84 tests pass, including livestock AI, recruitment, veteran spell progression, rebuilt schools, valid portrait fallbacks, and destroyed-building navigation. The old catalog-count assertions now cover the expanded catalog. An additional DOM harness exercised the real app’s commander selection, Barn construction, wave/AP refresh, pig recruitment, veteran progress, and restart. Full browser/WebGL rendering remains unverified because a browser binary could not be installed in this environment.
+
+### Building-led recruitment and veteran magic
+
+New browser matches now open with construction cards. Build a school to reveal its exclusive recruitment panel, choose an empty landscape, and spend AP to recruit. Each of the twelve commanders has separate building rosters. Farmer branches are Farm (crop creatures), Barn (pig, sheep, cow, bull), Windmill (harvest warriors), and Henhouse (birds). Existing livestock AI remains active. Destroyed buildings can be rebuilt; only one live copy of each building design is allowed. Existing troops survive the loss of their school, but recruitment and veteran spell casting require that school.
+
+A recruited unit that survives two completed waves earns a 2 AP spell. The living veteran must be ready and its school intact. Each veteran has at most one spell card, refreshed after a completed wave. Building branches unlock herd healing, field growth, flock empowerment, harvest area damage, winter control, tide reversal, sanctuary healing, or siege damage. Dead veterans leave no usable spells. Recruitment and casting are blocked while a wave runs; the rival uses the same construction and recruitment rules.
+
+The browser explicitly enables `buildingProgression: true`. The engine’s default retains the old card-deck API for legacy consumers and tests; new progression tests opt in explicitly.
 
 ### Detailed miniatures and living terrain
 
