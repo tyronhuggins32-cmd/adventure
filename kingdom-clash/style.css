@@ -70,6 +70,7 @@
 @media(prefers-reduced-motion:reduce){.flat-building,.flat-building *{animation:none!important}}
 
 
+
 /* Expanded Clash Royale-inspired battlefield: more room for lanes, terrain and animated units. */
 #arena{max-width:1200px}
 .lanes{gap:12px}
@@ -79,3 +80,7 @@
 .battle-line:before{border-top:2px solid #b8eee0;box-shadow:0 3px 0 #2d7773}
 .battle-line span{z-index:1;color:#fff0b9;text-shadow:0 1px 3px #243f2d}
 @media(max-width:767px){#arena{min-width:720px}.lanes{gap:10px}.landscape{aspect-ratio:1.45}.enemy .landscape{aspect-ratio:1.65}.battle-line{height:30px}}
+
+/* Real mesh battlefield: the camera, rather than page width, controls the view. */
+#arena,#arena.fit-field{width:100%;min-width:0;max-width:none}#livingField{width:100%;height:clamp(380px,53vw,670px);aspect-ratio:auto;touch-action:none;cursor:grab;filter:none;border-radius:12px;background:#365744}#livingField:active{cursor:grabbing}.arena-scroll{overflow:visible;padding:8px 0 14px}.camera-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 10px;color:#f4e6bf}.camera-controls>span{margin-right:auto;font-weight:800;font-size:11px;letter-spacing:1px}.camera-controls small{display:block;font-size:9px;font-weight:400;letter-spacing:0}.camera-controls button{padding:6px 11px;font-size:12px;box-shadow:0 2px #263e2c}.webgl-error{padding:20px;color:#ffedbd;border:1px solid #c2a56b}.lanes{gap:10px}.land-label{font-size:9px}.lane-actions button{font-size:10px}.mobile-hint{display:none!important}@media(max-width:767px){#arena,#arena.fit-field{width:100%;min-width:0}#livingField{height:420px}.camera-controls>span{width:100%;margin-bottom:3px}.camera-controls button{flex:1;padding:7px 6px}.lanes .landscape{height:35px}.lanes .structure-slot{width:44px;height:45px}.lanes .unit-slot{width:40px;height:45px;left:0}.lanes .commander-slot{width:30px;height:40px}.land-label>span:last-child{display:none}.lane-info strong{font-size:10px}.lane-info .field-stats{font-size:8px}.lane-actions{flex-direction:column}.lane-actions button{font-size:9px}.lane-info{min-height:90px}.enemy .lane-info{min-height:70px}}
+.mesh-card-preview{display:block;width:100%;height:100%;object-fit:contain}.mesh-portrait>.terrain{opacity:.22}.mesh-portrait:before{background:radial-gradient(ellipse,#fff3bf77,transparent)}.mesh-portrait .portrait-subject{filter:none!important}
