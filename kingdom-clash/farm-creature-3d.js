@@ -28,7 +28,7 @@ export function farmCreatureModel(card, S) {
     leaf: 0x62883b, gold: 0xf0bf4e, ochre: 0xd7a248, brass: 0xd2a44f,
     leather: 0x815130, rope: 0xe8c684, charcoal: 0x302c31
   };
-  const oval = (parent,r,c,x,y,z,s=[1,1,1]) => ball(parent,r,c,x,y,z,s);
+  const oval = (parent,r,c,x,y,z,s=[1,1,1]) => mesh(parent,'SphereGeometry',[r,12,9],c,x,y,z,s);
   const eyelids = (head, wide=.15, y=.10, z=.32, r=.067) => {
     for (const side of [-1,1]) {
       oval(head,r*1.35,P.cream,side*wide,y,z,[1.05,1.12,.70]);
