@@ -1,0 +1,102 @@
+// Seven additional designs per commander: 14 unique designs, four copies each.
+const c=(id,name,type,cost,effect,text,extra={})=>({id,name,type,cost,effect,text,...extra});
+export const EXPANSION={
+farmer:[
+c('pig','Truffle Pig','creature',1,'pig','Roots through food patches, wallows in mud, and flees danger. End of your turn: eat 1 food to heal 1 HP and turn this lane to mud.',{atk:2,hp:6,ability:'snuffle',behavior:'pig'}),
+c('coop','Henhouse','building',1,'coop','End of your turn: a hen appears (maximum 3); each hen restores 1 food to this lane.',{structure:'coop'}),
+c('ditch','Irrigation Ditch','spell',1,'irrigate','Flood your lane and its neighbors. Add 2 food and repair 1 field integrity in each.'),
+c('stampede','Barnyard Stampede','spell',2,'stampede','Every friendly animal charges: deal 2 per animal to its opposing creature. Animal-free lanes take 1 field damage.'),
+c('hound','Truffle Hound','creature',1,'hound','Sniffs out hidden stores. On summon: gain 2 food here. Floop: convert 1 food into one drawn card.',{atk:3,hp:4,ability:'nose',behavior:'hound'}),
+c('compost','Living Compost','spell',1,'compost','Turn this lane into fertile soil. Sacrifice 1 creature HP, if present, to restore 4 field integrity and add 3 food.'),
+c('bell','Supper Bell','spell',1,'bell','All your animals heal 2 HP and rally toward food. Non-animal creatures gain 1 HP instead.')],
+scarecrow:[
+c('crows','Crow Barrage','spell',2,'crows','A flock strikes up to 3 enemy creatures anywhere for 2 damage each. If none can be hit, it ravages YOUR chosen field for 3 integrity.'),
+c('raven','Omen Raven','creature',1,'raven','Circles the field and scatters when threatened. On summon: weaken the opposing creature by 1 attack.',{atk:2,hp:4,ability:'omen',behavior:'crow'}),
+c('thorns','Thorn Maze','spell',1,'thorns','Grow thorn terrain on the enemy lane. Its creature takes 1 damage at the end of its owner’s turn.'),
+c('effigy','Decoy Effigy','building',1,'effigy','Your creature in this lane takes 1 less retaliation damage. Leaves a straw dummy on the field.',{structure:'effigy'}),
+c('gale','Straw Gale','spell',1,'gale','Move the opposing creature to the next empty enemy lane. If none is empty, deal 3 damage instead.'),
+c('rats','Granary Rats','creature',1,'rats','On summon: steal up to 2 food from the opposing field. Floop: spend 1 food to heal 2 HP.',{atk:1,hp:7,ability:'nibble',behavior:'rat'}),
+c('eclipse','Harvest Eclipse','spell',2,'eclipse','Shroud all enemy fields in gloom. Every enemy creature loses 1 attack (minimum 1); enemy fields lose 1 integrity.')],
+cornDruid:[
+c('boar','Bramble Boar','creature',2,'boar','Turns its lane into brambles on arrival. Floop: gain 1 attack per 2 food in this lane (maximum +2).',{atk:4,hp:8,ability:'bramble',behavior:'pig'}),
+c('rain','Seed Rain','spell',1,'seedRain','Plant every friendly lane: add 1 food and repair 1 integrity, then sprout a seedling in this lane.'),
+c('orchard','Walking Orchard','building',2,'orchard','End of your turn: grow 2 food here and restore 1 HP to your creature. Its branches sway over the field.',{structure:'tree'}),
+c('roots','Root Prison','spell',1,'rootPrison','Bind the opposing creature so it misses its next turn; turn its terrain into roots.'),
+c('spore','Spore Lantern','spell',1,'spore','Grow glowing fungi here. Heal friendly creatures in this lane and adjacent lanes 3 HP.'),
+c('swap','Graft Exchange','spell',1,'swap','Exchange your chosen terrain and food with the opposing lane. Creatures and buildings stay where they are.'),
+c('sprout','Seedling Familiar','creature',1,'sprout','On summon: create 2 food here. Floop: eat 1 food, then gain +1 attack and +1 maximum HP.',{atk:1,hp:5,ability:'sprout',behavior:'plant'})],
+hearthkeeper:[
+c('fox','Ember Fox','creature',1,'fox','Melts this lane to warm earth on arrival. Floop: heal your commander 1 HP for each warm friendly lane (maximum 3).',{atk:2,hp:6,ability:'embers',behavior:'fox'}),
+c('camp','Campfire Circle','spell',1,'campfire','Warm this lane and its neighbors, thaw friendly creatures there, and heal each 1 HP.'),
+c('soup','Bottomless Soup Pot','building',1,'soup','End of your turn: heal the most injured friendly creature 2 HP.',{structure:'cauldron'}),
+c('rescue','Whiteout Rescue','spell',1,'rescue','Move the most injured friendly creature to this empty lane and heal it 3 HP. If occupied, heal this lane’s creature 3 HP.'),
+c('coal','Coal Cricket','creature',1,'coal','On summon: repair 2 field integrity. Floop: thaw your creature in an adjacent lane.',{atk:1,hp:4,ability:'thaw',behavior:'insect'}),
+c('blanket','Snow Blanket','spell',1,'blanket','Cover all your fields in sheltering snow: gain 1 field armor in every lane until changed.'),
+c('lantern','Lost Lanterns','spell',2,'lanterns','Place 3 guiding lights. Heal your commander 3 HP and restore 2 integrity to this lane.')],
+frostWitch:[
+c('owl','Mirror Owl','creature',1,'owl','Flies between ice crystals. On summon: freeze the opposing creature only if its field is already icy.',{atk:3,hp:4,ability:'mirror',behavior:'owl'}),
+c('blackIce','Black Ice','spell',1,'blackIce','Turn the opposing lane into slippery ice and deal 1 damage. Its creature’s attack is reduced by 1 while on ice.'),
+c('prism','Prism Cage','building',2,'prism','End of your turn: deal 1 damage to the opposing creature if it is frozen or resting.',{structure:'crystal'}),
+c('shards','Shatterstorm','spell',2,'shatter','Deal 4 damage to each frozen enemy creature; unfrozen creatures take 1 damage.'),
+c('thief','Icicle Thief','creature',1,'thief','On summon: steal 1 food from the enemy lane and turn it into ice. Floop: draw a card if this lane is icy.',{atk:2,hp:5,ability:'iceDraw',behavior:'imp'}),
+c('mirrorLake','Mirror Lake','spell',1,'mirrorLake','Flood your lane with reflecting ice. Restore 2 field integrity and give your creature +1 attack.'),
+c('hail','Hail Nest','spell',1,'hail','Spawn a drifting hail cloud over the enemy lane. Deal 2 creature damage and 1 field damage.')],
+glacierShepherd:[
+c('seal','Snowdrift Seal','creature',1,'seal','Prefers water and slides over ice. Floop: heal 3 HP on ice or water; otherwise heal 1.',{atk:2,hp:7,ability:'slide',behavior:'seal'}),
+c('salt','Salt Trail','spell',1,'salt','Lay a food trail on all friendly fields: add 2 food to each. Animals start foraging toward it.'),
+c('pen','Icehorn Pen','building',1,'pen','End of your turn: your animal here gains +1 maximum HP and heals 1 HP (maximum +3 growth).',{structure:'pen'}),
+c('herd','Herd Crossing','spell',2,'herd','Move friendly animals one lane right if empty. Each moved animal repairs 2 field integrity on arrival.'),
+c('musk','Musk Ox','creature',2,'musk','On arrival: gain +2 HP if this field has food. Floop: consume 1 food to gain +2 attack.',{atk:3,hp:10,ability:'graze',behavior:'ox'}),
+c('bridge','Glacier Bridge','spell',1,'bridge','Raise a frozen bridge here. Your creature heals 2 HP and ignores thorn terrain in this lane.'),
+c('call','Mammoth Call','spell',2,'mammoth','Each friendly 2-AP creature tramples its opposing field for 2 integrity and its opposing creature for 1 HP.')],
+castawayCaptain:[
+c('gull','Thieving Gull','creature',1,'gull','On summon: steal 1 food from each adjacent enemy lane. Floop: deal 2 commander damage if this field has food.',{atk:2,hp:4,ability:'plunder',behavior:'gull'}),
+c('lowTide','Low Tide','spell',1,'lowTide','Drain water from every field, revealing sand. Draw 1 card for each drained friendly lane (maximum 2).'),
+c('wreck','Wreck Crane','building',2,'wreck','End of your turn: repair this field 1 integrity, then deal 1 damage to its opposing building.',{structure:'crane'}),
+c('powder','Powder Keg','spell',2,'powder','Blast the opposing creature for 5 HP and its field for 2 integrity. Your chosen field takes 1 integrity damage.'),
+c('monkey','Rigging Monkey','creature',1,'monkey','On arrival: draw a card, then lose 1 commander HP. Floop: gain +1 attack if a friendly building is here.',{atk:3,hp:4,ability:'rigging',behavior:'monkey'}),
+c('rope','Boarding Rope','spell',1,'rope','Shift the enemy creature left into an empty lane; your creature here gains +1 attack. If blocked, deal 2 damage.'),
+c('treasure','Buried Treasure','spell',1,'treasure','Dig this field into sand. Add 3 food and draw 1 card, but reduce field integrity by 1.')],
+reefOracle:[
+c('turtle','Pearl Turtle','creature',1,'turtle','On summon: turn this lane into coral water. Floop: repair 2 field integrity and heal this creature 1 HP.',{atk:1,hp:9,ability:'shell',behavior:'turtle'}),
+c('garden','Coral Garden','spell',1,'coralGarden','Grow coral here and in adjacent lanes. Repair 2 integrity in each and heal their creatures 1 HP.'),
+c('anemone','Watchful Anemone','building',1,'anemone','End of your turn: deal 1 damage to the enemy creature opposite this coral lane.',{structure:'coral'}),
+c('forecast','Tide Forecast','spell',1,'forecast','Draw 2 cards. If the chosen field is not water or coral, it loses 2 integrity.'),
+c('jelly','Lantern Jelly','creature',1,'jelly','Floats above terrain. On arrival: freeze the opposing creature if both fields are wet.',{atk:2,hp:5,ability:'pulse',behavior:'jelly'}),
+c('echo','Pearl Echo','spell',2,'echo','Restore 3 commander HP and return the most recently defeated creature from your discard to your hand.'),
+c('reefWall','Reef Uprising','spell',2,'reefWall','All coral fields grow 1 armor. Enemy non-water fields take 1 integrity damage.')],
+tideCollector:[
+c('leech','Brine Leech','creature',1,'leech','On summon: drain 1 opposing creature HP to heal 1 HP. Floop: drain 1 commander HP.',{atk:2,hp:6,ability:'leech',behavior:'leech'}),
+c('whirlpool','Pocket Whirlpool','spell',2,'whirlpool','Flood the opposing field and pull its creature to the next empty lane. If no lane is empty, deal 3 damage.'),
+c('jar','Tide Jar','building',1,'jar','End of your turn: if this field is wet, drain 1 rival commander HP and heal 1 HP.',{structure:'jar'}),
+c('barnacle','Barnacle Debt','spell',1,'barnacle','Crust the opposing field with barnacles. Remove 2 enemy food and reduce its creature’s attack by 1.'),
+c('angler','Debt Angler','creature',2,'angler','On arrival: steal up to 3 food from the opposing lane. Floop: spend 2 food to deal 3 commander damage.',{atk:4,hp:7,ability:'debt',behavior:'fish'}),
+c('undertow','Reverse Undertow','spell',1,'undertow','Swap your creature with your next lane’s creature. Heal each swapped creature 1 HP.'),
+c('drain','Empty the Ocean','spell',2,'drainOcean','Drain every wet enemy field: each drained lane loses 2 integrity and heals your commander 1 HP.')],
+bannerKnight:[
+c('horse','Standard Charger','creature',2,'horse','Patrols the field. On summon: gain +1 attack if a friendly building is present. Floop: rally adjacent allies +1 attack.',{atk:4,hp:7,ability:'charge',behavior:'horse'}),
+c('road','Royal Road','spell',1,'road','Pave your field and its neighbors. Repair each 1 integrity and clear thorn hazards.'),
+c('drum','War Drum','building',1,'drum','End of your turn: your creature in this lane gains +1 attack (maximum +3 from this drum).',{structure:'drum'}),
+c('volley','Signal Volley','spell',2,'volley','Deal 2 damage to each enemy creature opposite one of your buildings. Empty opposing fields take 1 damage.'),
+c('squire','Messenger Hare','creature',1,'squire','Darts away from danger. On arrival: draw 1 card if a friendly creature is in an adjacent lane.',{atk:1,hp:4,ability:'dispatch',behavior:'hare'}),
+c('duel','Honorable Duel','spell',1,'duel','Both creatures in this lane deal their current attack to each other. If either is missing, heal your commander 1 HP.'),
+c('parade','Banner Parade','spell',2,'parade','Repair every friendly field 2 integrity. Creatures on intact fields gain +1 attack.')],
+royalCastellan:[
+c('mastiff','Gate Mastiff','creature',1,'mastiff','Guards buildings and barks at nearby threats. On summon: repair your building here 2 HP.',{atk:2,hp:8,ability:'guard',behavior:'hound'}),
+c('moat','Moatworks','spell',1,'moat','Flood your field with a moat, gain 1 field armor, and heal your creature here 1 HP.'),
+c('mason','Mason’s Yard','building',1,'mason','End of your turn: repair your most damaged field 2 integrity.',{structure:'workshop'}),
+c('portcullis','Falling Portcullis','spell',2,'portcullis','Deal 3 damage and freeze the opposing creature. Your field here gains 1 armor.'),
+c('gargoyle','Gargoyle Custodian','creature',2,'gargoyle','Circles above the keep. On arrival: gain +2 HP if your field has armor.',{atk:3,hp:9,ability:'stone',behavior:'gargoyle'}),
+c('ration','Emergency Rations','spell',1,'ration','Consume up to 3 food here; heal your commander 2 HP per food consumed. If none, heal 1 HP.'),
+c('keep','Raise the Keep','spell',2,'keep','Repair this field to full integrity, repair its building 3 HP, and restore 2 creature HP.')],
+exiledPrince:[
+c('wolf','Ash Wolf','creature',1,'wolf','Hunts wounded enemies. On arrival: damage the opposing creature 2 HP if it is already wounded.',{atk:3,hp:5,ability:'hunt',behavior:'wolf'}),
+c('burn','Scorched Claim','spell',1,'burn','Burn the opposing field for 3 integrity. Your commander loses 1 HP.'),
+c('camp','Rebel Camp','building',1,'rebelCamp','End of your turn: lose 1 commander HP and give your creature here +1 attack (maximum +4).',{structure:'tent'}),
+c('betrayal','Bitter Betrayal','spell',2,'betrayal','Sacrifice your creature here; deal its current HP as damage to the opposing creature (maximum 8). No enemy: damage your field 2.'),
+c('phoenix','Cinder Phoenix','creature',2,'phoenix','On arrival: turn your field to ash and heal your commander 2 HP. Floop: lose 1 creature HP to deal 2 enemy commander damage.',{atk:5,hp:6,ability:'cinder',behavior:'phoenix'}),
+c('oath','Broken Oath','spell',1,'oath','Your commander loses 2 HP. All your creatures gain +1 attack.'),
+c('throne','Throne of Thorns','spell',2,'throne','Turn your field to thorns and give your creature +3 attack. It takes 1 thorn damage at the end of your turn.')]
+};
+const FLOOP_HELP={snuffle:'Gain 1 food and heal this creature 1 HP.',omen:'Reduce the opposing creature’s attack by 2 (minimum 1).',mirror:'Freeze the opposing creature if your field is icy.',pulse:'Deal 2 damage to the opposing creature if your field is wet.',dispatch:'Draw 1 card if an adjacent friendly lane has a creature.',guard:'Give your field 1 armor.',stone:'Gain +1 maximum HP and heal 1 HP if your field has armor.',hunt:'Deal 3 damage to the opposing creature if it is wounded.'};
+export const extraCards=(id)=>EXPANSION[id].map(c=>({...c,commander:id,text:c.type==='creature'&&!c.text.includes('Floop:')&&FLOOP_HELP[c.ability]?c.text+' Floop: '+FLOOP_HELP[c.ability]:c.text}));

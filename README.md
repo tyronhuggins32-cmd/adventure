@@ -7,7 +7,7 @@ A four-lane browser card battler with illustrated terrain, creature and building
 1. Choose a **Territory Card**: Corn Field, Snowy Lands, The Beach, or The Knight Kingdom. This determines your scenery.
 2. Choose one of that territory’s three **Commander Cards**. Read its passive, creature Floop power, and army preview. You can go back and change territory.
 3. Place the commander on one of your four landscapes. The bot places its own commander. Both placements unlock the battle hands.
-4. Play your commander’s **Battle Deck**: 28 cards made from four copies each of three creatures, three buildings, and one spell. Commanders occupy a separate rear slot and share the hero’s 30 HP; damage through any empty enemy lane hits the opposing commander.
+4. Play your commander’s **Battle Deck**: 56 cards made from four copies each of 14 unique designs. Commanders occupy a separate rear slot and share the hero’s 30 HP; damage through any empty enemy lane hits the opposing commander.
 
 ## Commanders
 
@@ -18,7 +18,7 @@ A four-lane browser card battler with illustrated terrain, creature and building
 | The Beach | Castaway Captain, Reef Oracle, Tide Collector |
 | The Knight Kingdom | Banner Knight, Royal Castellan, Exiled Prince |
 
-Every commander has a distinct seven-card roster, creature stats, passive, and Floop ability. Play styles include summon healing, fear, plant growth, freezing, large beasts, salvage draws, draining, rallying, fortifications, and risky attack boosts. The rival uses a valid randomly chosen territory and commander.
+Every commander has a distinct 14-card roster, creature stats, passive, and Floop ability. Play styles include summon healing, fear, plant growth, freezing, large beasts, salvage draws, draining, rallying, fortifications, and risky attack boosts. The rival uses a valid randomly chosen territory and commander.
 
 ## Rules and controls
 
@@ -33,3 +33,18 @@ Tap battlefield miniatures to inspect cards. Sound is off by default. Reduced-mo
 `npm start` serves http://localhost:8000. `npm test` runs the rule tests, including all 144 commander pairings. GitHub Pages deploys main through the existing workflow.
 
 `commanders.js` defines rosters and passives; `lanes.js` runs combat and emits sequential events; `art.js` draws original SVG illustrations; `app.js` presents the setup stages and live table. The older grid engine remains unused legacy source. No external art assets or runtime dependencies are required.
+
+
+## Living battlefield expansion
+
+Each of the 12 commanders now has **14 unique card designs** (168 across all commanders), with four copies per design: **56 cards per deck**. The seven expansion cards per commander introduce animals, specialized buildings, terrain-changing spells, hazards, displacement, and effects with real downsides. The opening hand always includes one copy of that commander’s first expansion card, taken from the actual deck.
+
+The field is now a continuous canvas-rendered isometric diorama. Commanders, combat creatures, buildings, and up to 24 auxiliary entities appear on raised terrain. Field integrity (0–8), armor, food (0–12), and terrain type are visible in the accessible lane controls. A field reduced to zero loses its building and takes +1 direct attack damage. Thorn/root terrain damages its creature at turn end. Cards can irrigate, freeze, burn, pave, swap, grow coral, or raise defensive terrain; these are rule changes, not just colors.
+
+**Truffle Pig:** spawns as a combat creature in the Farmer’s deck. Its scripted state machine roots for food, forages, wallows in mud, wanders/rests, and flees stronger opposing creatures. Creature motion is real-time; meals, healing, food production, and combat resolve on turns so waiting cannot farm unlimited bonuses. Actors avoid building targets and stay inside their assigned landscape. This is species-inspired behavior, not a biological cognition simulation.
+
+**Crow Barrage:** flies a visible flock toward up to three living enemy creatures and deals 2 damage to each. If there is no living enemy creature, the flock damages the chosen friendly field by 3; buildings collapse if integrity reaches zero. Auxiliary hens, lights, and seedlings are scenery/support populations, not independently targetable combat creatures.
+
+Other examples: Henhouse grows a bounded flock that replenishes food; Powder Keg damages both fields; Root Prison binds enemies; Graft Exchange swaps terrain and food; tide effects flood/drain fields; War Drum and Rebel Camp have capped permanent growth. Each expansion card’s text describes its individual mechanic. Combat remains turn-based while movement and card reactions animate continuously. Reduced-motion mode keeps actors still and shows short feedback. The animation loop is capped around 30 FPS and stops drawing when the document is hidden; New Battle destroys the previous scene loop.
+
+`npm test` covers all 144 commander matchups, all 84 expansion cards on empty and populated lanes, crow targeting/backfire, pig foraging, terrain resources, population limits, and entity brain behavior. No external art or AI service is needed.
