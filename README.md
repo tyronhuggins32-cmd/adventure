@@ -21,30 +21,28 @@ The 3D scene uses a locally bundled Three.js 0.186.1 (MIT, license in `kingdom-c
 
 The four territories are Corn Field, Snowy Lands, The Beach, and Knight Kingdom. Each has three commanders. All twelve commanders have 14 unique designs with four copies per design: 168 designs total, 56 cards per deck. The opening hand includes that commander's first expansion card. Each lane holds one combat creature and one building, in addition to its commander marker. Each building design may be placed only once per player; buildings can absorb attacks and be destroyed.
 
-## Battle rules
+## Battle-world simulation
 
-Receive 2 AP each turn. Select a card, then a landscape. Floop exhausts a creature to use its ability instead of attacking. Fight resolves ready creatures: opposing creatures exchange damage; empty lanes expose the commander. Fighting and Floop unlock after the player's first turn. Frozen creatures miss their next turn. Reduce the rival commander from 30 HP to zero. Empty-deck draws inflict escalating fatigue (2, 4, 6, ...). The rival plays legal intermediate moves so placement reactions are visible.
+The active map is **72 × 36 meters**, three times the previous 24 × 12 world in both dimensions (nine times the ground area). Each territory tile is 18 meters across. Both sides have modeled keeps, a river with four bridges, stone paths, and 120 instanced trees. Models remain their previous physical size, so the additional space is real travel distance.
 
-Terrain has integrity 0–8, armor, and food 0–12. Zero integrity destroys its building and adds one to unblocked damage. Cards can irrigate, freeze, burn, pave, swap, grow coral, and raise defenses. Thorn/root fields damage their creature at turn end.
+Deploy cards with 2 AP, then choose **Launch battle**. The rival deploys its cards, and both armies fight a live wave lasting up to 32 simulation seconds. Units seek enemy creatures, then buildings, then the opposing keep. Ground units use grid pathfinding around trees/buildings and cross at bridges; fliers travel directly. Damage happens on melee contact or projectile arrival. Surviving attackers strike the keep once per wave, then return. Commanders guard their camps with healing or ranged support. Casualties are removed immediately from battle state and animate out of the scene.
 
-The Farmer's Truffle Pig roots for food, forages, wallows, wanders, and flees threats. Meals and healing resolve on turns. Scarecrow's Crow Barrage damages up to three enemy combat creatures; with no target, it ravages the chosen friendly field instead. Hens/support entities are bounded scenery/support populations. Individual card text describes each mechanic.
+**Pause**, **×2 speed**, and **Follow battle** control playback. Following centers the camera on a frontline encounter; camera pan/zoom and Full table remain available. The simulation pauses when the page is hidden. During a wave cards are locked; when it ends, surviving creatures reset, end-of-wave field effects resolve, both sides draw, and 2 AP refreshes for the next deployment. Floop is still available during deployment after the first wave. The keep/commander retains 30 HP and empty-deck draws still cause escalating fatigue.
 
-## Independent entities
+Every card keeps its original effect and gains a displayed battlefield capability:
 
-Every card design and commander has a stable behavior profile; each deployed copy owns separate runtime state. Creatures and commanders steer in X and Z across all four landscapes on their own side and avoid other actors/buildings. Guards patrol, animals forage or flee, fliers circle, and heavy creatures trudge. Buildings remain anchored and animate machinery; spell particles are moving 3D meshes and expire after their cast. Summons scale in, attacks lunge and swing, and removed entities shrink away. Reduced motion holds roaming/animation still while still cleaning up expired spells.
+- Creatures have a role, movement speed, attack reach, cadence, armor, and an additional trait. Traits include first-target ember damage, slowing hits, cleave, first-takedown scavenging, third-hit focus/life steal, rally bonuses, and low-health agility. Bonuses are capped and described on cards.
+- Buildings act as infirmaries (nearby healing), rally posts (15% movement/attack cadence boost), watchtowers (ranged defense), or supply depots (bounded food production). Each building design remains one placement per player and has finite durability.
+- Spells keep their immediate effect and add a six-second resonance around the cast field during the next battle: healing magic restores nearby allies periodically; hostile magic slows enemies. Resonances do not replay in subsequent waves without another cast.
+- The Farmer's pig still roots, wallows and forages during deployment, then fights with a scavenging trait. Crow Barrage still hits enemy creatures or ravages its own field if there are no valid targets.
 
-Roaming is visual: assigned combat lanes and turn-based rules remain authoritative. Waiting never grants extra damage, healing, food, or AP.
+World animations include articulated marching, wing beats, aiming, attack swings, projectile arcs, healing/hit rings, damage reactions, summon scale-ins, species-aware fall effects, interruptible wolf feeding, machinery, and unit/building/base health bars. Reduced motion suppresses cosmetic gait, while positions still reflect the running combat; Pause stops the simulation itself.
 
-## Latest update
-
-- Building cards are limited to one placement per player for each building design.
-- Buildings have durability, absorb attacks in an empty opposing lane, and are discarded with a destruction event when their health reaches zero.
-- The battlefield has expanded spacing, a river/bridge divider, and hit/destruction effects rendered on the correct side.
-- Rule tests run with `npm test`; GitHub Actions also checks the game before publishing the site from `main`.
+`battle-simulation.js` owns the real fight and changes authoritative health. `navigation.js` owns obstacle routing, `card-traits.js` owns the additional capabilities, and `world-layout.js`/`world-scenery.js` own the expanded geography. `entity-world.js` follows combat actors during a wave and uses its roaming brains during deployment. The legacy instant lane-fight function remains for compatibility/tests but is no longer called by the website's battle button.
 
 ## Development
 
-`npm start` serves http://localhost:8000. `npm test` runs 46 tests, including all 144 commander matchups, all expansion-card effects, entity bounds/state/lifetimes, all 180 mesh builds, volumetric bounds, joint animation, windmill machinery, and spell geometry.
+`npm start` serves http://localhost:8000. `npm test` runs 61 tests, including all 144 commander matchups, all expansion-card effects, entity bounds/state/lifetimes, all 180 mesh builds, volumetric bounds, joint animation, windmill machinery, and spell geometry.
 
 `model-3d.js` builds and animates geometry; `preview-3d.js` renders card thumbnails; `field-3d.js` owns the WebGL viewport/camera/raycasting. `entity-programs.js` and `entity-world.js` own independent behavior. `lanes.js`, `living-rules.js`, `commanders.js`, and `expansion.js` own battle state. The old canvas renderer/grid engine are unused legacy sources.
 
