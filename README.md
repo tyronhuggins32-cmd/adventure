@@ -35,6 +35,13 @@ Every card design and commander has a stable behavior profile; each deployed cop
 
 Roaming is visual: assigned combat lanes and turn-based rules remain authoritative. Waiting never grants extra damage, healing, food, or AP.
 
+## Latest update
+
+- Building cards are limited to one placement per player for each building design.
+- Buildings have durability, absorb attacks in an empty opposing lane, and are discarded with a destruction event when their health reaches zero.
+- The battlefield has expanded spacing, a river/bridge divider, and hit/destruction effects rendered on the correct side.
+- Rule tests run with `npm test`; GitHub Actions also checks the game before publishing the site from `main`.
+
 ## Development
 
 `npm start` serves http://localhost:8000. `npm test` runs 46 tests, including all 144 commander matchups, all expansion-card effects, entity bounds/state/lifetimes, all 180 mesh builds, volumetric bounds, joint animation, windmill machinery, and spell geometry.
