@@ -1,8 +1,8 @@
 import {hydratePreviews} from './preview-3d.js';
 import {FieldScene} from './field-3d.js';
 import {COMMANDERS,commandersFor} from './commanders.js';
-import{KINGDOMS,cards,createGame,play,floop,fight,cpu,draw,placeCommander,cardCost,attackValue}from './lanes.js';
-import{figure,building,terrain,portrait,PALETTES}from './art.js';
+import{KINGDOMS,cards,createGame,play,floop,fight,cpu,draw,placeCommander,cardCost,attackValue}from './lanes.js?v=mesh3d1';
+import{figure,building,terrain,portrait,PALETTES}from './art.js?v=mesh3d1';
 import {buildingDetail} from './building-details.js';
 const $=id=>document.getElementById(id);
 let state,selected=null,filter='all',epoch=0,busy=false,seen=0,sound=false,audioCtx,chosenTerritory=null,setupStage='territory',scene=null;
