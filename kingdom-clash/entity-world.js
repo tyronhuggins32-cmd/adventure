@@ -10,6 +10,8 @@ export class EntityWorld{
  for(const t of view.population||[])this.bind('support:'+t.id,{name:aliases[t.kind]||t.kind,id:t.kind,type:'creature',behavior:t.kind},t.side,t.lane,view.players[t.side].kingdom,keep);
  for(const [id,a]of this.actors)if(!keep.has(id)&&a.card.type!=='spell')this.actors.delete(id);
  for(const e of view.events||[]){if(e.seq<=this.seen)continue;this.seen=e.seq;if(e.kind==='spell'&&e.card){const id='spell:'+e.seq,side=e.friendly?e.p:1-e.p,a=this.bind(id,{...e.card,type:'spell'},side,e.targetLane??e.lane,e.kingdom,keep);a.born=this.time;a.sourceSide=e.p;a.state='cast';a.x=e.lane+.5;a.y=(e.p?0:1)+.5;a.tx=(e.targetLane??e.lane)+.5;a.ty=(side?0:1)+.5;}
+ if(e.kind==='feed'){for(const a of this.actors.values())if(a.side===e.p&&a.lane===e.lane&&a.card.uid===e.card?.uid){a.activity=1.6;a.action='feed';a.feedUntil=this.time+1.6;}}
+ if(e.kind==='attack'){for(const a of this.actors.values())if(a.side===1-e.p&&a.lane===e.lane&&a.action==='feed'){a.action='hit';a.feedUntil=0;a.activity=.9;}}
  if(['attack','power','summon','build','commander'].includes(e.kind))for(const a of this.actors.values())if(a.side===e.p&&a.lane===e.lane){a.activity=.9;a.action=e.kind;}}
  }
  step(dt,{reduced=false}={}){dt=clamp(dt,0,.1);if(!dt||!this.view)return;this.time+=dt;const actors=[...this.actors.values()];for(const a of actors){if(reduced){a.moving=false;if(a.card.type!=='spell')continue}else a.clock+=dt;a.activity=Math.max(0,a.activity-dt);const p=a.program,row=a.side?0:1,field=this.view.players[a.side].lanes[clamp(Math.floor(a.x),0,3)].field;
