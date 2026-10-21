@@ -1,0 +1,32 @@
+import {COMMANDERS} from './commanders.js';
+import {programFor,headingFor} from './entity-programs.js';
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const noise=(seed,n)=>{const v=Math.sin(seed*.001+n*12.9898)*43758.5453;return v-Math.floor(v)};
+const aliases={pig:'Truffle Pig',crow:'Omen Raven',owl:'Mirror Owl',gull:'Thieving Gull',gargoyle:'Gargoyle Custodian',phoenix:'Cinder Phoenix',jelly:'Lantern Jelly',hound:'Truffle Hound',rat:'Granary Rats',fox:'Ember Fox',wolf:'Ash Wolf',turtle:'Pearl Turtle',seal:'Snowdrift Seal',horse:'Standard Charger',ox:'Musk Ox',hare:'Messenger Hare',plant:'Seedling Familiar',fire:'lantern'};
+export class EntityWorld{
+ constructor(){this.actors=new Map();this.seen=0;this.time=0;}
+ bind(id,card,side,lane,territory,keep){keep.add(id);let a=this.actors.get(id);if(!a){const program=programFor(card),row=side?0:1;a={id,card,program,side,lane,territory,x:lane+(card.type==='building'?.77:card.type==='commander'?.58:.28),y:row+(card.type==='building'?.28:.6),tx:0,ty:0,clock:0,decision:0,cycle:0,state:'idle',heading:'SE',direction:1,moving:false,hunger:.6,rest:0,activity:0};a.tx=a.x;a.ty=a.y;this.actors.set(id,a)}Object.assign(a,{card,side,lane,territory});return a;}
+ sync(view){this.view=view;const keep=new Set();for(let side=0;side<2;side++){const p=view.players[side];for(let lane=0;lane<4;lane++){const l=p.lanes[lane];if(l.unit)this.bind('unit:'+(l.unit.uid||side+':'+lane+':'+l.unit.name),l.unit,side,lane,p.kingdom,keep);if(l.building)this.bind(`building:${side}:${lane}:${l.building.name}`,l.building,side,lane,p.kingdom,keep);if(p.commanderLane===lane)this.bind('leader:'+side,{...COMMANDERS[p.commander],id:p.commander,type:'commander'},side,lane,p.kingdom,keep);}}
+ for(const t of view.population||[])this.bind('support:'+t.id,{name:aliases[t.kind]||t.kind,id:t.kind,type:'creature',behavior:t.kind},t.side,t.lane,view.players[t.side].kingdom,keep);
+ for(const [id,a]of this.actors)if(!keep.has(id)&&a.card.type!=='spell')this.actors.delete(id);
+ for(const e of view.events||[]){if(e.seq<=this.seen)continue;this.seen=e.seq;if(e.kind==='spell'&&e.card){const id='spell:'+e.seq,side=e.friendly?e.p:1-e.p,a=this.bind(id,{...e.card,type:'spell'},side,e.targetLane??e.lane,e.kingdom,keep);a.born=this.time;a.sourceSide=e.p;a.state='cast';a.x=e.lane+.5;a.y=(e.p?0:1)+.5;a.tx=(e.targetLane??e.lane)+.5;a.ty=(side?0:1)+.5;}
+ if(['attack','power','summon','build','commander'].includes(e.kind))for(const a of this.actors.values())if(a.side===e.p&&a.lane===e.lane){a.activity=.9;a.action=e.kind;}}
+ }
+ step(dt,{reduced=false}={}){dt=clamp(dt,0,.1);if(!dt||!this.view)return;this.time+=dt;const actors=[...this.actors.values()];for(const a of actors){if(reduced){a.moving=false;if(a.card.type!=='spell')continue}else a.clock+=dt;a.activity=Math.max(0,a.activity-dt);const p=a.program,row=a.side?0:1,field=this.view.players[a.side].lanes[clamp(Math.floor(a.x),0,3)].field;
+ if(a.card.type==='spell'){const age=this.time-a.born;if(age>p.lifetime){this.actors.delete(a.id);continue}const t=Math.min(1,age/.7);a.x+=(a.tx-a.x)*Math.min(1,dt*5);a.y+=(a.ty-a.y)*Math.min(1,dt*5);a.state=t<1?'travel':p.style;a.activity=1-age/p.lifetime;continue}
+ if(p.stationary){a.state=p.specialty;a.activity=.4+.6*Math.abs(Math.sin(a.clock*(.7+p.speed)+p.phase));continue}
+ a.moving=false;if(a.card.frozen){a.state='frozen';continue}if(a.rest>0){a.rest-=dt;if(['root','graze'].includes(a.state))a.hunger=Math.max(.1,a.hunger-dt*.2);continue}a.hunger=Math.min(1,a.hunger+dt*.025);a.decision-=dt;
+ if(a.cycle>0&&a.decision>0&&Math.hypot(a.tx-a.x,a.ty-a.y)<.045){a.rest=.45+p.pause*.25;a.state=a.state==='forage'?(p.specialty==='pig'?'root':'graze'):p.family==='leader'?p.routine:p.routine==='guard'?'stand watch':'look around';a.decision=0;continue}
+ if(a.decision<=0){a.cycle++;const rand=n=>noise(p.seed,a.cycle*7+n),other=this.view.players[1-a.side].lanes[a.lane].unit,frightened=other&&other.atk>(a.card.atk||99)&&['pig','hare','rat','hen','gull'].includes(p.specialty);
+ a.state=frightened?'flee':p.family==='fly'?'circle':p.specialty==='pig'&&field.kind==='mud'&&a.hunger<.55?'wallow':p.family==='animal'&&a.hunger>.5&&field.food?'forage':p.family==='leader'?'survey':p.routine;
+ const reach=p.family==='leader'?1.5:p.range;a.tx=clamp(a.lane+.5+(rand(1)-.5)*reach*2,.13,3.87);a.ty=row+.14+rand(2)*.7;
+ if(p.family==='fly'){const angle=a.cycle*1.4+p.phase;a.tx=clamp(a.lane+.5+Math.cos(angle)*.8,.13,3.87);a.ty=row+.5+Math.sin(angle)*.32;}if(a.state==='forage'||p.routine==='inspect crops'){const fields=this.view.players[a.side].lanes.map((l,i)=>({i,score:l.field.food+noise(p.seed,a.cycle+i)*2})).sort((a,b)=>b.score-a.score);a.tx=fields[0].i+.2+rand(5)*.6;}if(p.routine==='guard'&&rand(4)>.5){a.tx=clamp(a.lane+.5+(rand(5)-.5)*.8,.13,3.87);a.ty=row+(a.side?.72:.22);}
+ if(a.state==='flee')a.ty=row+(a.side?.2:.8);if(a.state==='wallow'){a.tx=clamp(a.x+.05,.13,3.87);a.ty=clamp(a.y+.03,row+.14,row+.84)}
+ a.decision=p.pause+rand(3)*2.5;}
+ if(a.state==='wallow'){a.hunger=Math.min(1,a.hunger+dt*.12);continue}
+ let dx=a.tx-a.x,dy=a.ty-a.y;const dist=Math.hypot(dx,dy);if(dist>.035){let vx=dx/dist,vy=dy/dist;for(const b of actors){if(b===a||b.card.type==='spell'||b.side!==a.side)continue;const sx=a.x-b.x,sy=a.y-b.y,d=Math.hypot(sx,sy),radius=b.program.stationary?.25:.15;if(d<radius&&d>.001){vx+=sx/d*(1-d/radius)*2.8;vy+=sy/d*(1-d/radius)*2.8}}
+ const len=Math.hypot(vx,vy)||1,speed=p.speed*(a.state==='flee'?1.8:1)*(field.kind==='mud'&&p.family!=='fly'?.72:1);a.vx=vx/len*speed;a.vy=vy/len*speed;a.x=clamp(a.x+a.vx*dt,.1,3.9);a.y=clamp(a.y+a.vy*dt,row+.12,row+.88);a.heading=headingFor(a.vx,a.vy);a.direction=(250*a.vx-290*a.vy)>=0?1:-1;a.moving=true;
+ }else if(a.state==='forage'){a.hunger=Math.max(.1,a.hunger-dt*.25);a.state=p.specialty==='pig'?'root':'graze'}
+ }
+ }
+}

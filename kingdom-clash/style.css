@@ -39,6 +39,22 @@
 @keyframes house-spark{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25) drop-shadow(0 0 5px #fff2a1)}}
 @media(prefers-reduced-motion:reduce){.housing-card *, .mini-building *, .building-gag{animation:none!important;transition:none!important}}
 
+/* Every card previews its own seeded animation program. */
+.living-card .portrait-subject{transform-origin:50% 92%;animation:card-walk var(--life-duration) ease-in-out infinite;animation-delay:var(--life-delay);will-change:transform}
+.living-card[data-motion=fly] .portrait-subject{animation-name:card-flight}
+.living-card[data-motion=spell] .portrait-subject{animation-name:card-magic}
+.living-card[data-motion=structure] .portrait-subject{animation-name:card-building}
+.living-card[data-motion=lumber] .portrait-subject{animation-name:card-lumber}
+.living-card[data-motion=leader] .portrait-subject{animation-name:card-survey}
+.territory-art>.terrain{animation:territory-breathe 5s ease-in-out infinite}
+@keyframes card-walk{0%,100%{transform:translate(-3px,0) rotate(-1deg)}25%{transform:translate(0,-3px) rotate(1deg)}50%{transform:translate(3px,0) rotate(1deg)}75%{transform:translate(0,-2px) rotate(-1deg)}}
+@keyframes card-flight{0%,100%{transform:translate(-3px,0) rotate(-2deg)}50%{transform:translate(3px,-9px) rotate(2deg)}}
+@keyframes card-magic{0%,100%{transform:scale(.96) rotate(-3deg);filter:brightness(1)}50%{transform:scale(1.03) rotate(3deg);filter:brightness(1.2)}}
+@keyframes card-building{0%,100%{transform:translateY(0);filter:brightness(1)}50%{transform:translateY(-2px);filter:brightness(1.08)}}
+@keyframes card-lumber{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg) translateY(-2px)}}
+@keyframes card-survey{0%,100%{transform:translateX(-2px) rotate(-1deg)}50%{transform:translateX(2px) rotate(1deg)}}
+@keyframes territory-breathe{0%,100%{filter:brightness(1)}50%{filter:brightness(1.12)}}
+@media(prefers-reduced-motion:reduce){.living-card .portrait-subject,.territory-art>.terrain{animation:none!important;will-change:auto}}
 
 /* Flat, illustrated 2D housing: crisp outlines and solid color blocks. */
 .flat-building{filter:none!important}
@@ -52,3 +68,4 @@
 .housing-card .flat-building{shape-rendering:geometricPrecision}
 .housing-card .building-extra{box-shadow:none}
 @media(prefers-reduced-motion:reduce){.flat-building,.flat-building *{animation:none!important}}
+
