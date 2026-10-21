@@ -76,7 +76,7 @@ case 'pulse':if(wet(f)&&b.lanes[i].unit)b.lanes[i].unit.health-=2;break;case 'le
 case 'charge':for(const j of adj)if(a.lanes[j].unit)a.lanes[j].unit.atk++;break;case 'dispatch':if(adj.some(j=>a.lanes[j].unit))api.draw(s,p);break;
 case 'guard':f.armor=1;break;case 'stone':if(f.armor){u.hp++;u.health++}break;case 'hunt':if(b.lanes[i].unit?.health<b.lanes[i].unit?.hp)b.lanes[i].unit.health-=3;break;
 case 'cinder':u.health--;b.hp=Math.max(0,b.hp-2);break;default:return false;}return true;}
-export function settleField(s,p,api){const a=s.players[p],b=s.players[1-p];for(let i=0;i<4;i++){let l=a.lanes[i],f=l.field,u=l.unit,build=l.building;if(u&&f.hazard&&f.kind!=='bridge')u.health-=f.hazard;if(u?.behavior==='pig'&&f.food){food(f,-1);mend(u,1);if(f.kind!=='thorns')terrainChange(s,p,i,'mud',api)}if(!build)continue;switch(build.effect){
+export function settleField(s,p,api){const a=s.players[p],b=s.players[1-p];for(let i=0;i<4;i++){let l=a.lanes[i],f=l.field,u=l.unit,build=l.building;if(u&&f.hazard&&f.kind!=='bridge')u.health-=f.hazard;if(u?.behavior==='pig'&&f.food&&!s.episodePreset){food(f,-1);mend(u,1);if(f.kind!=='thorns')terrainChange(s,p,i,'mud',api)}if(!build)continue;switch(build.effect){
 case 'farm':food(f,2);repair(f,1);break;
 case 'barn':if(animal(u))mend(u,2);break;
 case 'coop':token(s,p,i,'hen');food(f,s.population.filter(v=>v.side===p&&v.lane===i&&v.kind==='hen').length);break;

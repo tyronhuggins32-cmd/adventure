@@ -1,5 +1,5 @@
-import {baseTerrain,makeField} from './living-rules.js?v=episode6';
-import {tableSlot} from './tabletop-layout.js?v=episode6';
+import {baseTerrain,makeField} from './living-rules.js?v=episode7';
+import {tableSlot} from './tabletop-layout.js?v=episode7';
 export const WORLD_CARDS=[
  {id:'world-reclaim',name:'Reclaim Landscape',type:'spell',cost:1,effect:'world-reclaim',text:'Restore your kingdom’s original terrain, 8 integrity and 3 food per landscape. Recall mud-trapped creatures.'},
  {id:'world-mud',name:'Mud Trap',type:'spell',cost:1,effect:'world-mud',text:'Turn the opposing landscape into mud. A raiding pig gets stuck there until its owner reclaims the landscape.'},

@@ -1,6 +1,6 @@
 import * as T from './vendor/three.js';
-import {group,box,ball,cyl,cone,material} from './model-3d.js?v=episode6';
-import {CELL_WIDTH,CELL_SIZE,WORLD_WIDTH} from './world-layout.js?v=episode6';
+import {group,box,ball,cyl,cone,material} from './model-3d.js?v=episode7';
+import {CELL_WIDTH,CELL_SIZE,WORLD_WIDTH} from './world-layout.js?v=episode7';
 const COLORS={corn:0x91a35c,snow:0xc9e4e8,sand:0xdcc48e,stone:0x9aa08b,mud:0x8b7254,water:0x489fae,fertile:0x83954c,thorns:0x637b42,roots:0x8a8756,fungi:0x7c7fa1,warm:0xa6a364,gloom:0x64667b,ice:0x98d4df,mirror:0x9eb5df,bridge:0x9aa2a0,coral:0x75b4ac,barnacles:0x6f9491,road:0xb7a78c,moat:0x4c919e,ash:0x7b7770};
 const noise=n=>{const x=Math.sin(n*12.9898)*43758.5453;return x-Math.floor(x)};
 export class TerrainDetails{

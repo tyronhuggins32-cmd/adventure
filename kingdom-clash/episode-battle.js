@@ -1,8 +1,8 @@
-import {Ecosystem} from './ecosystem.js?v=episode6';
-import {TabletopBattle} from './tabletop-battle.js?v=episode6';
-import {landscapePowered,finishWorldJobs,raidStops} from './world-interactions.js?v=episode6';
-import {tableSlot} from './tabletop-layout.js?v=episode6';
-import {clean,emit,log} from './lanes.js?v=episode6';
+import {Ecosystem} from './ecosystem.js?v=episode7';
+import {TabletopBattle} from './tabletop-battle.js?v=episode7';
+import {landscapePowered,finishWorldJobs,raidStops} from './world-interactions.js?v=episode7';
+import {tableSlot} from './tabletop-layout.js?v=episode7';
+import {clean,emit,log} from './lanes.js?v=episode7';
 const mix=(a,b,t)=>a+(b-a)*t,clamp=n=>Math.max(0,Math.min(1,n));
 // Cards choose the actions; their world actors carry them out before damage resolves.
 export class EpisodeBattle extends TabletopBattle{

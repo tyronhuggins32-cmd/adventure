@@ -1,7 +1,7 @@
 import * as T from './vendor/three.js';
-import {group,box,ball,cyl,cone,batchStaticMeshes,material} from './model-3d.js?v=episode6';
-import {TerrainDetails} from './terrain-detail.js?v=episode6';
-import {CELL_WIDTH,CELL_SIZE,WORLD_WIDTH,WORLD_DEPTH} from './world-layout.js?v=episode6';
+import {group,box,ball,cyl,cone,batchStaticMeshes,material} from './model-3d.js?v=episode7';
+import {TerrainDetails} from './terrain-detail.js?v=episode7';
+import {CELL_WIDTH,CELL_SIZE,WORLD_WIDTH,WORLD_DEPTH} from './world-layout.js?v=episode7';
 const THEMES={plains:[0x75a9b4,0x587a7a],corn:[0x8fae4e,0x665339],fertile:[0x8db662,0x665339],bare:[0x9d8657,0x665339],mud:[0x75604b,0x4e443c],snow:[0xdae5dc,0x657c85],ice:[0x98c6d0,0x526f85],sand:[0xe3c681,0x9f8754],water:[0x74b8b4,0x647d68],stone:[0x899880,0x616b60],road:[0xa6a48c,0x696b61],gloom:[0x746b89,0x514c61],ash:[0x67665d,0x4b473e]};
 const rand=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x);};
 export function buildTabletop(scene){const g=group(scene);g.userData.landscapeWorld=true;

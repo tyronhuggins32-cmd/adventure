@@ -1,9 +1,9 @@
-import {episodeModel} from './episode-models.js?v=episode6';
-import {farmCreatureModel} from './farm-creature-3d.js?v=episode6';
-import {harvestFarmer,animateFarmer} from './farmer-model.js?v=episode6';
-import {archetypeFor,detailedCreature,detailedBuilding,polishModel,animateDetails} from './model-detail.js?v=episode6';
+import {episodeModel} from './episode-models.js?v=episode7';
+import {farmCreatureModel} from './farm-creature-3d.js?v=episode7';
+import {harvestFarmer,animateFarmer} from './farmer-model.js?v=episode7';
+import {archetypeFor,detailedCreature,detailedBuilding,polishModel,animateDetails} from './model-detail.js?v=episode7';
 import * as T from './vendor/three.js';
-import {hashName} from './entity-programs.js?v=episode6';
+import {hashName} from './entity-programs.js?v=episode7';
 export const PALETTES_3D={farm:{body:0x607b43,trim:0xe5b554,roof:0x9b5834,wood:0x795135,skin:0xf2bd8e},ice:{body:0x668ba5,trim:0xbceeff,roof:0x5079a1,wood:0x5d697a,skin:0xf0cfb0},beach:{body:0x38a6a0,trim:0xefcb78,roof:0xa95544,wood:0x725644,skin:0xd99d6c},medieval:{body:0x66758a,trim:0xe6b85b,roof:0x794e71,wood:0x685343,skin:0xe9b38b}};
 const mats=new Map(),geos=new Map();
 export function material(color,glow=false,finish='matte'){const key=color+':'+glow+':'+finish;if(!mats.has(key))mats.set(key,new T.MeshStandardMaterial({color,roughness:finish==='metal'?.32:.7,metalness:finish==='metal'?.65:glow?.15:0,flatShading:false,emissive:glow?color:0,emissiveIntensity:glow?.45:0}));return mats.get(key)}

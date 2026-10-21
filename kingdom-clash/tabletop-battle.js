@@ -1,11 +1,11 @@
-import {COMMANDERS} from './commanders.js?v=episode6';
-import {traitsFor} from './card-traits.js?v=episode6';
-import {tableSlot} from './tabletop-layout.js?v=episode6';
-import {isFoodCreature,isLivestock} from './livestock-ai.js?v=episode6';
-import {deathHealthGain} from './death-effects.js?v=episode6';
-import {advanceVeterans} from './building-progression.js?v=episode6';
-import {settleField} from './living-rules.js?v=episode6';
-import {attackValue,emit,log,clean,victory,draw} from './lanes.js?v=episode6';
+import {COMMANDERS} from './commanders.js?v=episode7';
+import {traitsFor} from './card-traits.js?v=episode7';
+import {tableSlot} from './tabletop-layout.js?v=episode7';
+import {isFoodCreature,isLivestock} from './livestock-ai.js?v=episode7';
+import {deathHealthGain} from './death-effects.js?v=episode7';
+import {advanceVeterans} from './building-progression.js?v=episode7';
+import {settleField} from './living-rules.js?v=episode7';
+import {attackValue,emit,log,clean,victory,draw} from './lanes.js?v=episode7';
 const LANETIME=1.65;
 // Four card lanes, one simultaneous exchange per pair. Movement is presentation only.
 export class TabletopBattle{

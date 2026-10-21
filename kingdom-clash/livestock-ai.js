@@ -1,4 +1,4 @@
-import {distance} from './world-layout.js?v=episode6';
+import {distance} from './world-layout.js?v=episode7';
 export const isLivestock=c=>['pig','sheep','cow','bull'].includes(c?.behavior);
 export const isFoodCreature=c=>c?.type==='creature'&&(c.foodBased===true||/turnip|corn|kernel|carrot|pumpkin|cabbage|potato|fruit|berry|mushroom/i.test(c.name||''));
 // Returns true when the animal owns this frame instead of ordinary combat.
