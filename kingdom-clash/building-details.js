@@ -1,9 +1,9 @@
 // Small tactical readouts and personality for every building card.
 // Mechanical effects stay in the battle engine; these labels explain them and give every structure a little life.
 const detailsByName = {
-  'Hay Field': ['FIELD SUPPORT','The scarecrow practices its victory pose.','sway','🌾'],
+  'Hay Field': ['COMMANDER HEAL','The scarecrow practices its victory pose.','sway','🌾'],
   'Windmill': ['ATTACK BOOST','One blade squeaks louder than the others.','spin','💨'],
-  'Orchard Tower': ['COMMANDER HEAL','An apple bonks the lookout on the helmet.','bob','🍎'],
+  'Orchard Tower': ['DEFENSIVE COVER','An apple bonks the lookout on the helmet.','bob','🍎'],
   'Ice House': ['COMMANDER HEAL','A tiny snowman salutes, then loses its nose.','shiver','☃️'],
   'Glacier Forge': ['ATTACK BOOST','The anvil gives a proud little sparkle.','spark','✨'],
   'Frost Tower': ['DEFENSIVE COVER','A snow puff sneezes off the battlements.','shiver','❄️'],
