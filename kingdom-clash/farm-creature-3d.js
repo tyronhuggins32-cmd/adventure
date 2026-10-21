@@ -105,7 +105,7 @@ export function farmCreatureModel(card, S) {
       const a=j*2.39996, ring=j%3;
       const x=Math.sin(a)*(.36+.055*(ring%2)), z=Math.cos(a)*(.47+.05*(ring%2));
       const y=.90+((j*7)%5-2)*.16;
-      oval(g,.175,j%4===0?0xfff7e4:wool,x,y,z,[1.15,.94,1.12]);
+      mesh(g,'SphereGeometry',[.175,10,8],j%4===0?0xfff7e4:wool,x,y,z,[1.15,.94,1.12]);
     }
     for(const side of [-1,1])for(const z of [-.45,.38])hoofLeg(side,z,.64,0x7d695d,0x55433c);
     const head=group(g,0,1.05,.64);g.userData.head=head;
@@ -119,7 +119,7 @@ export function farmCreatureModel(card, S) {
     smile(head,0,-.213,.38);
     for(let j=0;j<5;j++){
       const x=(j-2)*.115;
-      oval(head,.105,j%2?0xfff1dd:wool,x,.261,.052,[1.12,1.0,1.12]);
+      mesh(head,'SphereGeometry',[.105,10,8],j%2?0xfff1dd:wool,x,.261,.052,[1.12,1.0,1.12]);
     }
     const tail=group(g,0,.91,-.66);g.userData.tail=tail;
     for(let j=0;j<3;j++)oval(tail,.107,wool,(j-1)*.09,.02,-.05,[1.1,.85,1.2]);
