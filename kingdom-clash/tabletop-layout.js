@@ -1,4 +1,4 @@
-import {CELL_WIDTH,CELL_SIZE,WORLD_WIDTH,WORLD_DEPTH} from './world-layout.js?v=square1';
+import {CELL_WIDTH,CELL_SIZE,WORLD_WIDTH,WORLD_DEPTH} from './world-layout.js?v=harvest4';
 export const TABLE_MODEL_SCALE={creature:3.2,building:2.7,commander:2.2,spell:2.5};
 export const tableSlot=(side,lane,type='creature')=>({x:lane+(type==='commander'?.2:.5),y:side?(type==='building'?.24:type==='commander'?.11:.72):(type==='building'?1.76:type==='commander'?1.89:1.28)});
 export function fitTableCamera(aspect,yaw=0,pitch=1){

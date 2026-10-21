@@ -1,11 +1,11 @@
 import {TabletopBattle} from './tabletop-battle.js';
-import {recruitmentRoster,lockReason} from './building-progression.js?v=livingworld3';
-import {BattleSimulation,deployRival} from './battle-simulation.js?v=roster20261021';
-import {traitMarkup} from './card-traits.js?v=livingworld3';
-import {hydratePreviews} from './preview-3d.js?v=polish1';
-import {FieldScene} from './field-3d.js?v=livingworld3';
+import {recruitmentRoster,lockReason} from './building-progression.js?v=harvest4';
+import {BattleSimulation,deployRival} from './battle-simulation.js?v=harvest4';
+import {traitMarkup} from './card-traits.js?v=harvest4';
+import {hydratePreviews} from './preview-3d.js?v=harvest4';
+import {FieldScene} from './field-3d.js?v=harvest4';
 import {COMMANDERS,commandersFor} from './commanders.js';
-import{KINGDOMS,cards,createGame,play,floop,fight,cpu,draw,placeCommander,cardCost,attackValue,recruit}from './lanes.js?v=livingworld3';
+import{KINGDOMS,cards,createGame,play,floop,fight,cpu,draw,placeCommander,cardCost,attackValue,recruit}from './lanes.js?v=harvest4';
 import{figure,building,terrain,portrait,PALETTES}from './art.js?v=mesh3d1';
 import {buildingDetail} from './building-details.js';
 const $=id=>document.getElementById(id);
@@ -35,12 +35,12 @@ $('battleSpeed').onclick=()=>{battleSpeed=battleSpeed===1?2:1;if(state?.wave)sta
 
 function renderRecruitment(view,active){
  const a=view.players[0],catalog=cards(a.kingdom,a.commander);
- const panel=document.createElement('section');panel.className='recruitment-panel';panel.style.cssText='grid-column:1/-1;width:100%;padding:12px;box-sizing:border-box';
+ const panel=document.createElement('section');panel.className='recruitment-panel';panel.setAttribute('aria-label','Building recruitment');
  panel.innerHTML='<h3>Building recruitment</h3><p>Recruit for AP into any empty landscape. Survive two waves to learn a 2 AP spell. Your veteran and its building must remain alive to cast. Cast spells refresh after each wave.</p>'+a.lanes.map((l,i)=>{
  if(!l.building)return '';
  const roster=recruitmentRoster(catalog,l.building),empty=a.lanes.map((l,i)=>l.unit?'':`<option value="${i}">Landscape ${i+1}</option>`).join('');
- return `<details open style="margin:12px 0;padding:12px;border:1px solid #a58a51;border-radius:8px"><summary><b>${l.building.name}</b> · ${roster.length} exclusive recruits</summary><label>Deploy to <select data-recruit-target="${i}" ${!active||!empty?'disabled':''}>${empty||'<option>No empty landscapes</option>'}</select></label><div style="display:flex;gap:10px;overflow-x:auto;padding:10px 0">${roster.map(c=>`<div style="flex:0 0 220px">${cardMarkup(c,a.kingdom)}<button data-recruit-building="${i}" data-recruit-id="${c.id}" ${!active||!empty||a.ap<cardCost(a,c)?'disabled':''}>Recruit ${c.name} · ${cardCost(a,c)} AP</button></div>`).join('')}</div></details>`;
+ return `<details open class="recruit-school"><summary><b>${l.building.name}</b> · ${roster.length} exclusive recruits</summary><label>Deploy to <select data-recruit-target="${i}" ${!active||!empty?'disabled':''}>${empty||'<option>No empty landscapes</option>'}</select></label><div class="recruit-grid">${roster.map(c=>`<div class="recruit-option">${cardMarkup(c,a.kingdom)}<button data-recruit-building="${i}" data-recruit-id="${c.id}" ${!active||!empty||a.ap<cardCost(a,c)?'disabled':''}>Recruit ${c.name} · ${cardCost(a,c)} AP</button></div>`).join('')}</div></details>`;
  }).join('')+(!a.lanes.some(l=>l.building)?'<p>Build one of the cards above to reveal its recruits.</p>':'');
- $('hand').append(panel);
+ document.querySelector('.recruitment-panel')?.remove();$('hand').after(panel);
  panel.querySelectorAll('[data-recruit-building]').forEach(button=>button.onclick=()=>{const from=+button.dataset.recruitBuilding,target=+panel.querySelector(`[data-recruit-target="${from}"]`).value;if(recruit(state,0,from,button.dataset.recruitId,target)){selected=null;render();}});
 }

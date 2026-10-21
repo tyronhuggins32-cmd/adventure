@@ -1,27 +1,27 @@
-import {TabletopTerrain,buildTabletop} from './tabletop-scene.js';
-import {fitTableCamera,TABLE_MODEL_SCALE} from './tabletop-layout.js';
-import {TerrainDetails} from './terrain-detail.js?v=polish1';
-import {CameraControls} from './camera-controls.js?v=livingworld3';
+import {TabletopTerrain,buildTabletop} from './tabletop-scene.js?v=harvest4';
+import {fitTableCamera,TABLE_MODEL_SCALE} from './tabletop-layout.js?v=harvest4';
+import {TerrainDetails} from './terrain-detail.js?v=harvest4';
+import {CameraControls} from './camera-controls.js?v=harvest4';
 import {deathPose,deathProgress} from './death-effects.js';
-import {CELL_SIZE,CELL_WIDTH,WORLD_WIDTH,WORLD_DEPTH,distance,worldPoint} from './world-layout.js?v=roster20261021';
-import {buildScenery} from './world-scenery.js?v=polish1';
+import {CELL_SIZE,CELL_WIDTH,WORLD_WIDTH,WORLD_DEPTH,distance,worldPoint} from './world-layout.js?v=harvest4';
+import {buildScenery} from './world-scenery.js?v=harvest4';
 import * as T from './vendor/three.js';
-import {EntityWorld} from './entity-world.js?v=livingworld3';
-import {createModel,animateModel,disposeModel,batchStaticMeshes,group,box,ball,cyl,cone,material} from './model-3d.js?v=polish1';
+import {EntityWorld} from './entity-world.js?v=harvest4';
+import {createModel,animateModel,disposeModel,batchStaticMeshes,group,box,ball,cyl,cone,material} from './model-3d.js?v=harvest4';
 const COLORS={corn:0x91a35c,snow:0xc9e4e8,sand:0xdcc48e,stone:0x9aa08b,mud:0x8b7254,water:0x489fae,fertile:0x83954c,thorns:0x637b42,roots:0x8a8756,fungi:0x7c7fa1,warm:0xa6a364,gloom:0x64667b,ice:0x98d4df,mirror:0x9eb5df,bridge:0x9aa2a0,coral:0x75b4ac,barnacles:0x6f9491,road:0xb7a78c,moat:0x4c919e,ash:0x7b7770};
 const pos=(x,y,h=0)=>new T.Vector3((x-2)*CELL_WIDTH,h,(y-1)*CELL_SIZE);
 export class FieldScene{
  constructor(canvas,{choose,inspect,inspectEntity}={}){this.canvas=canvas;this.choose=choose;this.inspect=inspect;this.inspectEntity=inspectEntity;this.world=new EntityWorld();this.actors=this.world.actors;this.models=new Map();this.departing=[];this.pulses=[];this.bolts=new Map();this.eventSeq=0;this.tiles=new Map();this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;this.running=true;this.time=0;this.yaw=.55;this.pitch=.9;this.zoom=1;this.followBattle=false;this.target=new T.Vector3(0,0,0);this.pointers=new Map();this.listeners=[];
- this.scene=new T.Scene();this.scene.background=new T.Color(0x292d38);this.scene.fog=new T.Fog(0x292d38,230,450);this.camera=new T.OrthographicCamera(-20,20,12,-12,.1,500);this.raycaster=new T.Raycaster();this.groundPlane=new T.Plane(new T.Vector3(0,1,0),0);
+ this.scene=new T.Scene();this.scene.background=new T.Color(0x292d38);this.scene.fog=new T.Fog(0x292d38,420,650);this.camera=new T.OrthographicCamera(-20,20,12,-12,.1,500);this.raycaster=new T.Raycaster();this.groundPlane=new T.Plane(new T.Vector3(0,1,0),0);
  try{this.renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});}catch(error){this.running=false;const note=document.createElement('p');note.className='webgl-error';note.textContent='This 3D battlefield needs WebGL 2. Enable hardware acceleration or open it in a current Safari/Chrome browser. The lane controls below remain available.';canvas.before(note);canvas.hidden=true;return;}
  this.renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=T.PCFShadowMap;this.renderer.outputColorSpace=T.SRGBColorSpace;this.renderer.toneMapping=T.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.0;
- this.scene.add(new T.HemisphereLight(0xfff1cf,0x536453,1.8));const sun=new T.DirectionalLight(0xffe6bb,2.8);sun.position.set(-60,100,60);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-95,right:95,top:75,bottom:-75,near:1,far:260});sun.shadow.bias=-.0005;sun.shadow.normalBias=.04;this.scene.add(sun);this.sun=sun;
+ this.scene.add(new T.HemisphereLight(0xfff1cf,0x536453,1.8));const sun=new T.DirectionalLight(0xffe6bb,2.8);sun.position.set(-100,200,100);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-185,right:185,top:160,bottom:-160,near:1,far:500});sun.shadow.bias=-.0005;sun.shadow.normalBias=.04;this.scene.add(sun);this.sun=sun;
  this.terrain=new TabletopTerrain(this.scene,this.instances.bind(this));this.scenery=buildTabletop(this.scene);this.board=this.scenery.group;this.controls=new CameraControls(this);
  this.observer=new ResizeObserver(()=>this.resize());this.observer.observe(canvas);this.resize();this.frame=now=>{if(!this.running)return;this.raf=requestAnimationFrame(this.frame);if(document.hidden||now-(this.last||0)<33)return;const dt=this.last?Math.min(.1,(now-this.last)/1000):0;this.last=now;this.draw(dt)};this.raf=requestAnimationFrame(this.frame);
  }
  listen(el,name,fn,opts){el.addEventListener(name,fn,opts);this.listeners.push(()=>el.removeEventListener(name,fn,opts));}
  resize(){if(!this.renderer)return;const width=this.canvas.clientWidth||1000,height=this.canvas.clientHeight||550;this.renderer.setSize(width,height,false);const aspect=width/height;Object.assign(this.camera,fitTableCamera(aspect,.55,.9));this.updateCamera();}
- updateCamera(){this.dirty=true;const pose=this.controls?.pose||this;this.camera.zoom=pose.zoom;const r=170;this.camera.position.set(pose.target.x+Math.sin(pose.yaw)*Math.cos(pose.pitch)*r,Math.sin(pose.pitch)*r,pose.target.z+Math.cos(pose.yaw)*Math.cos(pose.pitch)*r);this.camera.lookAt(pose.target);this.camera.updateProjectionMatrix();this.camera.updateMatrixWorld();}
+ updateCamera(){this.dirty=true;const pose=this.controls?.pose||this;this.camera.zoom=pose.zoom;const r=300;this.camera.position.set(pose.target.x+Math.sin(pose.yaw)*Math.cos(pose.pitch)*r,Math.sin(pose.pitch)*r,pose.target.z+Math.cos(pose.yaw)*Math.cos(pose.pitch)*r);this.camera.lookAt(pose.target);this.camera.updateProjectionMatrix();this.camera.updateMatrixWorld();}
  project(x,y,z=0){const p=pos(x,y,z).project(this.camera);return {x:(p.x+1)*960,y:(1-p.y)*480};}
  pick(e){if(!this.view)return;const r=this.canvas.getBoundingClientRect(),ndc=new T.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);this.raycaster.setFromCamera(ndc,this.camera);const hit=this.raycaster.intersectObjects([...this.models.values()],true)[0];if(hit&&this.view.phase!=='setup'&&!this.selected){let o=hit.object;while(o&&!o.userData.entity)o=o.parent;if(o){const a=o.userData.entity;if(this.inspectEntity)this.inspectEntity(a.card,a.territory);else this.inspect?.(a.side,a.lane);return;}}
  const point=new T.Vector3();if(!this.raycaster.ray.intersectPlane(this.groundPlane,point))return;const lane=Math.floor(point.x/CELL_WIDTH+2),row=Math.floor(point.z/CELL_SIZE+1);if(lane<0||lane>3||row<0||row>1)return;const side=row===1?0:1;if(side===0&&(this.selected||this.view.phase==='setup'))this.choose?.(lane);else this.inspect?.(side,lane);

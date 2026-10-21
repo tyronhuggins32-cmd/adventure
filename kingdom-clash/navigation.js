@@ -1,4 +1,4 @@
-import {FOREST,CELL_SIZE,CELL_WIDTH,WORLD_WIDTH,WORLD_DEPTH} from './world-layout.js?v=square1';
+import {FOREST,CELL_SIZE,CELL_WIDTH,WORLD_WIDTH,WORLD_DEPTH} from './world-layout.js?v=harvest4';
 const W=WORLD_WIDTH,H=WORLD_DEPTH,cell=p=>({x:Math.max(0,Math.min(W-1,Math.floor(p.x*CELL_WIDTH))),y:Math.max(0,Math.min(H-1,Math.floor(p.y*CELL_SIZE)))});
 export function makeObstacles(structures=[]){const blocked=new Set();for(const t of FOREST){const p=cell(t);blocked.add(p.y*W+p.x);}for(let x=0;x<W;x++)if(Math.abs((x+.5)%CELL_WIDTH-CELL_WIDTH/2)>1.2){blocked.add((CELL_SIZE-1)*W+x);blocked.add(CELL_SIZE*W+x);}for(const b of structures){const p=cell(b);for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)blocked.add((p.y+dy)*W+p.x+dx);}return blocked;}
 export function findPath(start,target,blocked,reach=0){const a=cell(start),b=cell(target),key=p=>p.y*W+p.x,first=key(a),cost=new Map([[first,0]]),parent=new Map(),open=[{...a,k:first,f:0}],closed=new Set();let best=first,bestD=Infinity,goal=first;

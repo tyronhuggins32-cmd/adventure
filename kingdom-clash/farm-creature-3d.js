@@ -239,3 +239,4 @@ export function farmCreatureModel(card, S) {
   g.userData.isFarmCreatureHero = true;
   return g;
 }
+

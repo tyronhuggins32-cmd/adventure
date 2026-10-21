@@ -1,6 +1,6 @@
 // Kingdom Clash — procedural 3D roster expansion.
 // Generates 720 named, commander-aligned character and animal variants from reusable
-// low-poly model recipes. Models are built by model-3d.js; no external assets required.
+// low-poly model recipes. Models are built by model-3d.js?v=harvest4; no external assets required.
 export const ROSTER_TARGET = 720;
 export const ROSTER_KINGDOMS = Object.freeze({
   farm: { title: "Harvest Kingdom", palette: "farm", creatures: ["Hay Golem","Harvest Griffin","Turnip Squire","Scarecrow Knight","Corn Witch","Orchard Keeper","Moss Boar","Clover Stag"], animals: ["Pig","Wolf","Fox","Horse","Ox","Hare","Crow","Owl","Sheep","Goat","Barn Cat","Field Mouse","Badger","Duck","Rooster","Bee Swarm"] },

@@ -1,6 +1,6 @@
-import {tableSlot} from './tabletop-layout.js';
-import {CELL_WIDTH,CELL_SIZE} from './world-layout.js?v=square1';
-import {findPath,makeObstacles} from './navigation.js?v=square1';
+import {tableSlot} from './tabletop-layout.js?v=harvest4';
+import {CELL_WIDTH,CELL_SIZE} from './world-layout.js?v=harvest4';
+import {findPath,makeObstacles} from './navigation.js?v=harvest4';
 import {COMMANDERS} from './commanders.js';
 import {programFor,headingFor} from './entity-programs.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));

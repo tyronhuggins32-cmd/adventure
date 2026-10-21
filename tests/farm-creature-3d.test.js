@@ -76,3 +76,4 @@ test('farm birds flap independently and unrelated kingdoms stay unchanged',()=>{
   assert.equal(wolf.userData.isFarmCreatureHero,undefined,'other factions retain their original mesh design');
   disposeModel(wolf);
 });
+
