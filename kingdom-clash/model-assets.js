@@ -1,0 +1,27 @@
+import {COMMANDERS} from './commanders.js';
+export const COMMANDER_ORDER=Object.keys(COMMANDERS);
+export const CREATURE_ORDER=[
+'Turnip Squire','Haystack Golem','Harvest Griffin','Crow Spy','Straw Stalker','Wicker Colossus','Kernel Sprite','Rootbound Stag',
+'Ancient Corn Ent','Ember Penguin','Hearth Yak','Aurora Bear','Snow Imp','Mirror Wraith','Blizzard Serpent','Icehorn Kid',
+'Glacier Ram','Wandering Mammoth','Crab Buccaneer','Coconut Corsair','Shipwreck Leviathan','Pearl Seer','Coral Sentinel','Dreaming Manta',
+'Bottle Hermit','Undertow Eel','Abyss Collector','Pennant Squire','Lance Captain','Banner Gryphon','Gate Warden','Moat Guardian',
+'Walking Keep','Outcast Duelist','Oathbreaker','Ashen Cavalier','Truffle Pig','Truffle Hound','Omen Raven','Granary Rats',
+'Bramble Boar','Seedling Familiar','Ember Fox','Coal Cricket','Mirror Owl','Icicle Thief','Snowdrift Seal','Musk Ox',
+'Thieving Gull','Rigging Monkey','Pearl Turtle','Lantern Jelly','Brine Leech','Debt Angler','Standard Charger','Messenger Hare',
+'Gate Mastiff','Gargoyle Custodian','Ash Wolf','Cinder Phoenix','hen','lantern','seedling','cloud'];
+export const BUILDING_ORDER=[
+'Hay Field','Windmill','Orchard Tower','Crow Roost','Briar Snare','Haunted Silo','Seed Shrine','Root Circle',
+'Elder Grove','Snow Lodge','Ember Kiln','Aurora Beacon','Ice House','Mirror Spire','Whiteout Tower','Frost Pasture',
+'Crystal Saltlick','Glacier Cairn','Driftwood Dock','Smuggler Lookout','Wreck Fortress','Pearl Pool','Coral Library','Oracle Lighthouse',
+'Tide Pool','Sunken Vault','Undertow Bell','Knight House','Rally Standard','Siege Tower','Guard Quarters','Ballista Yard',
+'Castle Wall','Refuge Camp','Broken Throne','Rebel Watch','Henhouse','Decoy Effigy','Walking Orchard','Bottomless Soup Pot',
+'Prism Cage','Icehorn Pen','Wreck Crane','Watchful Anemone','Tide Jar','War Drum','Mason’s Yard','Rebel Camp'];
+const root=new URL('./assets/',import.meta.url).href;
+export const ATLASES={commander:{url:root+'commanders.webp',cols:4,rows:3,width:1448,height:1086,bands:[0,358,709,1086]},creature:{url:root+'creatures.webp',cols:8,rows:8,width:1297,height:1212,bands:[0,178,343,500,661,813,950,1083,1212]},building:{url:root+'buildings.webp',cols:8,rows:6,width:1448,height:1086,bands:[0,194,393,576,753,917,1086]}};
+export function modelFor(card,k){if(!card)return null;const leader=COMMANDERS[card.id];if(leader)return {...ATLASES.commander,index:COMMANDER_ORDER.indexOf(card.id),type:'commander'};let index=card.type==='building'?BUILDING_ORDER.indexOf(card.name):CREATURE_ORDER.indexOf(card.name);if(index>=0)return {...ATLASES[card.type==='building'?'building':'creature'],index,type:card.type==='building'?'building':'creature'};
+if(/^b[0-2]$/.test(card.id)){const c=COMMANDERS[card.commander]||Object.values(COMMANDERS).find(v=>v.territory===k);index=BUILDING_ORDER.indexOf(c.buildings[+card.id[1]]);return {...ATLASES.building,index,type:'building'}}
+if(/^u[0-2]$/.test(card.id)){const c=COMMANDERS[card.commander]||Object.values(COMMANDERS).find(v=>v.territory===k);index=CREATURE_ORDER.indexOf(c.units[+card.id[1]]);return {...ATLASES.creature,index,type:'creature'}}return null;}
+export function modelRect(m){const row=Math.floor(m.index/m.cols),width=m.width/m.cols;return {x:(m.index%m.cols)*width,y:m.bands[row],width,height:m.bands[row+1]-m.bands[row]};}
+export function modelMarkup(card,k,cls=''){const m=modelFor(card,k);if(!m)return '';const r=modelRect(m);return `<svg class="illustration painted-model ${cls}" viewBox="0 0 ${r.width} ${r.height}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><svg width="${r.width}" height="${r.height}" viewBox="${r.x} ${r.y} ${r.width} ${r.height}" overflow="hidden"><image href="${m.url}" width="${m.width}" height="${m.height}"/></svg></svg>`;}
+const images=new Map();
+export function paintModel(ctx,card,k,x,y,width,height,{facing=1,clock=0,state='idle',reduced=false}={}){const m=modelFor(card,k);if(!m)return false;let image=images.get(m.url);if(!image){image=new Image();image.src=m.url;images.set(m.url,image)}if(!image.complete||!image.naturalWidth)return false;const r=modelRect(m),scale=Math.min(width/r.width,height/r.height),dw=r.width*scale,dh=r.height*scale;ctx.save();ctx.translate(x,y);if(facing<0)ctx.scale(-1,1);const bob=reduced?0:Math.sin(clock*(state==='flee'?10:state==='circle'?5:3))*1.8;ctx.translate(0,bob);if(state==='root')ctx.rotate(.06);if(state==='wallow')ctx.scale(1.05,.92);ctx.drawImage(image,r.x,r.y,r.width,r.height,-dw/2,-dh,dw,dh);ctx.restore();return true;}

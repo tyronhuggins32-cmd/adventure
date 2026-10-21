@@ -1,3 +1,4 @@
+import {modelMarkup} from './model-assets.js';
 import {EXPANSION} from './expansion.js';
 import {COMMANDERS} from './commanders.js';
 // Code-native illustrations: shared visual vocabulary for cards and live miniatures.
@@ -5,6 +6,7 @@ export const PALETTES={farm:['#efc550','#8ead44','#ffe6a1','#71552d'],ice:['#b5e
 const wrap=(body,cls='',box='0 0 200 200')=>`<svg class="illustration ${cls}" viewBox="${box}" preserveAspectRatio="${cls==='terrain'?'none':'xMidYMid meet'}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><g stroke="#293b35" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${body}</g></svg>`;
 const eyes=(x=88,y=96)=>`<ellipse cx="${x}" cy="${y}" rx="4" ry="6" fill="#25352b" stroke="none"/><ellipse cx="${x+25}" cy="${y}" rx="4" ry="6" fill="#25352b" stroke="none"/><path d="M${x+6} ${y+14}q7 7 14 0" fill="none"/>`;
 export function figure(k,id='u0'){
+ const subject=typeof id==='object'?id:{id};const painted=modelMarkup(subject,k);if(painted)return painted;id=subject.id;
  if(COMMANDERS[id])return leaderArt(k,id);
  const special=Object.entries(EXPANSION).filter(([key])=>COMMANDERS[key].territory===k).flatMap(([,v])=>v).find(c=>c.id===id);if(special?.behavior)return animalPortrait(k,special.behavior);
  let [gold,land,light,dark]=PALETTES[k],tier=+id.slice(-1)||0,body='';
@@ -41,6 +43,7 @@ function leaderArt(k,id){
  return wrap(`<ellipse cx="100" cy="181" rx="64" ry="9" fill="#12271b33" stroke="none"/><g class="character-body">${robe}${head}${eyes(87,82)}${extra}${tool}</g>`,'character commander-illustration');
 }
 export function building(k,id='b0'){
+ const subject=typeof id==='object'?{...id,type:'building'}:{id,type:'building'};const painted=modelMarkup(subject,k);if(painted)return painted;id=subject.id;
  const [gold,land,light,dark]=PALETTES[k],n=+id.slice(-1)||0;
  let base=`<path d="M49 160V91h101v69Z" fill="${light}"/><path d="M35 92l65-51 65 51Z" fill="${dark}"/><path d="M87 160v-39q13-14 26 0v39" fill="${dark}"/><path d="M61 111h15v19H61Zm64 0h15v19h-15Z" fill="${gold}"/>`;
  if(k==='farm'&&n===0)base=`<path d="M36 153V94l24-42h82l25 42v59Z" fill="#d7af4d"/><path d="M36 94h130M58 57l-7 91m36-91-4 91m33-91 5 91m20-91 11 91" stroke="#98732f"/><path d="M84 153v-34h32v34" fill="#71552d"/><path d="M84 119l32 34m0-34-32 34" stroke="#edd48a"/>`;
@@ -57,5 +60,5 @@ export function terrain(k,lane=0){const [gold,land,light,dark]=PALETTES[k];let d
  if(k==='beach'){detail=`<path class="water" d="M0 94q35-18 70 3t70 0 70 5v98H0Z" fill="#45b7bf" stroke="none"/><path class="water" d="M0 111q35-18 70 3t70 0 70 5M0 143q35-18 70 3t70 0 70 5M0 174q35-18 70 3t70 0 70 5" fill="none" stroke="#b5f1dd" stroke-width="3"/><path d="M27 79l-3-43" stroke="#8d7950" stroke-width="7"/><path d="M24 36q-25-24-36-4 21-4 36 4-3-31 16-28-10 12-16 28 29-14 38 5-21-7-38-5" fill="#3e8f62"/>`;}
  if(k==='medieval'){detail=`<path d="M76 0h43v200H76Z" fill="#baa58b" stroke="#796d5d" stroke-width="2"/>`;for(let i=0;i<8;i++)detail+=`<path d="M77 ${i*27}h40m-21 0v13m0 0h21" fill="none" stroke="#847c69" stroke-width="2"/>`;for(let i=0;i<7;i++){let x=12+(i*63)%170,y=25+(i*47)%145;detail+=`<path d="M${x} ${y}l-9 20h5l-7 12h24l-7-12h5Z" fill="#46724c" stroke="#304e38" stroke-width="2"/>`;}}
  return wrap(`<path d="M0 0h200v200H0Z" fill="${land}" stroke="none"/>${detail}<path d="M0 0h200v200H0Z" fill="none" stroke="${dark}" stroke-width="3"/>`,'terrain');}
-export function portrait(k,id,type='creature'){return `<div class="portrait ${k}">${terrain(k)}<div class="portrait-subject">${type==='building'?building(k,id):type==='spell'?spell(k,id):figure(k,id)}</div></div>`;}
-export function spell(k,id='s'){if(id==='crows')return animalPortrait(k,'crow');if(['stampede','bell','salt','mammoth','herd'].includes(id))return animalPortrait(k,'pig');if(['rain','compost','spore','roots','garden','reefWall','throne'].includes(id))return animalPortrait(k,'plant');let color=PALETTES[k][0];return wrap(`<circle cx="100" cy="102" r="64" fill="${color}" opacity=".6"/><path d="M112 18L58 105h37l-9 77 59-99h-40Z" fill="#fff2b5"/><path d="M44 47l-9 13m119-23 10 13M34 140l-12 6m136-1 15 12" stroke="${color}" stroke-width="6"/>`,'spell-art');}
+export function portrait(k,id,type='creature',card={}){return `<div class="portrait ${k}">${terrain(k)}<div class="portrait-subject">${type==='building'?building(k,{...card,id}):type==='spell'?spell(k,id):figure(k,{...card,id})}</div></div>`;}
+export function spell(k,id='s'){const themes={farm:['Seedling Familiar','Omen Raven','Ancient Corn Ent'],ice:['Mirror Wraith','Blizzard Serpent','Wandering Mammoth'],beach:['Dreaming Manta','Shipwreck Leviathan','Lantern Jelly'],medieval:['Banner Gryphon','Ashen Cavalier','Walking Keep']};const hash=[...id].reduce((n,c)=>n+c.charCodeAt(0),0),name=id==='crows'?'Omen Raven':themes[k][hash%3];return `<div class="painted-spell" style="--spell-color:${PALETTES[k][0]}">${modelMarkup({name,type:'creature'},k)}<span class="spell-sigil" aria-hidden="true">${['✦','✧','❧'][hash%3]}</span></div>`;}

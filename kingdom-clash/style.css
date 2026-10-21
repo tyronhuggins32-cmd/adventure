@@ -12,6 +12,13 @@
 #livingField{display:block;width:100%;height:auto;aspect-ratio:2;cursor:pointer;touch-action:pan-x;filter:drop-shadow(0 6px 3px #1c352366)}#arena{max-width:1040px;min-width:660px}.lanes .landscape{height:40px;aspect-ratio:auto!important;background:transparent;box-shadow:none;border:0}.lanes .landscape>.terrain,.lanes .ambient{display:none}.lanes .structure-slot{top:-15px;width:65px;height:55px;right:0}.lanes .unit-slot{top:-8px;width:55px;height:55px;left:15%}.lanes .commander-slot{top:-10px;left:55%;width:35px;height:50px}.lane-info{min-height:68px;padding-top:4px}.field-stats{display:block;font-size:9px;color:#e1dab1}.lane-info .empty-label{font-size:9px}.enemy .lane-info{min-height:55px}.lanes{gap:10px}.land-label{padding:6px 3px 2px;border-top:1px solid #aabf9166}.battle-line{height:10px}.targetable .landscape{box-shadow:none}.card .rules{min-height:145px}.card .rules p{font-size:11px;line-height:1.5}.card .card-title b{font-size:16px}#hand .card{flex-basis:220px}.commander .rules{min-height:215px}#inspectCard .rules{min-height:0}
 @media(max-width:767px){#arena{min-width:660px}.arena-scroll{padding-top:0}#hand .card{flex-basis:205px}.table-label{margin-bottom:0}.lanes .landscape{height:35px}.commander-grid .rules{min-height:0}}
 
+/* Painted model sheets share one camera, lighting direction and material palette. */
+.painted-model{overflow:hidden!important}.portrait-subject:has(.painted-model){filter:drop-shadow(3px 5px 2px #20322455)}
+#arena{width:2080px;max-width:none;min-width:1320px}#arena.fit-field{width:100%;min-width:660px;max-width:1040px}#fieldZoom{display:block;margin:8px 0 8px auto;font-size:12px;padding:7px 12px;background:#f0d69b}.arena-scroll{overscroll-behavior-x:contain}#livingField{touch-action:pan-x pan-y}.lanes{gap:18px}.lanes .landscape{height:56px}.lanes .unit-slot{height:66px;width:66px}.lanes .structure-slot{width:90px;height:72px}.lanes .commander-slot{width:48px;height:64px}.land-label{font-size:10px}.lane-info strong{font-size:14px}.lane-actions button{font-size:12px}.fit-field .lanes{gap:8px}
+@media(max-width:767px){#arena{width:1320px;min-width:1320px}#arena.fit-field{width:660px;min-width:660px}.lanes .landscape{height:46px}.lanes .structure-slot{width:70px;height:60px}.lane-actions button{font-size:11px}}
+
+.painted-spell{position:relative;width:100%;height:100%;background:radial-gradient(ellipse,var(--spell-color),transparent 68%)}.painted-spell .painted-model{filter:drop-shadow(0 0 8px var(--spell-color))}.spell-sigil{position:absolute;right:8%;bottom:4%;font-size:48px;color:#fff4bb;text-shadow:0 0 12px var(--spell-color),2px 2px #34483c}.portrait:has(.painted-model){background-image:radial-gradient(ellipse at 40% 20%,#f7e7bd99,transparent 70%)}
+
 /* Building cards: tactical micro-details and playful structure reactions. */
 .housing-card .building-extra{display:grid;gap:3px;margin:8px 2px 2px;padding:7px 8px;border:1px dashed #a18e60;border-radius:6px;background:#fff7dc;min-height:48px}
 .housing-card .building-extra b{font-size:8px;letter-spacing:1px;color:var(--deep)}
@@ -31,3 +38,4 @@
 @keyframes house-shiver{0%,88%,100%{transform:translateX(0)}90%{transform:translateX(-2px)}94%{transform:translateX(2px)}}
 @keyframes house-spark{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25) drop-shadow(0 0 5px #fff2a1)}}
 @media(prefers-reduced-motion:reduce){.housing-card *, .mini-building *, .building-gag{animation:none!important;transition:none!important}}
+

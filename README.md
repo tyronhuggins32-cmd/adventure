@@ -32,7 +32,7 @@ Tap battlefield miniatures to inspect cards. Sound is off by default. Reduced-mo
 
 `npm start` serves http://localhost:8000. `npm test` runs the rule tests, including all 144 commander pairings. GitHub Pages deploys main through the existing workflow.
 
-`commanders.js` defines rosters and passives; `lanes.js` runs combat and emits sequential events; `art.js` draws original SVG illustrations; `app.js` presents the setup stages and live table. The older grid engine remains unused legacy source. No external art assets or runtime dependencies are required.
+`commanders.js` defines rosters and passives; `lanes.js` runs combat and emits sequential events; `art.js` composes card portraits from the painted model sheets; `app.js` presents the setup stages and live table. The older grid engine remains unused legacy source. All art is bundled locally; no runtime dependencies are required.
 
 
 ## Living battlefield expansion
@@ -48,3 +48,12 @@ The field is now a continuous canvas-rendered isometric diorama. Commanders, com
 Other examples: Henhouse grows a bounded flock that replenishes food; Powder Keg damages both fields; Root Prison binds enemies; Graft Exchange swaps terrain and food; tide effects flood/drain fields; War Drum and Rebel Camp have capped permanent growth. Each expansion card’s text describes its individual mechanic. Combat remains turn-based while movement and card reactions animate continuously. Reduced-motion mode keeps actors still and shows short feedback. The animation loop is capped around 30 FPS and stops drawing when the document is hidden; New Battle destroys the previous scene loop.
 
 `npm test` covers all 144 commander matchups, all 84 expansion cards on empty and populated lanes, crow targeting/backfire, pig foraging, terrain resources, population limits, and entity brain behavior. No external art or AI service is needed.
+
+
+## Expanded painted diorama
+
+Fields are twice their previous width and depth (four times the ground area), using a 1920 × 960 world projection. Desktop expanded view is 2080px wide; phone view is 1320px, both twice their former dimensions. Pan inside the table or choose **Fit field**. Lane count and combat capacity stay at four per player.
+
+The 12 commanders have new full-body painted sprites inspired by the supplied farmer reference, and all combat creatures and buildings share matching shaded materials. Three local WebP sheets include 12 commanders, 64 creatures/support entities, and 48 buildings. Spells compose matching models with magic sigils. Model names bind the same artwork in cards, inspection, and the live field. The field adds 48px exposed soil strata, cultivated beds, crop varieties, fences, shaded trees, and depth-sorted larger buildings. This is a painted 2.5D canvas diorama, not rotatable polygonal 3D. Generated bitmap art is bundled under `kingdom-clash/assets`; no image or AI service runs during play.
+
+`scene-math.js` owns projection and inverse picking; `model-assets.js` owns atlas bands and bindings. Tests verify every commander and creature/building model, all eight clickable field centers, and the existing battle rules.
