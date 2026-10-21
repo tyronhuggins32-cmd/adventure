@@ -45,6 +45,8 @@ function leaderArt(k,id){
 }
 export function building(k,id='b0'){
  const card=typeof id==='object'?id:{id},name=card.name||'',key=String(card.id||id||'b0');
+ // Prefer the polished, hand-painted 3D building atlas for the reference look.
+ const painted=modelMarkup(card,k,'building-miniature');if(painted)return painted;
  const [gold,land,light,dark]=PALETTES[k]||PALETTES.farm;
  const p=k==='ice'?['#eafaff','#83c9e3','#4d829f','#e7c76d']:k==='beach'?['#fff0c7','#f0c66f','#3f9e9d','#d87f62']:k==='medieval'?['#e2d5ed','#9a8ab4','#596b56','#d6b15b']:['#fff0bf','#d5a74e','#6b934c','#a45f42'];
  const [wall,roof,accent,trim]=p;let b='';
