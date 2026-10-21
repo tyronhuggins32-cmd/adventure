@@ -1,0 +1,43 @@
+import {COMMANDERS} from './commanders.js';
+import {traitsFor} from './card-traits.js';
+import {tableSlot} from './tabletop-layout.js';
+import {isFoodCreature,isLivestock} from './livestock-ai.js';
+import {deathHealthGain} from './death-effects.js';
+import {advanceVeterans} from './building-progression.js';
+import {settleField} from './living-rules.js';
+import {attackValue,emit,log,clean,victory,draw} from './lanes.js?v=polish1';
+const LANETIME=1.65;
+// Four card lanes, one simultaneous exchange per pair. Movement is presentation only.
+export class TabletopBattle{
+ constructor(s){this.s=s;this.time=0;this.running=s.phase==='battle';this.units=[];this.structures=[];this.leaders=[];this.events=[];this.projectiles=[];this.serial=0;this.resolved=new Set();
+  for(let side=0;side<2;side++){const p=s.players[side];for(let lane=0;lane<4;lane++){const l=p.lanes[lane];if(l.unit)this.units.push(this.actor(l.unit,side,lane));if(l.building)this.structures.push(this.actor(l.building,side,lane));}this.leaders.push(this.actor({id:p.commander,name:COMMANDERS[p.commander].name,type:'commander',hp:30,health:p.hp},side,p.commanderLane??1));}
+  s.wave={running:this.running,tabletop:true,time:0,limit:LANETIME*4+.5,speed:1,paused:false,activeLane:0,number:s.round,units:this.units,structures:this.structures,leaders:this.leaders,projectiles:this.projectiles,events:this.events,stats:{hits:0,kills:0,baseHits:0}};this.support();clean(s);victory(s);
+ }
+ actor(card,side,lane){const type=card.type==='building'?'building':card.type==='commander'?'commander':'creature',slot=tableSlot(side,lane,type);card.health??=card.hp;return {id:type==='commander'?'leader:'+side:(type==='building'?'building:':'unit:')+(card.uid||side+':'+lane+':'+card.name),card,side,lane,building:type==='building',profile:traitsFor({...card,territory:this.s.players[side].kingdom}),...slot,home:{...slot},vx:0,vy:0,state:card.frozen?'frozen':card.exhausted?'resting':'guard',action:0,hits:0,targetsHit:new Set()};}
+ event(kind,a,target,extra={}){const e={kind,p:a.side,lane:a.lane,kingdom:this.s.players[a.side].kingdom,card:{...a.card},worldX:a.x,worldY:a.y,...(target?{targetSide:target.side,targetLane:target.lane,targetX:target.x,targetY:target.y}:{}),...extra};emit(this.s,e);this.events.push({...e,at:this.time,id:++this.serial});}
+ support(){for(const b of this.structures){const l=this.s.players[b.side].lanes[b.lane],u=l.unit;if(b.card.health<=0)continue;if(b.profile.role==='farm'||b.profile.role==='supply depot'){l.field.food=Math.min(12,l.field.food+1);if(b.profile.role==='farm')l.field.integrity=Math.min(8,l.field.integrity+1);}if(b.profile.role==='watchtower'){const target=this.units.find(a=>a.side!==b.side&&a.lane===b.lane&&a.card.health>0);if(target){this.hit(b,target,1);if(!target.card.health)this.s.wave.stats.kills++;}}if(u&&(b.profile.role==='infirmary'||b.profile.role==='barn'&&isLivestock(u)))u.health=Math.min(u.hp,u.health+1);}}
+ hit(a,target,amount){if(!target||target.card.health<=0)return;let n=Math.max(1,amount-(target.profile.armor||0));if(a.card.behavior==='bull')n+=2;if(a.profile.trait==='ember'&&!a.targetsHit.has(target.id))n++;if(a.profile.trait==='focus'&&a.card.tableHits%3===0)n+=2;if(target.profile.trait==='agile'&&target.card.health<target.card.hp/2)n=Math.max(1,n-1);a.targetsHit.add(target.id);target.card.health=Math.max(0,target.card.health-n);target.hurtUntil=this.time+.45;target.action=.45;if(a.profile.trait==='chill'&&!target.building)target.card.frozenNext=true;this.s.wave.stats.hits++;this.event(target.building?'buildingHit':'impact',a,target,{damage:n});}
+ resolve(lane){if(this.resolved.has(lane))return;this.resolved.add(lane);const pair=[0,1].map(side=>this.units.find(a=>a.side===side&&a.lane===lane&&a.card.health>0));const attacks=[];
+  for(const a of pair){if(!a||a.card.frozen||a.card.exhausted)continue;const enemy=pair[1-a.side],own=this.s.players[a.side].lanes[lane];
+   if(a.card.behavior==='pig'){
+    if(enemy&&isFoodCreature(enemy.card)){attacks.push({a,target:enemy,eat:true});}else if(enemy){a.state='flee';a.fleeUntil=this.time+.7;this.event('power',a,null,{label:'SCARED'});}else a.state='graze';continue;
+   }
+   if(a.card.behavior==='sheep'){if(own.field.food&&a.card.health<a.card.hp){own.field.food--;a.card.health++;this.event('healing',a,a);}a.state='graze';continue;}
+   if(a.card.behavior==='cow'){for(const b of this.units)if(b.side===a.side&&isLivestock(b.card)&&b.card.health>0&&Math.abs(b.lane-lane)<=1)b.card.health=Math.min(b.card.hp,b.card.health+1);this.event('healing',a,a);}
+   const building=this.structures.find(b=>b.side!==a.side&&b.lane===lane&&b.card.health>0),target=enemy||building;
+   const rally=this.structures.some(b=>b.side===a.side&&b.lane===lane&&b.card.health>0&&b.profile.role==='rally post')||this.units.some(b=>b!==a&&b.side===a.side&&b.card.health>0&&Math.abs(b.lane-lane)===1&&b.profile.trait==='rally')?1:0;
+   attacks.push({a,target,amount:Math.max(1,attackValue(this.s.players[a.side],lane))+rally});
+  }
+  // Snapshot all attacks first so both creatures retaliate even on simultaneous defeat.
+  for(const shot of attacks){const {a,target}=shot;a.state=shot.eat?'feed':a.profile.role==='ranged'?'shoot':'attack';a.action=.7;a.strikeUntil=this.time+.7;a.hits++;a.card.tableHits=(a.card.tableHits||0)+1;this.event('attack',a,target,{damage:shot.eat?target.card.health:shot.amount});if(a.profile.role==='ranged'&&target)this.projectiles.push({id:++this.serial,source:a,target,fromX:a.x,fromY:a.y,x:a.x,y:a.y,side:a.side,age:0,duration:.35});if(shot.eat){target.card.health=0;a.card.health=Math.min(a.card.hp,a.card.health+2);a.feedUntil=this.time+.7;this.event('feed',a,target,{healed:2});this.s.wave.stats.kills++;}else if(target){const before=target.card.health;this.hit(a,target,shot.amount);if(a.profile.trait==='cleave'&&!target.building)for(const other of this.units)if(other.side!==a.side&&Math.abs(other.lane-lane)===1&&other.card.health>0){other.card.health=Math.max(0,other.card.health-1);this.event('impact',a,other,{damage:1});this.s.wave.stats.hits++;if(!other.card.health)this.s.wave.stats.kills++;}if(before>0&&target.card.health<=0){this.s.wave.stats.kills++;const healed=deathHealthGain({...a.card,hp:a.card.health,maxHp:a.card.hp},{...target.card,hp:0});if(healed)a.card.health=Math.min(a.card.hp,a.card.health+healed);if(a.profile.trait==='scavenger'&&a.card.health>0)a.card.health=Math.min(a.card.hp,a.card.health+1);}if(a.profile.trait==='vampiric'&&a.card.health>0&&a.card.tableHits%3===0)a.card.health=Math.min(a.card.hp,a.card.health+1);}else{const p=this.s.players[1-a.side],damage=shot.amount+(!p.lanes[lane].field.integrity?1:0);p.hp=Math.max(0,p.hp-damage);this.s.wave.stats.baseHits++;this.event('baseHit',a,null,{damage});}}
+  clean(this.s);victory(this.s);
+ }
+ step(dt){if(!this.running||this.s.wave.paused)return;this.time+=Math.max(0,Math.min(.1,dt));this.s.wave.time=this.time;this.s.wave.activeLane=Math.min(3,Math.floor(this.time/LANETIME));
+  const lane=this.s.wave.activeLane;if(this.time>=lane*LANETIME+.55)this.resolve(lane);
+  for(const a of this.units){a.action=Math.max(0,(a.strikeUntil-this.time)||0);const t=Math.max(0,Math.min(1,(this.time-(a.strikeUntil-.7))/.7)),lunge=a.strikeUntil>this.time?Math.sin(t*Math.PI)*.16:0;a.x=a.home.x;a.y=a.home.y+(a.side?1:-1)*lunge;a.vx=0;a.vy=a.strikeUntil>this.time?(a.side?1:-1):0;if(a.fleeUntil>this.time)a.y=a.home.y+(a.side?-.07:.07);if(!a.action&&a.state!=='frozen'&&a.state!=='resting')a.state='guard';}
+  for(const p of [...this.projectiles]){p.age+=dt;const t=Math.min(1,p.age/p.duration);p.x=p.fromX+(p.target.x-p.fromX)*t;p.y=p.fromY+(p.target.y-p.fromY)*t;if(t>=1)this.projectiles.splice(this.projectiles.indexOf(p),1);}
+  for(const leader of this.leaders)leader.card.health=this.s.players[leader.side].hp;
+  if(this.s.phase==='ended'||this.time>=this.s.wave.limit)this.finish();
+ }
+ finish(){if(!this.running)return;this.running=false;this.s.wave.running=false;for(let p=0;p<2;p++)settleField(this.s,p,{emit,log,draw});clean(this.s);for(let p=0;p<2;p++)advanceVeterans(this.s,p);victory(this.s);if(this.s.phase==='ended')return;this.s.lastWaveEventSeq=this.s.eventId;this.s.round++;this.s.turn=0;for(const p of this.s.players){p.ap=2;p.summons=0;p.spellPlayed=false;for(const l of p.lanes){if(l.unit){l.unit.frozen=!!l.unit.frozenNext;delete l.unit.frozenNext;l.unit.exhausted=false;}if(l.building?.effect===0)p.hp=Math.min(30,p.hp+1);}draw(this.s,this.s.players.indexOf(p));}log(this.s,'Four lanes resolved. Your turn: build, recruit, cast or Floop.');}
+}
