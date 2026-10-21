@@ -69,3 +69,13 @@
 .housing-card .building-extra{box-shadow:none}
 @media(prefers-reduced-motion:reduce){.flat-building,.flat-building *{animation:none!important}}
 
+
+/* Expanded Clash Royale-inspired battlefield: more room for lanes, terrain and animated units. */
+#arena{max-width:1200px}
+.lanes{gap:12px}
+.landscape{aspect-ratio:1.5;box-shadow:0 9px 0 var(--deep),0 12px 0 #243e2b,0 16px 20px #172b1e30}
+.enemy .landscape{aspect-ratio:1.7}
+.battle-line{height:34px;gap:12px;background:linear-gradient(180deg,transparent 0 22%,#4aa9a2 23% 76%,transparent 77%);border-radius:10px;text-shadow:0 1px #243f2d}
+.battle-line:before{border-top:2px solid #b8eee0;box-shadow:0 3px 0 #2d7773}
+.battle-line span{z-index:1;color:#fff0b9;text-shadow:0 1px 3px #243f2d}
+@media(max-width:767px){#arena{min-width:720px}.lanes{gap:10px}.landscape{aspect-ratio:1.45}.enemy .landscape{aspect-ratio:1.65}.battle-line{height:30px}}
