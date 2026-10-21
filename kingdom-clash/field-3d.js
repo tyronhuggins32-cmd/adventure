@@ -1,12 +1,12 @@
 import {TabletopTerrain,buildTabletop} from './tabletop-scene.js';
 import {fitTableCamera,TABLE_MODEL_SCALE} from './tabletop-layout.js';
 import {TerrainDetails} from './terrain-detail.js?v=polish1';
-import {CameraControls} from './camera-controls.js?v=polish1';
+import {CameraControls} from './camera-controls.js?v=tabletop1';
 import {deathPose,deathProgress} from './death-effects.js';
 import {CELL_SIZE,CELL_WIDTH,WORLD_WIDTH,WORLD_DEPTH,distance,worldPoint} from './world-layout.js?v=roster20261021';
 import {buildScenery} from './world-scenery.js?v=polish1';
 import * as T from './vendor/three.js';
-import {EntityWorld} from './entity-world.js?v=roster20261021';
+import {EntityWorld} from './entity-world.js?v=tabletop1';
 import {createModel,animateModel,disposeModel,batchStaticMeshes,group,box,ball,cyl,cone,material} from './model-3d.js?v=polish1';
 const COLORS={corn:0x91a35c,snow:0xc9e4e8,sand:0xdcc48e,stone:0x9aa08b,mud:0x8b7254,water:0x489fae,fertile:0x83954c,thorns:0x637b42,roots:0x8a8756,fungi:0x7c7fa1,warm:0xa6a364,gloom:0x64667b,ice:0x98d4df,mirror:0x9eb5df,bridge:0x9aa2a0,coral:0x75b4ac,barnacles:0x6f9491,road:0xb7a78c,moat:0x4c919e,ash:0x7b7770};
 const pos=(x,y,h=0)=>new T.Vector3((x-2)*CELL_WIDTH,h,(y-1)*CELL_SIZE);

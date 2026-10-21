@@ -1,11 +1,11 @@
 import {TabletopBattle} from './tabletop-battle.js';
 import {recruitmentRoster,lockReason} from './building-progression.js';
 import {BattleSimulation,deployRival} from './battle-simulation.js?v=roster20261021';
-import {traitMarkup} from './card-traits.js';
+import {traitMarkup} from './card-traits.js?v=tabletop1';
 import {hydratePreviews} from './preview-3d.js?v=polish1';
-import {FieldScene} from './field-3d.js?v=polish1';
+import {FieldScene} from './field-3d.js?v=tabletop1';
 import {COMMANDERS,commandersFor} from './commanders.js';
-import{KINGDOMS,cards,createGame,play,floop,fight,cpu,draw,placeCommander,cardCost,attackValue,recruit}from './lanes.js?v=polish1';
+import{KINGDOMS,cards,createGame,play,floop,fight,cpu,draw,placeCommander,cardCost,attackValue,recruit}from './lanes.js?v=tabletop1';
 import{figure,building,terrain,portrait,PALETTES}from './art.js?v=mesh3d1';
 import {buildingDetail} from './building-details.js';
 const $=id=>document.getElementById(id);
