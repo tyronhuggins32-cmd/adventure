@@ -1,0 +1,33 @@
+const creature=(id,name,atk,hp,cost,extra={})=>({id,name,type:'creature',atk,hp,cost,text:'',...extra});
+const building=(id,name,cost,effect,text)=>({id,name,type:'building',cost,hp:8,effect,text});
+const spell=(id,name,cost,effect,text)=>({id,name,type:'spell',cost,effect,text});
+export const EPISODE_CARDS=[
+ creature('ep-pig','The Pig',1,7,1,{behavior:'pig',ability:'raid-corn',kind:'animal',text:'Floop: raid every opposing cornfield. Eat its corn and disable corn-powered enemies. Mud traps this pig; nearby monsters frighten it. Automatically eats food creatures at no AP cost.'}),
+ creature('ep-husker','Husker Knights',4,8,2,{terrainPower:'corn',text:'Draws its power from living cornfields. Cannot attack when its kingdom has no corn. Reclaim Landscape restores its power.'}),
+ creature('ep-scholar','Ancient Scholar',1,7,1,{ability:'study',text:'Send to a Schoolhouse to study instead of attacking. Two surviving study turns unlock Raise the Dead.'}),
+ creature('ep-dog','Cool Dog',3,8,1,{behavior:'hound',text:'A loyal guardian. Defends its landscape and resists fear.'}),
+ creature('ep-maize','Immortal Maize Walker',3,12,2,{terrainPower:'corn',spirit:true,text:'A spirit. Deals triple attack damage while its kingdom has a living cornfield. A Spirit Tower can capture it.'}),
+ creature('ep-archer','Archer Dan',3,6,2,{model:{species:'archer'},ranged:true,text:'Shoots corn-tipped arrows. On activation, targets every opposing building instead of creatures.'}),
+ creature('ep-earlings','Legion of Earlings',2,6,1,{fearAura:true,text:'Terrifies unsheltered pigs in the opposite landscape. Cannot enter the Cave of Solitude.'}),
+ creature('ep-reaper','Field Reaper',3,9,2,{ability:'reap',text:'Floop: possess the opposing non-spirit creature for one battle. Its owner recovers it afterward if it survives.'}),
+ building('ep-silo','Silo of Truth',1,'ep-silo','Floop building: reveal the rival hand and steal its last spell. Once each turn.'),
+ building('ep-school','Schoolhouse',1,'ep-school','A creature can study here instead of attacking. Two surviving study turns teach Raise the Dead.'),
+ building('ep-cave','Cave of Solitude',1,'ep-cave','Send your creature inside to rest. Enemies attack the cave first; fear cannot reach its occupant. Destroying the cave exposes the occupant.'),
+ building('ep-spirit','Spirit Tower',2,'ep-spirit','Floop building: convert an opposing spirit into the next empty friendly landscape.'),
+ building('ep-volcano','Volcano',2,'ep-volcano','Floop building: erupt across your own landscapes, burn your creatures and launch a rock at the opposing building. Reclaim repairs the terrain, not the dead.'),
+ spell('world-reclaim','Reclaim Landscape',1,'world-reclaim','Restore all your landscapes to their original terrain and 3 food. Recall your trapped pig.'),
+ spell('world-mud','Useless Swamp',1,'world-mud','Replace the opposing landscape with mud. A raiding pig gets stuck when it enters.'),
+ spell('ep-nightmares','Field of Nightmares',1,'ep-nightmares','Summon a Legion of Earlings into your chosen empty landscape. Its fear aura drives unsheltered opposing pigs away.'),
+ spell('ep-teleport','Teleport',1,'ep-teleport','Move your most injured creature into this empty friendly landscape. Cannot move enemy creatures or a mud-trapped pig.'),
+ spell('ep-storm','Cerebral Blood Storm',2,'ep-storm','Place a storm over the opposing lane. Deals 3 damage only to creatures that activate an attack there this battle. Also catches your attackers.'),
+ spell('world-revive','Raise the Dead',2,'world-revive','Requires a living scholar with two study turns and a Schoolhouse. Revive the last defeated creature in this empty lane at half health.')
+];
+export const episodeCard=id=>({...EPISODE_CARDS.find(c=>c.id===id)});
+export function installEpisodeDecks(s){if(!s.episodeWorld||s.episodeCards===false)return;for(let side=0;side<2;side++){const p=s.players[side];p.buildingProgression=false;p.hand=(side?['ep-husker','ep-silo','ep-volcano','ep-maize','world-reclaim','world-mud']:['ep-pig','ep-scholar','ep-dog','ep-school','ep-cave','ep-spirit']).map(episodeCard);const order=side?['ep-archer','ep-earlings','ep-nightmares','ep-storm','world-reclaim','ep-reaper']:['world-reclaim','world-mud','ep-teleport','ep-storm','ep-husker','ep-maize'];p.deck=Array.from({length:4},()=>order.map(episodeCard)).flat().reverse();p.ap=3;p.episodeWorld=true;}}
+export function episodeSpell(s,p,c,lane,api){if(!s.episodeWorld||c.type!=='spell'||!c.effect?.startsWith('ep-'))return false;const a=s.players[p],l=a.lanes[lane];if(c.effect==='ep-nightmares'&&!l.unit){l.unit={...episodeCard('ep-earlings'),uid:'unit'+ ++s.entityId,health:6,exhausted:false,frozen:false};api.emit(s,{kind:'summon',p,lane,card:{...l.unit},kingdom:a.kingdom});}if(c.effect==='ep-teleport'&&!l.unit){const from=a.lanes.filter(q=>q.unit&&!q.unit.trapped).sort((a,b)=>a.unit.health-b.unit.health)[0];if(from){l.unit=from.unit;from.unit=null;api.emit(s,{kind:'power',p,lane,card:{...l.unit},kingdom:a.kingdom});}}if(c.effect==='ep-storm'){s.players[1-p].lanes[lane].field.storm=true;api.emit(s,{kind:'terrain',p:1-p,lane,kingdom:s.players[1-p].kingdom});}return true;}
+export function floopEpisodeBuilding(s,p,lane,api){const a=s.players[p],b=s.players[1-p],l=a.lanes[lane],c=l.building;if(!s.episodeWorld||s.phase!=='battle'||s.turn!==p||s.wave?.running||!c||c.floopRound===s.round||!['ep-silo','ep-spirit','ep-volcano'].includes(c.effect))return false;
+ if(c.effect==='ep-silo'){a.revealedHand=b.hand.map(c=>({...c}));const i=b.hand.findLastIndex(c=>c.type==='spell');if(i>=0)a.hand.push(b.hand.splice(i,1)[0]);api.log(s,'Silo of Truth reveals the rival hand and steals a spell.');}
+ if(c.effect==='ep-spirit'){const empty=a.lanes.find(q=>!q.unit),from=b.lanes.find(q=>q.unit?.spirit);if(!empty||!from)return false;empty.unit=from.unit;from.unit=null;api.log(s,'The Spirit Tower captures '+empty.unit.name+'.');api.emit(s,{kind:'summon',p,lane:a.lanes.indexOf(empty),card:{...empty.unit},kingdom:a.kingdom});}
+ if(c.effect==='ep-volcano'){for(let i=0;i<4;i++){const f=a.lanes[i].field;f.kind='ash';f.food=0;f.fire=3;if(a.lanes[i].unit)a.lanes[i].unit.health=Math.max(0,a.lanes[i].unit.health-2);api.emit(s,{kind:'terrain',p,lane:i,kingdom:a.kingdom});}const target=b.lanes[lane];if(target.building)target.building.health=Math.max(0,(target.building.health??target.building.hp)-8);api.log(s,'The volcano burns its own kingdom and throws a rock at the opposing building.');}
+ c.floopRound=s.round;api.emit(s,{kind:'power',p,lane,card:{...c},kingdom:a.kingdom});api.clean(s);api.victory(s);return true;
+}
