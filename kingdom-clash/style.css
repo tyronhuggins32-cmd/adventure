@@ -39,3 +39,16 @@
 @keyframes house-spark{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25) drop-shadow(0 0 5px #fff2a1)}}
 @media(prefers-reduced-motion:reduce){.housing-card *, .mini-building *, .building-gag{animation:none!important;transition:none!important}}
 
+
+/* Flat, illustrated 2D housing: crisp outlines and solid color blocks. */
+.flat-building{filter:none!important}
+.flat-building path,.flat-building rect,.flat-building circle{vector-effect:non-scaling-stroke}
+.structure.flat-building{filter:none!important;overflow:visible}
+.housing-card .portrait-subject:has(.flat-building){filter:none!important}
+.structure-slot:has(.flat-building){filter:none!important}
+.mini-building:has(.flat-building){filter:none!important}
+.housing-card .portrait{background-image:none}
+.housing-card .portrait:before{display:none}
+.housing-card .flat-building{shape-rendering:geometricPrecision}
+.housing-card .building-extra{box-shadow:none}
+@media(prefers-reduced-motion:reduce){.flat-building,.flat-building *{animation:none!important}}
