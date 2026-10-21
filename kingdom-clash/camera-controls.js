@@ -1,5 +1,5 @@
 import * as T from './vendor/three.js';
-import {WORLD_WIDTH,WORLD_DEPTH,CELL_WIDTH,CELL_SIZE} from './world-layout.js?v=harvest4';
+import {WORLD_WIDTH,WORLD_DEPTH,CELL_WIDTH,CELL_SIZE} from './world-layout.js?v=episode6';
 export const MAX_ZOOM=16;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),angle=n=>Math.atan2(Math.sin(n),Math.cos(n));
 export class CameraControls{

@@ -1,4 +1,4 @@
-import {COMMANDERS} from './commanders.js';
+import {COMMANDERS} from './commanders.js?v=episode6';
 export const COMMANDER_ORDER=Object.keys(COMMANDERS);
 export const CREATURE_ORDER=[
 'Turnip Squire','Haystack Golem','Harvest Griffin','Crow Spy','Straw Stalker','Wicker Colossus','Kernel Sprite','Rootbound Stag',

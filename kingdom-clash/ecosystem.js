@@ -1,4 +1,4 @@
-import {emit,log,clean} from './lanes.js?v=episode5';
+import {emit,log,clean} from './lanes.js?v=episode6';
 // Deterministic world ticks: rendering never changes health or terrain.
 export class Ecosystem{
  constructor(s){this.s=s;this.accumulator=0;s.world??={ticks:0,minutes:0,weather:'clear',history:[]};s.world.weather=s.round%4===0?'rain':s.round%6===0?'drought':'clear';}

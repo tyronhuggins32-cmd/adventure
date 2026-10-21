@@ -1,9 +1,9 @@
-import {landscapePowered} from './world-interactions.js?v=episode5';
-import {tableSlot} from './tabletop-layout.js?v=episode5';
-import {CELL_WIDTH,CELL_SIZE} from './world-layout.js?v=harvest4';
-import {findPath,makeObstacles} from './navigation.js?v=harvest4';
-import {COMMANDERS} from './commanders.js';
-import {programFor,headingFor} from './entity-programs.js';
+import {landscapePowered} from './world-interactions.js?v=episode6';
+import {tableSlot} from './tabletop-layout.js?v=episode6';
+import {CELL_WIDTH,CELL_SIZE} from './world-layout.js?v=episode6';
+import {findPath,makeObstacles} from './navigation.js?v=episode6';
+import {COMMANDERS} from './commanders.js?v=episode6';
+import {programFor,headingFor} from './entity-programs.js?v=episode6';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const noise=(seed,n)=>{const v=Math.sin(seed*.001+n*12.9898)*43758.5453;return v-Math.floor(v)};
 const aliases={pig:'Truffle Pig',crow:'Omen Raven',owl:'Mirror Owl',gull:'Thieving Gull',gargoyle:'Gargoyle Custodian',phoenix:'Cinder Phoenix',jelly:'Lantern Jelly',hound:'Truffle Hound',rat:'Granary Rats',fox:'Ember Fox',wolf:'Ash Wolf',turtle:'Pearl Turtle',seal:'Snowdrift Seal',horse:'Standard Charger',ox:'Musk Ox',hare:'Messenger Hare',plant:'Seedling Familiar',fire:'lantern'};

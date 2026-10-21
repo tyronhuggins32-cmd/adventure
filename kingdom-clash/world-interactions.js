@@ -1,5 +1,5 @@
-import {baseTerrain,makeField} from './living-rules.js';
-import {tableSlot} from './tabletop-layout.js?v=episode5';
+import {baseTerrain,makeField} from './living-rules.js?v=episode6';
+import {tableSlot} from './tabletop-layout.js?v=episode6';
 export const WORLD_CARDS=[
  {id:'world-reclaim',name:'Reclaim Landscape',type:'spell',cost:1,effect:'world-reclaim',text:'Restore your kingdom’s original terrain, 8 integrity and 3 food per landscape. Recall mud-trapped creatures.'},
  {id:'world-mud',name:'Mud Trap',type:'spell',cost:1,effect:'world-mud',text:'Turn the opposing landscape into mud. A raiding pig gets stuck there until its owner reclaims the landscape.'},
@@ -9,7 +9,7 @@ export const cornPowered=c=>c?.terrainPower==='corn'||/corn|kernel|turnip|carrot
 export const landscapePowered=(player,card)=>!cornPowered(card)||player.lanes.some(l=>l.field.kind==='corn'&&l.field.food>0&&l.field.integrity>0);
 export function worldSpell(s,p,card,lane,api){if(!s.episodeWorld||!card.effect?.startsWith('world-'))return false;const own=s.players[p],l=own.lanes[lane],op=s.players[1-p].lanes[lane];
  if(card.effect==='world-reclaim'){for(let i=0;i<4;i++){const f=own.lanes[i].field;Object.assign(f,makeField(own.kingdom),{kind:f.originalKind||baseTerrain[own.kingdom],food:3,fire:0,storm:false});const u=own.lanes[i].unit;if(u?.trapped)delete u.trapped;api.emit(s,{kind:'terrain',p,lane:i,terrain:f.kind,kingdom:own.kingdom});}api.log(s,'The kingdom is reclaimed. Crops, paths and terrain power return.');}
- if(card.effect==='world-mud'){Object.assign(op.field,{kind:'mud',food:0,hazard:0});for(const u of s.players[1-p].lanes.map(l=>l.unit).filter(Boolean))if(u.behavior==='pig'&&u.raidPosition?.side===1-p&&u.raidPosition.lane===lane)u.trapped={side:1-p,lane};api.emit(s,{kind:'terrain',p:1-p,lane,terrain:'mud',kingdom:s.players[1-p].kingdom});api.log(s,'Mud replaces the opposing landscape. Pigs cannot cross it.');}
+ if(card.effect==='world-mud'){Object.assign(op.field,{kind:'mud',food:0,hazard:0});for(const [i,slot]of s.players[1-p].lanes.entries()){const u=slot.unit;if(u?.behavior==='pig'&&(u.raidPosition?.side===1-p&&u.raidPosition.lane===lane||!u.raidPosition&&i===lane))u.trapped={side:1-p,lane};}api.emit(s,{kind:'terrain',p:1-p,lane,terrain:'mud',kingdom:s.players[1-p].kingdom});api.log(s,'Mud replaces the opposing landscape. Pigs cannot cross it.');}
  if(card.effect==='world-revive'){const index=own.discard.findLastIndex(c=>c.type==='creature');if(index>=0&&!l.unit){const c=own.discard.splice(index,1)[0];l.unit={...c,uid:'unit'+ ++s.entityId,health:Math.max(1,Math.ceil(c.hp/2)),exhausted:true,frozen:false};delete l.unit.trapped;api.emit(s,{kind:'summon',p,lane,card:{...l.unit},kingdom:own.kingdom});api.log(s,l.unit.name+' returns through learned magic.');}}
  return true;
 }

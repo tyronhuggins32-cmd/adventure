@@ -1,12 +1,12 @@
-import {advanceVeterans,recruitmentRoster} from './building-progression.js';
-import {livestockStep,isLivestock} from './livestock-ai.js?v=harvest4';
-import {deathHealthGain} from './death-effects.js';
-import {makeObstacles,findPath} from './navigation.js?v=harvest4';
-import {COMMANDERS} from './commanders.js';
-import {traitsFor} from './card-traits.js?v=episode5';
-import {CELL_SIZE,CELL_WIDTH,distance,basePosition,bridgeX} from './world-layout.js?v=harvest4';
-import {play,draw,cardCost,clean,victory,emit,log,attackValue,recruit,cards} from './lanes.js?v=episode5';
-import {settleField} from './living-rules.js';
+import {advanceVeterans,recruitmentRoster} from './building-progression.js?v=episode6';
+import {livestockStep,isLivestock} from './livestock-ai.js?v=episode6';
+import {deathHealthGain} from './death-effects.js?v=episode6';
+import {makeObstacles,findPath} from './navigation.js?v=episode6';
+import {COMMANDERS} from './commanders.js?v=episode6';
+import {traitsFor} from './card-traits.js?v=episode6';
+import {CELL_SIZE,CELL_WIDTH,distance,basePosition,bridgeX} from './world-layout.js?v=episode6';
+import {play,draw,cardCost,clean,victory,emit,log,attackValue,recruit,cards} from './lanes.js?v=episode6';
+import {settleField} from './living-rules.js?v=episode6';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 export function deployRival(s){const saved=s.turn;s.turn=1;const p=s.players[1];if(p.buildingProgression){const spell=p.hand.findIndex(c=>c.caster);if(spell>=0){const lane=s.players[0].lanes.findIndex(l=>l.unit);play(s,1,spell,lane<0?0:lane);}for(let i=0;i<4;i++){const b=p.lanes[i].building;if(!b)continue;const lane=p.lanes.findIndex(l=>!l.unit);if(lane<0)break;const roster=recruitmentRoster(cards(p.kingdom,p.commander),b).sort((a,b)=>b.atk-a.atk);for(const c of roster)if(recruit(s,1,i,c.id,lane))break;}}for(let turn=0;turn<3&&s.phase==='battle';turn++){const choices=[];p.hand.forEach((c,index)=>{for(let lane=0;lane<4;lane++){const l=p.lanes[lane];if(cardCost(p,c)>p.ap)continue;if(c.type==='creature'&&!l.unit&&!p.buildingProgression)choices.push({index,lane,score:10+(s.players[0].lanes[lane].unit?4:0)+c.atk});if(c.type==='building'&&!l.building&&!p.lanes.some(l=>l.building?.id===c.id))choices.push({index,lane,score:5+(l.unit?4:0)});if(c.type==='spell')choices.push({index,lane,score:s.players[0].lanes[lane].unit?8:1});}});choices.sort((a,b)=>b.score-a.score);if(!choices.length)break;play(s,1,choices[0].index,choices[0].lane);}s.turn=saved;}
 export class BattleSimulation{

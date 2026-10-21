@@ -1,7 +1,7 @@
-import {programFor} from './entity-programs.js';
-import {modelMarkup} from './model-assets.js?v=polish1';
-import {EXPANSION} from './expansion.js';
-import {COMMANDERS} from './commanders.js';
+import {programFor} from './entity-programs.js?v=episode6';
+import {modelMarkup} from './model-assets.js?v=episode6';
+import {EXPANSION} from './expansion.js?v=episode6';
+import {COMMANDERS} from './commanders.js?v=episode6';
 // Code-native illustrations: shared visual vocabulary for cards and live miniatures.
 export const PALETTES={farm:['#efc550','#8ead44','#ffe6a1','#71552d'],ice:['#b5ecff','#76b5d2','#eefcff','#456283'],beach:['#f1d193','#44b8ae','#b5efe0','#376d71'],medieval:['#a8b67c','#617d56','#d5c0e9','#5c506c']};
 const wrap=(body,cls='',box='0 0 200 200')=>`<svg class="illustration ${cls}" viewBox="${box}" preserveAspectRatio="${cls==='terrain'?'none':'xMidYMid meet'}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><g stroke="#293b35" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${body}</g></svg>`;
