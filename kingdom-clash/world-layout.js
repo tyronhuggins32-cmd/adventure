@@ -1,4 +1,4 @@
-export const MAP_SCALE=3,CELL_SIZE=18,CELL_WIDTH=36,WORLD_WIDTH=144,WORLD_DEPTH=36;
+export const MAP_SCALE=3,CELL_SIZE=36,CELL_WIDTH=18,WORLD_WIDTH=72,WORLD_DEPTH=72;
 export const worldPoint=(x,y,h=0)=>({x:(x-2)*CELL_WIDTH,y:h,z:(y-1)*CELL_SIZE});
 export const distance=(a,b)=>Math.hypot((a.x-b.x)*CELL_WIDTH,(a.y-b.y)*CELL_SIZE);
 export const basePosition=side=>({x:2,y:side?.12:1.88});

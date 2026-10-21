@@ -23,7 +23,7 @@ The four territories are Corn Field, Snowy Lands, The Beach, and Knight Kingdom.
 
 ## Battle-world simulation
 
-The active map is **144 × 36 meters**, twice the width of the previous 72 × 36 world with the same length. Each territory tile is 36 meters wide and 18 meters deep. Both sides have modeled keeps, a river with four bridges, stone paths, and 120 instanced trees. Models remain their previous physical size, so the additional space is real travel distance.
+The active map is **72 × 72 meters**, a square made by expanding the short side of the earlier 72 × 36 world. Each territory tile is 18 meters wide and 36 meters deep. Both sides have modeled keeps, a river with four bridges, stone paths, and 120 instanced trees. Models remain their previous physical size, so the additional space is real travel distance.
 
 Deploy cards with 2 AP, then choose **Launch battle**. The rival deploys its cards, and both armies fight a live wave lasting up to 32 simulation seconds. Units seek enemy creatures, then buildings, then the opposing keep. Ground units use grid pathfinding around trees/buildings and cross at bridges; fliers travel directly. Damage happens on melee contact or projectile arrival. Surviving attackers strike the keep once per wave, then return. Commanders guard their camps with healing or ranged support. Casualties are removed immediately from battle state and animate out of the scene.
 
@@ -42,7 +42,7 @@ World animations include articulated marching, wing beats, aiming, attack swings
 
 ## Development
 
-`npm start` serves http://localhost:8000. `npm test` runs 61 tests, including all 144 commander matchups, all expansion-card effects, entity bounds/state/lifetimes, all 180 mesh builds, volumetric bounds, joint animation, windmill machinery, and spell geometry.
+`npm start` serves http://localhost:8000. `npm test` runs 62 tests, including all 144 commander matchups, all expansion-card effects, entity bounds/state/lifetimes, all 180 mesh builds, volumetric bounds, joint animation, windmill machinery, and spell geometry.
 
 `model-3d.js` builds and animates geometry; `preview-3d.js` renders card thumbnails; `field-3d.js` owns the WebGL viewport/camera/raycasting. `entity-programs.js` and `entity-world.js` own independent behavior. `lanes.js`, `living-rules.js`, `commanders.js`, and `expansion.js` own battle state. The old canvas renderer/grid engine are unused legacy sources.
 

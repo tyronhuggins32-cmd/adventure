@@ -1,9 +1,9 @@
-import {BattleSimulation,deployRival} from './battle-simulation.js?v=wide1';
+import {BattleSimulation,deployRival} from './battle-simulation.js?v=square1';
 import {traitMarkup} from './card-traits.js';
-import {hydratePreviews} from './preview-3d.js?v=wide1';
-import {FieldScene} from './field-3d.js?v=wide1';
+import {hydratePreviews} from './preview-3d.js?v=square1';
+import {FieldScene} from './field-3d.js?v=square1';
 import {COMMANDERS,commandersFor} from './commanders.js';
-import{KINGDOMS,cards,createGame,play,floop,fight,cpu,draw,placeCommander,cardCost,attackValue}from './lanes.js?v=wide1';
+import{KINGDOMS,cards,createGame,play,floop,fight,cpu,draw,placeCommander,cardCost,attackValue}from './lanes.js?v=square1';
 import{figure,building,terrain,portrait,PALETTES}from './art.js?v=mesh3d1';
 import {buildingDetail} from './building-details.js';
 const $=id=>document.getElementById(id);
