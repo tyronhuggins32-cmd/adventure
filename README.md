@@ -47,3 +47,9 @@ World animations include articulated marching, wing beats, aiming, attack swings
 `model-3d.js` builds and animates geometry; `preview-3d.js` renders card thumbnails; `field-3d.js` owns the WebGL viewport/camera/raycasting. `entity-programs.js` and `entity-world.js` own independent behavior. `lanes.js`, `living-rules.js`, `commanders.js`, and `expansion.js` own battle state. The old canvas renderer/grid engine are unused legacy sources.
 
 Browser verification covers 375/768/1280 layouts, WebGL 2 rendering, model card portraits, raycast commander/card placement, orbit/zoom, pig deployment, rival turn playback, restart, continuous model movement, and model inspection. GitHub Pages deploys main through the existing workflow.
+
+### Camera controls
+
+Drag to pan, or select **Orbit** to rotate and tilt. Two fingers move, pinch to zoom, and twist to rotate; a multi-touch gesture never places a card. Mouse wheel zooms toward the pointer and right-drag or Shift-drag orbits. The zoom slider, holdable movement/rotation buttons, Full map, My army, Rival army, Top view, and Follow battle work on touch and desktop. Manual movement releases battle follow. Expand opens a fullscreen battlefield with an in-page expanded view where fullscreen is unavailable.
+
+With the battlefield focused: WASD/arrows move, Q/E rotate, R/F tilt, +/− zoom, Home resets the full map, and Escape exits expanded view. Camera transitions are smoothed and respect reduced motion.
