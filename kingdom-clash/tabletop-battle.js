@@ -25,7 +25,7 @@ export class TabletopBattle{
    if(a.card.behavior==='sheep'){if(own.field.food&&a.card.health<a.card.hp){own.field.food--;a.card.health++;this.event('healing',a,a);}a.state='graze';continue;}
    if(a.card.behavior==='cow'){for(const b of this.units)if(b.side===a.side&&isLivestock(b.card)&&b.card.health>0&&Math.abs(b.lane-lane)<=1)b.card.health=Math.min(b.card.hp,b.card.health+1);this.event('healing',a,a);}
    const building=this.structures.find(b=>b.side!==a.side&&b.lane===lane&&b.card.health>0),target=enemy||building;
-   const rally=this.structures.some(b=>b.side===a.side&&b.lane===lane&&b.card.health>0&&b.profile.role==='rally post')||this.units.some(b=>b!==a&&b.side===a.side&&b.card.health>0&&Math.abs(b.lane-lane)===1&&b.profile.trait==='rally')?1:0;
+   const rally=this.structures.some(b=>b.side===a.side&&b.lane===lane&&b.card.health>0&&b.profile.role==='rally post'&&b.card.effect!==1)||this.units.some(b=>b!==a&&b.side===a.side&&b.card.health>0&&Math.abs(b.lane-lane)===1&&b.profile.trait==='rally')?1:0;
    attacks.push({a,target,amount:Math.max(1,attackValue(this.s.players[a.side],lane))+rally});
   }
   // Snapshot all attacks first so both creatures retaliate even on simultaneous defeat.

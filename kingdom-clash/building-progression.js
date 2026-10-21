@@ -5,9 +5,9 @@ export function recruitmentRoster(catalog,building){
  const branch=buildings.findIndex(c=>c.id===building.id);
  if(branch<0)return [];
  if(building.commander==='farmer'){
-  const home=c=>['pig','sheep','cow','bull'].includes(c.behavior)?'barn':/turnip|corn|kernel|seed|root|fruit|pumpkin|carrot/i.test(c.name)?'farm':/hen|chicken|rooster|bird|crow|raven|owl|griffin|gryphon/i.test(c.name)?'coop':'mill';
+  const home=c=>['pig','sheep','cow','bull'].includes(c.behavior)?'barn':/\b(turnip|corn|kernel|seed|root|fruit|pumpkin|carrot|orchard)\b/i.test(c.name)?'farm':/\b(hen|chicken|rooster|bird|crow|raven|owl|griffin|gryphon)\b/i.test(c.name)?'coop':c.kind!=='animal'&&!/\b(pig|boar|wolf|fox|horse|ox|hare|cat|goat|mouse|badger|duck|sheep)\b/i.test(c.name)?'mill':null;
   const school=building.effect==='barn'?'barn':building.effect==='farm'?'farm':building.effect==='coop'?'coop':'mill';
-  return units.filter(c=>home(c)===school).slice(0,5);
+  const names=new Set();return units.filter(c=>{if(home(c)!==school||names.has(c.name))return false;names.add(c.name);return true;}).slice(0,5);
  }
  // Each other school owns a disjoint roster, including that commander's matching core warrior.
  return units.filter((c,i)=>i%buildings.length===branch).slice(0,5);

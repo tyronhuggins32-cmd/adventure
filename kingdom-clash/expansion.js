@@ -2,7 +2,7 @@
 const c=(id,name,type,cost,effect,text,extra={})=>({id,name,type,cost,effect,text,...extra});
 export const EXPANSION={
 farmer:[
-c('pig','Truffle Pig','creature',1,'pig','Automatically eats enemy food creatures within 2m for no AP, healing 2 HP (once per turn). Flees non-food enemies within 7m. End of wave: eat 1 field food to heal 1 HP.',{atk:2,hp:6,ability:'snuffle',behavior:'pig'}),
+c('pig','Truffle Pig','creature',1,'pig','Automatically eats the opposing food creature for no AP, healing 2 HP (once per turn). Flees non-food opponents. End of turn: eat 1 field food to heal 1 HP.',{atk:2,hp:6,ability:'snuffle',behavior:'pig'}),
 c('coop','Henhouse','building',1,'coop','End of your turn: a hen appears (maximum 3); each hen restores 1 food to this lane.',{structure:'coop'}),
 c('ditch','Irrigation Ditch','spell',1,'irrigate','Flood your lane and its neighbors. Add 2 food and repair 1 field integrity in each.'),
 c('stampede','Barnyard Stampede','spell',2,'stampede','Every friendly animal charges: deal 2 per animal to its opposing creature. Animal-free lanes take 1 field damage.'),
