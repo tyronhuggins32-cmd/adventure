@@ -34,7 +34,7 @@ export class TabletopBattle{
  }
  step(dt){if(!this.running||this.s.wave.paused)return;this.time+=Math.max(0,Math.min(.1,dt));this.s.wave.time=this.time;this.s.wave.activeLane=Math.min(3,Math.floor(this.time/LANETIME));
   const lane=this.s.wave.activeLane;if(this.time>=lane*LANETIME+.55)this.resolve(lane);
-  for(const a of this.units){a.action=Math.max(0,(a.strikeUntil-this.time)||0);const t=Math.max(0,Math.min(1,(this.time-(a.strikeUntil-.7))/.7)),lunge=a.strikeUntil>this.time?Math.sin(t*Math.PI)*.16:0;a.x=a.home.x;a.y=a.home.y+(a.side?1:-1)*lunge;a.vx=0;a.vy=a.strikeUntil>this.time?(a.side?1:-1):0;if(a.fleeUntil>this.time)a.y=a.home.y+(a.side?-.07:.07);if(!a.action&&a.state!=='frozen'&&a.state!=='resting')a.state='guard';}
+  for(const a of this.units){a.action=Math.max(0,(a.strikeUntil-this.time)||0);const t=Math.max(0,Math.min(1,(this.time-(a.strikeUntil-.7))/.7)),lunge=a.strikeUntil>this.time?Math.sin(t*Math.PI)*.16:0;a.x=a.home.x;a.y=a.home.y+(a.side?1:-1)*lunge;a.vx=0;a.vy=a.strikeUntil>this.time?(a.side?1:-1)*Math.cos(t*Math.PI):0;if(a.fleeUntil>this.time){const retreat=Math.sin((a.fleeUntil-this.time)/.7*Math.PI)*.16;a.y=a.home.y+(a.side?-retreat:retreat);a.vy=a.side?-1:1;}if(!a.action&&!(a.fleeUntil>this.time)&&a.state!=='frozen'&&a.state!=='resting')a.state='guard';}
   for(const p of [...this.projectiles]){p.age+=dt;const t=Math.min(1,p.age/p.duration);p.x=p.fromX+(p.target.x-p.fromX)*t;p.y=p.fromY+(p.target.y-p.fromY)*t;if(t>=1)this.projectiles.splice(this.projectiles.indexOf(p),1);}
   for(const leader of this.leaders)leader.card.health=this.s.players[leader.side].hp;
   if(this.s.phase==='ended'||this.time>=this.s.wave.limit)this.finish();

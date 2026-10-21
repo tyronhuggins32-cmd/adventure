@@ -1,6 +1,6 @@
 import {recruitmentRoster,lockReason,advanceVeterans,castVeteran} from './building-progression.js';
 import {COMMANDER_ROSTERS,RARE_DANCER,resolveTerritoryDance} from './character-catalog.js?v=polish1';
-import {extraCards} from './expansion.js?v=tabletop2';
+import {extraCards} from './expansion.js?v=livingworld3';
 import {makeField,extraEffect,extraFloop,settleField} from './living-rules.js';
 import {COMMANDERS,DEFAULT_COMMANDER,SPELL_TEXT} from './commanders.js';
 import {deathHealthGain} from './death-effects.js';
