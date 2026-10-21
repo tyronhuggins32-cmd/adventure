@@ -37,7 +37,7 @@ test('the harvest roster builds eight visually distinct creature families',()=>{
     });
     assert.ok(vertices>250,name+' is an actual 3D sculpture');
     assert.ok(meshes<120,name+' should remain affordable for mobile rendering');
-    assert.ok(vertices<35000,name+' exceeds the mobile vertex budget');
+    assert.ok(vertices<35000,name+' exceeds the mobile vertex budget: '+vertices+' vertices / '+meshes+' meshes');
     signatures.add([size.x.toFixed(2),size.y.toFixed(2),size.z.toFixed(2),meshes].join(':'));
     disposeModel(animal);
   }
