@@ -42,7 +42,7 @@ World animations include articulated marching, wing beats, aiming, attack swings
 
 ## Development
 
-`npm start` serves http://localhost:8000. `npm test` runs 62 tests, including all 144 commander matchups, all expansion-card effects, entity bounds/state/lifetimes, all 180 mesh builds, volumetric bounds, joint animation, windmill machinery, and spell geometry.
+`npm start` serves http://localhost:8000. `npm test` runs 66 tests, including all 144 commander matchups, all expansion-card effects, entity bounds/state/lifetimes, all 180 mesh builds, volumetric bounds, joint animation, windmill machinery, and spell geometry.
 
 `model-3d.js` builds and animates geometry; `preview-3d.js` renders card thumbnails; `field-3d.js` owns the WebGL viewport/camera/raycasting. `entity-programs.js` and `entity-world.js` own independent behavior. `lanes.js`, `living-rules.js`, `commanders.js`, and `expansion.js` own battle state. The old canvas renderer/grid engine are unused legacy sources.
 
@@ -53,3 +53,9 @@ Browser verification covers 375/768/1280 layouts, WebGL 2 rendering, model card 
 Drag to pan, or select **Orbit** to rotate and tilt. Two fingers move, pinch to zoom, and twist to rotate; a multi-touch gesture never places a card. Mouse wheel zooms toward the pointer and right-drag or Shift-drag orbits. The zoom slider, holdable movement/rotation buttons, Full map, My army, Rival army, Top view, and Follow battle work on touch and desktop. Manual movement releases battle follow. Expand opens a fullscreen battlefield with an in-page expanded view where fullscreen is unavailable.
 
 With the battlefield focused: WASD/arrows move, Q/E rotate, R/F tilt, +/− zoom, Home resets the full map, and Escape exits expanded view. Camera transitions are smoothed and respect reduced motion.
+
+### Detailed miniatures and living terrain
+
+The camera now reaches **16× zoom**, twice the former maximum, through the slider, pinch, wheel, and buttons. Card art uses 512-pixel renders of the same models shown on the battlefield. Anatomical recipes distinguish winged quadruped griffins and dragons, birds, hoofed and padded mammals, swimming creatures, crustaceans, and tentacled creatures. Commanders and troops have additional clothing, armor, faces, hair, equipment, and articulated accessories. Special structures have purpose-built silhouettes, including bell frames, drums, cranes, ballistas, tents, crystal cages, lighthouses, and coral.
+
+Terrain details use physical world sizes. Crop rows, grass, flowers, snow drifts, shore shells, palms, river stones, reeds, taller trees, keep flags, drifting pollen/snow, rippling water, and movement dust bring the square field to life. Wind and placement ripples animate foliage in the shader; reduced-motion mode holds ambient effects still. Mesh batching preserves moving wings, magical orbs, and machinery. Coverage includes the expanded roster and anatomy regressions.

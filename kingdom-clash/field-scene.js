@@ -1,4 +1,4 @@
-import {paintModel} from './model-assets.js';
+import {paintModel} from './model-assets.js?v=polish1';
 import {projectPoint,pickField,SCENE_WIDTH,SCENE_HEIGHT} from './scene-math.js';
 import {figure,building} from './art.js';
 import {EntityWorld} from './entity-world.js?v=square1';

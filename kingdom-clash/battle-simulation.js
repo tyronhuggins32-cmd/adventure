@@ -3,7 +3,7 @@ import {makeObstacles,findPath} from './navigation.js?v=square1';
 import {COMMANDERS} from './commanders.js';
 import {traitsFor} from './card-traits.js';
 import {CELL_SIZE,CELL_WIDTH,distance,basePosition,bridgeX} from './world-layout.js?v=square1';
-import {play,draw,cardCost,clean,victory,emit,log,attackValue} from './lanes.js?v=square1';
+import {play,draw,cardCost,clean,victory,emit,log,attackValue} from './lanes.js?v=polish1';
 import {settleField} from './living-rules.js';
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 export function deployRival(s){const saved=s.turn;s.turn=1;const p=s.players[1];for(let turn=0;turn<3&&s.phase==='battle';turn++){const choices=[];p.hand.forEach((c,index)=>{for(let lane=0;lane<4;lane++){const l=p.lanes[lane];if(cardCost(p,c)>p.ap)continue;if(c.type==='creature'&&!l.unit)choices.push({index,lane,score:10+(s.players[0].lanes[lane].unit?4:0)+c.atk});if(c.type==='building'&&!l.building&&!p.placedBuildings.includes(c.id))choices.push({index,lane,score:5+(l.unit?4:0)});if(c.type==='spell')choices.push({index,lane,score:s.players[0].lanes[lane].unit?8:1});}});choices.sort((a,b)=>b.score-a.score);if(!choices.length)break;play(s,1,choices[0].index,choices[0].lane);}s.turn=saved;}
