@@ -32,7 +32,7 @@ function makeEntry(index, kingdom) {
     roleLabel:animal?"Beast":role.label, rarity:animal?(index%13===0?"rare":"common"):role.rarity,
     hp:animal?5+(seed%7):role.hp+(seed%3), attack:animal?1+(seed%4):role.attack,
     ability:animal?(index%5===0?"pack":"beast"):role.ability,
-    model:{type:animal?"animal":"human",palette:data.palette,seed,variant:seed%8},
+    model:{species:base,type:animal?"animal":"human",palette:data.palette,seed,variant:seed%8},
     commanderAffinity:kingdom
   });
 }

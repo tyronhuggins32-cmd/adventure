@@ -1,5 +1,5 @@
 import {programFor} from './entity-programs.js';
-import {modelMarkup} from './model-assets.js';
+import {modelMarkup} from './model-assets.js?v=polish1';
 import {EXPANSION} from './expansion.js';
 import {COMMANDERS} from './commanders.js';
 // Code-native illustrations: shared visual vocabulary for cards and live miniatures.

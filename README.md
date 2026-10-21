@@ -42,7 +42,7 @@ World animations include articulated marching, wing beats, aiming, attack swings
 
 ## Development
 
-`npm start` serves http://localhost:8000. `npm test` runs 78 tests, including all 144 commander matchups, all expansion-card effects, entity bounds/state/lifetimes, all 2,352 commander/card mesh builds, volumetric bounds, joint animation, windmill machinery, and spell geometry.
+`npm start` serves http://localhost:8000. `npm test` runs 84 tests, including all 144 commander matchups, all expansion-card effects, entity bounds/state/lifetimes, all 2,352 commander/card mesh builds, volumetric bounds, joint animation, windmill machinery, and spell geometry.
 
 `model-3d.js` builds and animates geometry; `preview-3d.js` renders card thumbnails; `field-3d.js` owns the WebGL viewport/camera/raycasting. `entity-programs.js` and `entity-world.js` own independent behavior. `lanes.js`, `living-rules.js`, `commanders.js`, and `expansion.js` own battle state. The old canvas renderer/grid engine are unused legacy sources.
 
@@ -58,7 +58,7 @@ With the battlefield focused: WASD/arrows move, Q/E rotate, R/F tilt, +/− zoom
 
 Farm and Barn replace Hay Field and Orchard Tower. Farm grows food and repairs its field every 4 seconds and at wave end. Barn heals nearby livestock and offers a refuge for frightened animals. Pasture Sheep, Dairy Cow, and Barnyard Bull replace Truffle Hound, Living Compost, and Supper Bell in the Farmer’s core deck, preserving its 14 core designs. Sheep flock and graze, cows heal the herd, and bulls charge with a six-second bonus cooldown. Truffle Pigs automatically consume enemy food-based creatures at contact for zero AP (four-second cooldown); non-food threats within seven meters make them flee. Food identity accepts an explicit `foodBased: true` tag or recognizable crop/fruit names. Allied creatures are never eaten.
 
-Validation: all 78 tests pass, including livestock AI, recruitment, veteran spell progression, rebuilt schools, valid portrait fallbacks, and destroyed-building navigation. The old catalog-count assertions now cover the expanded catalog. An additional DOM harness exercised the real app’s commander selection, Barn construction, wave/AP refresh, pig recruitment, veteran progress, and restart. Full browser/WebGL rendering remains unverified because a browser binary could not be installed in this environment.
+Validation: all 84 tests pass, including livestock AI, recruitment, veteran spell progression, rebuilt schools, valid portrait fallbacks, and destroyed-building navigation. The old catalog-count assertions now cover the expanded catalog. An additional DOM harness exercised the real app’s commander selection, Barn construction, wave/AP refresh, pig recruitment, veteran progress, and restart. Full browser/WebGL rendering remains unverified because a browser binary could not be installed in this environment.
 
 ### Building-led recruitment and veteran magic
 
@@ -67,3 +67,9 @@ New browser matches now open with construction cards. Build a school to reveal i
 A recruited unit that survives two completed waves earns a 2 AP spell. The living veteran must be ready and its school intact. Each veteran has at most one spell card, refreshed after a completed wave. Building branches unlock herd healing, field growth, flock empowerment, harvest area damage, winter control, tide reversal, sanctuary healing, or siege damage. Dead veterans leave no usable spells. Recruitment and casting are blocked while a wave runs; the rival uses the same construction and recruitment rules.
 
 The browser explicitly enables `buildingProgression: true`. The engine’s default retains the old card-deck API for legacy consumers and tests; new progression tests opt in explicitly.
+
+### Detailed miniatures and living terrain
+
+The camera now reaches **16× zoom**, twice the former maximum, through the slider, pinch, wheel, and buttons. Card art uses 512-pixel renders of the same models shown on the battlefield. Anatomical recipes distinguish winged quadruped griffins and dragons, birds, hoofed and padded mammals, swimming creatures, crustaceans, and tentacled creatures. Commanders and troops have additional clothing, armor, faces, hair, equipment, and articulated accessories. Special structures have purpose-built silhouettes, including bell frames, drums, cranes, ballistas, tents, crystal cages, lighthouses, and coral.
+
+Terrain details use physical world sizes. Crop rows, grass, flowers, snow drifts, shore shells, palms, river stones, reeds, taller trees, keep flags, drifting pollen/snow, rippling water, and movement dust bring the square field to life. Wind and placement ripples animate foliage in the shader; reduced-motion mode holds ambient effects still. Mesh batching preserves moving wings, magical orbs, and machinery. Coverage includes the expanded roster and anatomy regressions.
