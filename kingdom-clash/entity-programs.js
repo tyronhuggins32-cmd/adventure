@@ -1,7 +1,7 @@
 // Per-card programs share movement primitives, but each actor owns its state and traits.
 export const hashName=name=>[...String(name)].reduce((n,c)=>Math.imul(n^c.charCodeAt(0),16777619)>>>0,2166136261);
 const birds=/crow|raven|owl|griffin|gryphon|manta|gull|phoenix|jelly|sprite|cloud/i;
-const beasts=/pig|hound|rat|boar|yak|bear|kid|ram|mammoth|fox|cricket|seal|ox|monkey|turtle|leech|angler|charger|hare|mastiff|wolf|hen/i;
+const beasts=/sheep|cow|bull|pig|hound|rat|boar|yak|bear|kid|ram|mammoth|fox|cricket|seal|ox|monkey|turtle|leech|angler|charger|hare|mastiff|wolf|hen/i;
 export function programFor(card){
  const key=[card.commander||'',card.type||'',card.id||'',card.name||''].join(':'),seed=hashName(key),name=card.name||card.id||'Entity';
  let family=card.type==='spell'?'spell':card.type==='building'?'structure':card.type==='commander'?'leader':birds.test(name)?'fly':beasts.test(name)?'animal':/root|seed|corn|ent|golem|keep|colossus/i.test(name)?'lumber':'patrol';

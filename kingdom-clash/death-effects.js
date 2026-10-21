@@ -3,7 +3,7 @@ export const DEATH_DURATION = 0.72;
 
 export function deathPose(card = {}) {
   const identity = [card.name, card.id, card.behavior].filter(Boolean).join(" ").toLowerCase();
-  if (/pig|boar|hog|wolf|hound|fox|rat|hare|ox|horse|turtle|seal/.test(identity)) return "side";
+  if (/sheep|cow|bull|pig|boar|hog|wolf|hound|fox|rat|hare|ox|horse|turtle|seal/.test(identity)) return "side";
   if (/bird|crow|raven|owl|gull|hen|phoenix/.test(identity)) return "flat";
   return "ragdoll";
 }

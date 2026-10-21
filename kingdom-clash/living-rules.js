@@ -4,7 +4,7 @@ export const wet=f=>['water','coral','moat','ice','mirror'].includes(f.kind);
 export function terrainChange(s,p,i,kind,api){const f=s.players[p].lanes[i].field;if(f.kind!==kind)f.armor=0;f.kind=kind;f.hazard=['thorns','roots'].includes(kind)?1:0;api.emit(s,{kind:'terrain',p,lane:i,terrain:kind,kingdom:s.players[p].kingdom});}
 export function fieldDamage(s,p,i,n,api){const l=s.players[p].lanes[i],f=l.field;f.integrity=Math.max(0,f.integrity-Math.max(0,n-f.armor));if(!f.integrity&&l.building){api.log(s,l.building.name+' collapses with its field.');s.players[p].discard.push(l.building);l.building=null;}api.emit(s,{kind:'fieldDamage',p,lane:i,damage:n,kingdom:s.players[p].kingdom});}
 const heal=(p,n)=>p.hp=Math.min(30,p.hp+n),mend=(u,n)=>{if(u)u.health=Math.min(u.hp,u.health+n)},food=(f,n)=>f.food=Math.max(0,Math.min(12,f.food+n)),repair=(f,n)=>f.integrity=Math.min(8,f.integrity+n);
-const animal=u=>u&&['pig','hound','rat','fox','seal','ox','gull','turtle','fish','horse','hare','wolf','monkey','owl'].includes(u.behavior);
+const animal=u=>u&&['sheep','cow','bull','pig','hound','rat','fox','seal','ox','gull','turtle','fish','horse','hare','wolf','monkey','owl'].includes(u.behavior);
 export function token(s,p,lane,kind){s.population??=[];if(s.population.length<24&&s.population.filter(a=>a.side===p&&a.lane===lane&&a.kind===kind).length<3)s.population.push({id:'token'+ ++s.entityId,side:p,lane,kind});}
 export function extraEffect(s,p,c,i,api){const a=s.players[p],b=s.players[1-p],l=a.lanes[i],e=b.lanes[i],f=l.field,t=e.field,u=l.unit,v=e.unit;
  const terrain=(side,lane,k)=>terrainChange(s,side,lane,k,api),damage=(side,lane,n)=>fieldDamage(s,side,lane,n,api),hit=(unit,n)=>{if(unit)unit.health-=n},adj=[i-1,i,i+1].filter(j=>j>=0&&j<4),own=()=>terrain(p,i,c.effect),steal=n=>{const nfood=Math.min(n,t.food);food(t,-nfood);food(f,nfood)};
@@ -77,6 +77,8 @@ case 'charge':for(const j of adj)if(a.lanes[j].unit)a.lanes[j].unit.atk++;break;
 case 'guard':f.armor=1;break;case 'stone':if(f.armor){u.hp++;u.health++}break;case 'hunt':if(b.lanes[i].unit?.health<b.lanes[i].unit?.hp)b.lanes[i].unit.health-=3;break;
 case 'cinder':u.health--;b.hp=Math.max(0,b.hp-2);break;default:return false;}return true;}
 export function settleField(s,p,api){const a=s.players[p],b=s.players[1-p];for(let i=0;i<4;i++){let l=a.lanes[i],f=l.field,u=l.unit,build=l.building;if(u&&f.hazard&&f.kind!=='bridge')u.health-=f.hazard;if(u?.behavior==='pig'&&f.food){food(f,-1);mend(u,1);if(f.kind!=='thorns')terrainChange(s,p,i,'mud',api)}if(!build)continue;switch(build.effect){
+case 'farm':food(f,2);repair(f,1);break;
+case 'barn':if(animal(u))mend(u,2);break;
 case 'coop':token(s,p,i,'hen');food(f,s.population.filter(v=>v.side===p&&v.lane===i&&v.kind==='hen').length);break;
 case 'orchard':food(f,2);mend(u,1);break;case 'soup':{const injured=a.lanes.map(l=>l.unit).filter(Boolean).sort((a,b)=>(a.health/a.hp)-(b.health/b.hp))[0];mend(injured,2);break;}
 case 'prism':if(b.lanes[i].unit&&(b.lanes[i].unit.frozen||b.lanes[i].unit.exhausted))b.lanes[i].unit.health--;break;

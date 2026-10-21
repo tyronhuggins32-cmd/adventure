@@ -2,13 +2,13 @@
 const c=(id,name,type,cost,effect,text,extra={})=>({id,name,type,cost,effect,text,...extra});
 export const EXPANSION={
 farmer:[
-c('pig','Truffle Pig','creature',1,'pig','Roots through food patches, wallows in mud, and flees danger. End of your turn: eat 1 food to heal 1 HP and turn this lane to mud.',{atk:2,hp:6,ability:'snuffle',behavior:'pig'}),
+c('pig','Truffle Pig','creature',1,'pig','Automatically eats enemy food creatures within 2m for no AP, healing 2 HP (4s cooldown). Flees non-food enemies within 7m. End of wave: eat 1 field food to heal 1 HP.',{atk:2,hp:6,ability:'snuffle',behavior:'pig'}),
 c('coop','Henhouse','building',1,'coop','End of your turn: a hen appears (maximum 3); each hen restores 1 food to this lane.',{structure:'coop'}),
 c('ditch','Irrigation Ditch','spell',1,'irrigate','Flood your lane and its neighbors. Add 2 food and repair 1 field integrity in each.'),
 c('stampede','Barnyard Stampede','spell',2,'stampede','Every friendly animal charges: deal 2 per animal to its opposing creature. Animal-free lanes take 1 field damage.'),
-c('hound','Truffle Hound','creature',1,'hound','Sniffs out hidden stores. On summon: gain 2 food here. Floop: convert 1 food into one drawn card.',{atk:3,hp:4,ability:'nose',behavior:'hound'}),
-c('compost','Living Compost','spell',1,'compost','Turn this lane into fertile soil. Sacrifice 1 creature HP, if present, to restore 4 field integrity and add 3 food.'),
-c('bell','Supper Bell','spell',1,'bell','All your animals heal 2 HP and rally toward food. Non-animal creatures gain 1 HP instead.')],
+c('sheep','Pasture Sheep','creature',1,'sheep','Flocks toward nearby allies and flees enemies within 6m. Grazes to heal 1 HP every 4s.',{atk:1,hp:7,behavior:'sheep',kind:'animal'}),
+c('cow','Dairy Cow','creature',1,'cow','Stays near the herd. Every 5s, heal an injured animal within 8m by 1 HP.',{atk:2,hp:9,behavior:'cow',kind:'animal'}),
+c('bull','Barnyard Bull','creature',2,'bull','Defends the herd. Charges at 6m/s; first contact deals +2 damage. Recharges after 6s.',{atk:4,hp:10,behavior:'bull',kind:'animal'})],
 scarecrow:[
 c('crows','Crow Barrage','spell',2,'crows','A flock strikes up to 3 enemy creatures anywhere for 2 damage each. If none can be hit, it ravages YOUR chosen field for 3 integrity.'),
 c('raven','Omen Raven','creature',1,'raven','Circles the field and scatters when threatened. On summon: weaken the opposing creature by 1 attack.',{atk:2,hp:4,ability:'omen',behavior:'crow'}),
