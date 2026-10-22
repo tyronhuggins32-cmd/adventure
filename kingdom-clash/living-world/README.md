@@ -6,6 +6,12 @@ steps update terrain, creatures, projectiles, buildings and commanders. A pause 
 all those clocks, including births and spell durations. Every player placement goes
 through `playCard` so it checks allegiance, space, ownership and energy first.
 
+The Farmer opens beside a Barn and two sheep, so Cotton Siege is available from
+the first decision; a Farm Field supports the crop routine. The Scarecrow opens
+beside a planted, producing Corn Field, with a Crow Roost and Briar Snare farther
+out. This starting Field is a scenario asset: the Scarecrow can use its crop
+production and defend it, while only the Farmer can place additional Farm Fields.
+
 | Commander | Routine | Active order | Buildings |
 | --- | --- | --- | --- |
 | Farmer | Finds depleted corn by a live Farm; heals wounded livestock | Harvest Rally consumes 2 ripe crop food, heals and rallies nearby allies, adds 1 energy; 22s recovery | Farm Field, Barn, Harvest Mill, Seed Slinger, Livestock Pen, Harvest Cart |

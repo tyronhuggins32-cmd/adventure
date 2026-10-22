@@ -17,6 +17,19 @@ test('all three Cornlands leaders start with distinct functioning buildings, han
   for(const other of Object.keys(CORNLAND_COMMANDERS).filter(x=>x!==id))assert.match(cardLock(w,CORNLAND_COMMANDERS[other].buildings[0]),/different Cornlands/);
  }
 });
+test('Farmer begins beside a working Barn and herd; Scarecrow begins beside a growing Corn Field',()=>{
+ const farmer=createTabletop(42,'farmer'),f=farmer.entities[0],barn=farmer.structures.find(e=>e.side===0&&e.card.id==='barn');
+ assert.ok(barn);assert.ok(Math.hypot(f.x-barn.x,f.z-barn.z)<30);
+ assert.ok(farmer.entities.filter(e=>e.side===0&&e.card.id==='sheep'&&Math.hypot(e.x-barn.x,e.z-barn.z)<18).length>=2);
+ assert.ok(farmer.knowledge[0].has('cotton'));
+ const scare=createTabletop(42,'scarecrow'),s=scare.entities[0],field=scare.structures.find(e=>e.side===0&&e.card.id==='farm');
+ assert.ok(field);assert.ok(Math.hypot(s.x-field.x,s.z-field.z)<30);
+ assert.equal(scare.terrain.cell(field.x,field.z).kind,'corn');
+ const before=scare.terrain.cells.filter(c=>c.owner===0&&c.kind==='corn').reduce((n,c)=>n+c.food,0);
+ run(scare,8);
+ const after=scare.terrain.cells.filter(c=>c.owner===0&&c.kind==='corn').reduce((n,c)=>n+c.food,0);
+ assert.ok(after>=before,`field crop supply fell from ${before} to ${after}`);
+});
 test('Scarecrow patrols toward its roost without dropping the final path segment',()=>{
  const w=createTabletop(42,'scarecrow'),e=w.entities[0];run(w,5);assert.ok(Math.hypot(e.x+64,e.z-102)>1.5);assert.notEqual(e.state,'blocked');
 });

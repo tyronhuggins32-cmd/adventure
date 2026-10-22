@@ -1,4 +1,4 @@
-import { createTabletop } from './scenario.js?v=world10';
+import { createTabletop } from './scenario.js?v=world12';
 import { WorldView } from './view.js?v=world10';
 import { CARDS, RECRUITS } from './catalog.js?v=world10';
 import { playCard, cardLock } from './card-actions.js?v=world10';
