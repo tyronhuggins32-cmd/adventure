@@ -7,7 +7,7 @@ import {miniatureCard,miniatureScale} from '../kingdom-clash/living-world/view.j
 import {createModel,animateModel,disposeModel} from '../kingdom-clash/model-3d.js';
 import {programFor} from '../kingdom-clash/entity-programs.js';
 
-test('the playable opening occupies a shared 144 unit world with real models',()=>{
+test('the playable opening occupies a shared 288 unit world with real models',()=>{
  const world=createTabletop();
  assert.equal(world.paused,true);
  assert.ok(world.entities.filter(e=>!e.side).length>8);

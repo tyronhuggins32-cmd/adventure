@@ -1,5 +1,5 @@
-import { CARDS, card } from './catalog.js?v=world8a';
-import { distance } from './terrain.js?v=world8a';
+import { CARDS, card } from './catalog.js?v=world9';
+import { distance, HALF } from './terrain.js?v=world9';
 
 export function cardLock(world, id, side = 0) {
   const definition = CARDS[id];
@@ -8,8 +8,10 @@ export function cardLock(world, id, side = 0) {
     entity.side === side && entity.card.id === definition.requires && entity.hp > 0
   )) return 'Build a ' + CARDS[definition.requires].name + ' first';
   if (definition.requiresKnowledge && !world.knowledge[side].has(definition.requiresKnowledge)) {
-    return 'A scholar must learn this spell';
+    return id === 'cotton' ? 'A sheep must arrive at a living Barn' : id === 'cornmaze' ? 'A living Scarecrow must teach this spell' : 'A scholar must learn this spell';
   }
+  if (id === 'cotton' && !world.entities.some(e => e.side === side && e.hp > 0 && e.card.id === 'barn') || id === 'cotton' && !world.entities.some(e => e.side === side && e.hp > 0 && e.card.id === 'sheep')) return 'Keep a Barn and sheep alive to cast';
+  if (id === 'cornmaze' && !world.entities.some(e => e.side === side && e.hp > 0 && e.card.id === 'scarecrow')) return 'A living Scarecrow is required';
   if (id === 'revive' && !world.graveyard.some(entity =>
     entity.side === side && entity.card.type === 'creature'
   )) return 'No fallen creature to revive';
@@ -71,7 +73,23 @@ export function castRevive(world, definition, point, side) {
   return entity;
 }
 
-const spells = { fire: castFire, rain: castRain, reclaim: castReclaim, revive: castRevive };
+export function castCotton(world, definition, point, side) {
+  const source = world.entities.find(e => e.side === side && e.hp > 0 && e.card.id === 'barn');
+  if (!source) return null;
+  const target = world.entities.filter(e => e.hp > 0 && e.side !== side && distance(e, point) < definition.radius).sort((a,b) => distance(a,point)-distance(b,point))[0];
+  if (!target) return null;
+  world.projectiles.push({id:++world.serial,source,side,point:{x:target.x,z:target.z},x:source.x,z:source.z,age:0,damage:9,area:definition.radius,speed:24,cotton:true});
+  world.note('The barn launches a giant cotton ball.');
+  return {spell:true};
+}
+export function castCornMaze(world, definition, point, side) {
+  const count=world.terrain.growMaze(point.x,point.z,side,world.time+28);
+  if (!count) return null;
+  for(const crow of world.entities)if(crow.hp>0&&crow.side!==side&&crow.card.behavior==='crow'&&distance(crow,point)<definition.radius){crow.morale=0;crow.decisionAt=0;}
+  world.note('The scarecrow raises a maze of corn for 28 seconds.');
+  return {spell:true};
+}
+const spells = { cotton:castCotton, cornmaze:castCornMaze, fire: castFire, rain: castRain, reclaim: castReclaim, revive: castRevive };
 export function playSpellCard(world, definition, point, side) {
   const result = spells[definition.id]?.(world, definition, point, side);
   if (result) world.note(definition.name + ' resolves in the world.');
@@ -98,7 +116,7 @@ export function playCard(world, id, x, z, { side = 0, handIndex = null } = {}) {
   if (locked) return reject(locked);
   if (world.ended) return reject('The battle has ended');
   if (world.energy[side] < definition.cost) return reject('Not enough energy');
-  if (Math.abs(x) > 67 || Math.abs(z) > 67) return reject('Choose ground inside the tabletop');
+  if (Math.abs(x) > HALF-5 || Math.abs(z) > HALF-5) return reject('Choose ground inside the tabletop');
 
   const point = { x, z };
   const summons = definition.type === 'creature' || definition.type === 'building' || id === 'revive';

@@ -1,12 +1,16 @@
 // Card data is separate from every card's execution function and world AI.
 export const CARDS={
  farm:{name:'Farm',type:'building',cost:2,hp:35,radius:4,text:'Grows corn and restores food around its actual location.'},
+ iceDen:{name:'Ice Den',type:'building',cost:3,hp:42,radius:4,text:'Shelters a snow wolf pack and unlocks pack recruits.'},
  barn:{name:'Barn',type:'building',cost:3,hp:45,radius:4,text:'Unlocks sheep, cows and bulls. Injured or frightened livestock can seek shelter here.'},
  school:{name:'Schoolhouse',type:'building',cost:3,hp:35,radius:4,text:'Unlocks scholars. A creature sent here can study resurrection.'},
  tower:{name:'Watchtower',type:'building',cost:3,hp:35,radius:3,text:'Unlocks archers. Fires at enemies that physically enter its range.'},
  cave:{name:'Cave of Solitude',type:'building',cost:2,hp:45,radius:4,text:'Creatures resting inside are protected until the cave is destroyed.'},
  spirit:{name:'Spirit Tower',type:'building',cost:4,hp:30,radius:3,text:'Floop: capture a nearby hostile spirit. 20-second cooldown.'},
  volcano:{name:'Volcano',type:'building',cost:4,hp:55,radius:5,text:'Floop: erupt at a chosen point. Fire harms either kingdom.'},
+ scarecrow:{name:'Scarecrow Warden',type:'creature',cost:2,hp:26,atk:2,speed:2.6,behavior:'scarecrow',requires:'farm',text:'Guards crops. Frightens hostile crows and teaches Corn Maze while alive.'},
+ crow:{name:'Crop Crow',type:'creature',cost:1,hp:10,atk:1,speed:5.5,behavior:'crow',text:'Raids ripe fields, then flees from scarecrows.'},
+ wolf:{name:'Snow Wolf',type:'creature',cost:2,hp:19,atk:3,speed:5.1,behavior:'wolf',requires:'iceDen',text:'Huddles with its pack in the cold. Each nearby wolf strengthens its bite.'},
  pig:{name:'Truffle Pig',type:'creature',cost:1,hp:12,atk:0,speed:4.6,behavior:'pig',text:'Eats enemy corn and food creatures automatically. Flees threats; mud can trap it.'},
  sheep:{name:'Pasture Sheep',type:'creature',cost:1,hp:14,atk:0,speed:3.5,behavior:'sheep',requires:'barn',text:'Flocks with livestock and grazes to recover health.'},
  cow:{name:'Dairy Cow',type:'creature',cost:2,hp:22,atk:2,speed:2.8,behavior:'cow',requires:'barn',text:'Stays with its herd and heals nearby livestock every five seconds.'},
@@ -19,10 +23,12 @@ export const CARDS={
  corn:{name:'Corn Landscape',type:'terrain',cost:2,radius:15,text:'Plant a corn patch. Its food can power creatures, be eaten, or burn.'},
  meadow:{name:'Blue Meadow',type:'terrain',cost:1,radius:15,text:'Replace nearby terrain with walkable meadow and fresh food.'},
  mud:{name:'Mud Trap',type:'terrain',cost:2,radius:11,text:'Mud slows movement. A pig becomes trapped when it enters.'},
+ cotton:{name:'Cotton Siege',type:'spell',cost:2,radius:9,requiresKnowledge:'cotton',text:'A barn sheep rolls a giant cotton ball at enemies. Impact damages and slows a whole group.'},
+ cornmaze:{name:'Corn Maze',type:'spell',cost:3,radius:32,requiresKnowledge:'cornmaze',text:'A living scarecrow raises a temporary maze of tall corn. Walls reroute enemies and crows panic.'},
  rain:{name:'Rainstorm',type:'spell',cost:2,radius:20,text:'Extinguish fire and restore food around the target.'},
  fire:{name:'Wildfire',type:'spell',cost:3,radius:10,text:'Ignite dry ground. Fire spreads and hurts friend and foe.'},
  reclaim:{name:'Reclaim Landscape',type:'spell',cost:2,radius:16,text:'Regrow meadow or corn, extinguish fire, and free pigs in the area.'},
  revive:{name:'Raise the Dead',type:'spell',cost:4,requiresKnowledge:'revive',text:'Restore your last fallen creature at the target. Requires a trained scholar.'}
 };
-export const RECRUITS={barn:['pig','sheep','cow','bull'],school:['scholar'],tower:['archer']};
+export const RECRUITS={barn:['pig','sheep','cow','bull'],school:['scholar'],tower:['archer'],farm:['scarecrow'],iceDen:['wolf']};
 export const card=id=>({id,...CARDS[id]});

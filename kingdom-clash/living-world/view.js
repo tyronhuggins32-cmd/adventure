@@ -1,11 +1,11 @@
 import * as T from '../vendor/three.js';
-import { CameraControls } from '../camera-controls.js?v=episode7';
+import { CameraControls } from '../camera-controls.js?v=world9';
 import { createModel, animateModel, disposeModel } from '../model-3d.js?v=episode7';
 import { programFor } from '../entity-programs.js?v=episode7';
-import { buildWorldGeometry, GROUND_COLORS } from './world-geometry.js?v=world8a';
+import { buildWorldGeometry, GROUND_COLORS } from './world-geometry.js?v=world9';
 
-const aliases = { guard: 'ep-husker', archer: 'ep-archer', scholar: 'ep-scholar', maize: 'ep-maize', cave: 'ep-cave', school: 'ep-school', spirit: 'ep-spirit', volcano: 'ep-volcano' };
-export const miniatureCard = card => ({ ...card, id: aliases[card.id] || card.id });
+const aliases = {  guard: 'ep-husker', archer: 'ep-archer', scholar: 'ep-scholar', maize: 'ep-maize', cave: 'ep-cave', school: 'ep-school', spirit: 'ep-spirit', volcano: 'ep-volcano' };
+export const miniatureCard = card => ({ ...card, id: aliases[card.id] || card.id, type: card.id==='scarecrow'?'commander':card.type });
 export const miniatureScale = entity => entity.card.type === 'building' ? 3.2 : entity.card.type === 'commander' ? 3.4 : 2.8;
 const tint = side => side ? 0xda9265 : 0xa9dcbe;
 
@@ -14,7 +14,7 @@ export class WorldView {
     this.canvas = canvas; this.world = world; this.onPick = onPick;
     this.listeners = []; this.models = new Map(); this.actors = new Map(); this.bolts = new Map();
     this.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.yaw = .18; this.pitch = 1; this.zoom = 1.12; this.followBattle = false;
+    this.worldWidth=288;this.worldDepth=288;this.yaw = .18; this.pitch = 1; this.zoom = 1.12; this.followBattle = false;
     this.target = new T.Vector3(); this.groundPlane = new T.Plane(new T.Vector3(0, 1, 0), 0);
     this.camera = new T.OrthographicCamera(-110, 110, 85, -85, .1, 700);
     this.scene = new T.Scene(); this.scene.background = new T.Color(0x272b28);
@@ -30,8 +30,8 @@ export class WorldView {
     }
     this.scene.add(new T.HemisphereLight(0xfff4d8, 0x3f5b47, 2.1));
     const sun = new T.DirectionalLight(0xffe8bc, 2.6); sun.position.set(-60, 140, 80); sun.castShadow = true;
-    Object.assign(sun.shadow.camera, { left: -90, right: 90, top: 90, bottom: -90, near: 1, far: 320 });
-    sun.shadow.mapSize.set(1024, 1024); sun.shadow.normalBias = .08; this.scene.add(sun);
+    Object.assign(sun.shadow.camera, { left: -175, right: 175, top: 175, bottom: -175, near: 1, far: 500 });
+    sun.shadow.mapSize.set(2048, 2048); sun.shadow.normalBias = .08; this.scene.add(sun);
     this.geometry = buildWorldGeometry(world.terrain); this.scene.add(this.geometry.group);
     this.selection = new T.Mesh(new T.RingGeometry(3.5, 3.8, 40), new T.MeshBasicMaterial({ color: 0xf7e7a1, side: T.DoubleSide, depthWrite: false }));
     this.selection.rotation.x = -Math.PI / 2; this.selection.visible = false; this.scene.add(this.selection);
@@ -52,7 +52,7 @@ export class WorldView {
   }
   resize() {
     const width = Math.max(1, this.canvas.clientWidth), height = Math.max(1, this.canvas.clientHeight), aspect = width / height;
-    const halfHeight = Math.max(82, 100 / aspect);
+    const halfHeight = Math.max(164, 200 / aspect);
     Object.assign(this.camera, { left: -halfHeight * aspect, right: halfHeight * aspect, top: halfHeight, bottom: -halfHeight });
     this.camera.updateProjectionMatrix();
     if (this.renderer) this.renderer.setSize(width, height, false);
@@ -60,7 +60,7 @@ export class WorldView {
   }
   pick(event) {
     const point = this.controls.groundAt(event.clientX, event.clientY);
-    if (!point || Math.abs(point.x) > 72 || Math.abs(point.z) > 72) return;
+    if (!point || Math.abs(point.x) > 144 || Math.abs(point.z) > 144) return;
     // Screen-space selection includes tall miniature silhouettes, not just their feet.
     const rect = this.canvas.getBoundingClientRect(), x = event.clientX - rect.left, y = event.clientY - rect.top;
     let selected = null, best = 24;
@@ -82,7 +82,7 @@ export class WorldView {
       this.scene.remove(model); model.userData.health.geometry.dispose(); model.userData.health.material.dispose(); disposeModel(model); this.models.delete(id); this.actors.delete(id);
     }
     for (const entity of this.world.entities) {
-      this.actors.set(entity.id, { ...entity, x: entity.x / 36 + 2, y: entity.z / 72 + 1 });
+      this.actors.set(entity.id, { ...entity, worldX:entity.x,worldZ:entity.z });
       if (!this.renderer || this.models.has(entity.id) || entity.hp <= 0) continue;
       const renderCard = miniatureCard(entity.card), model = createModel(renderCard, entity.side ? 'medieval' : 'farm');
       model.userData.program = programFor(renderCard);
@@ -117,7 +117,7 @@ export class WorldView {
       }
       const moving = Math.hypot(entity.vx, entity.vz) > .2 && !this.world.paused;
       animateModel(model, { clock: entity.clock, program: model.userData.program, moving, vx: entity.vx, vy: entity.vz, activity: entity.action, action: entity.state === 'attack' || entity.state === 'shoot' ? 'attack' : entity.state }, this.reduced);
-      model.position.set(entity.x, this.world.terrain.height(entity.x, entity.z) + (model.userData.bob || 0), entity.z);
+      model.position.set(entity.x, this.world.terrain.height(entity.x, entity.z) + (model.userData.bob || 0) + (entity.card.behavior==='crow'?3.5+Math.sin(entity.clock*6)*.8:0), entity.z);
       model.userData.health.scale.x = Math.max(.01, entity.hp / entity.maxHp);
       model.userData.health.quaternion.copy(model.quaternion).invert().multiply(this.camera.quaternion);
     }
@@ -128,7 +128,7 @@ export class WorldView {
     for (const projectile of this.world.projectiles) {
       live.add(projectile.id);
       let bolt = this.bolts.get(projectile.id);
-      if (!bolt) { bolt = new T.Mesh(new T.OctahedronGeometry(.6), new T.MeshBasicMaterial({ color: 0xffdc86 })); this.bolts.set(projectile.id, bolt); this.scene.add(bolt); }
+      if (!bolt) { bolt = new T.Mesh(projectile.cotton?new T.IcosahedronGeometry(3.4,1):new T.OctahedronGeometry(.6), new T.MeshBasicMaterial({ color: projectile.cotton?0xf5f3e9:0xffdc86 })); this.bolts.set(projectile.id, bolt); this.scene.add(bolt); }
       bolt.position.set(projectile.x, 4 + Math.sin(Math.min(1, projectile.age) * Math.PI) * 3, projectile.z);
     }
     for (const [id, bolt] of this.bolts) if (!live.has(id)) { this.scene.remove(bolt); bolt.geometry.dispose(); bolt.material.dispose(); this.bolts.delete(id); }
@@ -140,26 +140,28 @@ export class WorldView {
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.fillStyle = '#272b28'; ctx.fillRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
     const polygon = (points, color) => { ctx.fillStyle = color; ctx.beginPath(); points.forEach(([x, y, z], i) => { const p = this.project(x, y, z); i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); }); ctx.closePath(); ctx.fill(); };
-    polygon([[-76, -2, -76], [76, -2, -76], [76, -2, 76], [-76, -2, 76]], '#815836');
+    polygon([[-148, -2, -148], [148, -2, -148], [148, -2, 148], [-148, -2, 148]], '#815836');
     const cells = [...this.world.terrain.cells].sort((a, b) => this.project(a.x, 0, a.z).y - this.project(b.x, 0, b.z).y);
     for (const cell of cells) {
       polygon([[cell.x - 3.12, 0, cell.z - 3.12], [cell.x + 3.12, 0, cell.z - 3.12], [cell.x + 3.12, 0, cell.z + 3.12], [cell.x - 3.12, 0, cell.z + 3.12]], '#' + (GROUND_COLORS[cell.kind] || GROUND_COLORS.meadow).toString(16).padStart(6, '0'));
       const p = this.project(cell.x, 0, cell.z), size = this.canvas.clientWidth / (this.camera.right - this.camera.left) * this.camera.zoom;
+      if(cell.feature && size>1.2){ctx.fillStyle=cell.feature==='stone'?'#b0ada1':cell.feature==='pine'?'#315e55':'#427447';ctx.beginPath();ctx.arc(p.x,p.y-3*size,(cell.feature==='stone'?1:2)*size,0,Math.PI*2);ctx.fill();}
+      if(cell.kind==='mazeWall'){ctx.fillStyle='#286c3c';ctx.fillRect(p.x-2*size,p.y-5*size,4*size,4*size);}
       if (cell.kind === 'corn' && cell.food > 0) { ctx.fillStyle = '#edcf70'; for (const offset of [-1.4, 0, 1.4]) { const stalk = this.project(cell.x + offset, 0, cell.z); ctx.fillRect(stalk.x, stalk.y - 3 * size, Math.max(1, size * .5), 3 * size); } }
       if (cell.fire) { ctx.fillStyle = '#f79a36'; ctx.beginPath(); ctx.moveTo(p.x - 2 * size, p.y); ctx.lineTo(p.x, p.y - 6 * size); ctx.lineTo(p.x + 2 * size, p.y); ctx.fill(); }
     }
     const zoom = this.canvas.clientWidth / (this.camera.right - this.camera.left) * this.camera.zoom;
     const entities = this.world.entities.filter(e => e.hp > 0 && !e.inside).sort((a, b) => this.project(a.x, 0, a.z).y - this.project(b.x, 0, b.z).y);
-    const symbols = { pig: 'P', sheep: 'S', cow: 'C', bull: 'B', guard: 'K', dog: 'D', archer: 'A', scholar: 'L' };
+    const symbols = { pig: 'P', sheep: 'S', cow: 'C', bull: 'B',wolf:'W',crow:'↟',scarecrow:'✚',iceDen:'❄', guard: 'K', dog: 'D', archer: 'A', scholar: 'L' };
     for (const entity of entities) {
-      const p = this.project(entity.x, 0, entity.z), building = entity.card.type === 'building', radius = Math.max(6, zoom * (building ? 4.8 : 2.5));
+      const p = this.project(entity.x,entity.card.behavior==='crow'?4:0, entity.z), building = entity.card.type === 'building', radius = Math.max(6, zoom * (building ? 4.8 : 2.5));
       ctx.fillStyle = '#16291b77'; ctx.beginPath(); ctx.ellipse(p.x + 2, p.y + 2, radius + 2, radius * .55, 0, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = entity.side ? '#e0a078' : '#bad8ac'; ctx.strokeStyle = entity.id === this.selectedId ? '#fff1b5' : '#36452f'; ctx.lineWidth = entity.id === this.selectedId ? 3 : 1;
       ctx.beginPath(); if (building) ctx.rect(p.x - radius, p.y - radius * 1.6, radius * 2, radius * 1.6); else ctx.arc(p.x, p.y - radius, radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#243326'; ctx.font = `bold ${Math.max(9, radius)}px system-ui`; ctx.textAlign = 'center'; ctx.fillText(symbols[entity.card.id] || (entity.card.type === 'commander' ? '★' : entity.card.name[0]), p.x, p.y - radius + 3);
       ctx.fillStyle = '#1b241e'; ctx.fillRect(p.x - radius, p.y - radius * 2 - 5, radius * 2, 3); ctx.fillStyle = entity.side ? '#eeaa79' : '#bce3a9'; ctx.fillRect(p.x - radius, p.y - radius * 2 - 5, radius * 2 * entity.hp / entity.maxHp, 3);
     }
-    for (const projectile of this.world.projectiles) { const p = this.project(projectile.x, 3, projectile.z); ctx.fillStyle = '#ffe29a'; ctx.fillRect(p.x - 2, p.y - 2, 4, 4); }
+    for (const projectile of this.world.projectiles) { const p = this.project(projectile.x, 3, projectile.z); ctx.fillStyle = projectile.cotton?'#f4f0e3':'#ffe29a';ctx.beginPath();ctx.arc(p.x,p.y,projectile.cotton?Math.max(5,zoom*3.4):3,0,Math.PI*2);ctx.fill(); }
   }
   destroy() {
     this.observer.disconnect(); this.listeners.forEach(remove => remove()); this.controls.destroy(); this.geometry.dispose();

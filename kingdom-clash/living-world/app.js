@@ -1,7 +1,7 @@
-import { createTabletop } from './scenario.js?v=world8a';
-import { WorldView } from './view.js?v=world8a';
-import { CARDS, RECRUITS } from './catalog.js?v=world8a';
-import { playCard, cardLock } from './card-actions.js?v=world8a';
+import { createTabletop } from './scenario.js?v=world9';
+import { WorldView } from './view.js?v=world9';
+import { CARDS, RECRUITS } from './catalog.js?v=world9';
+import { playCard, cardLock } from './card-actions.js?v=world9';
 
 const $ = id => document.getElementById(id);
 let world, view, selectedId = null, cardIndex = null, order = null, last = 0, lastUI = 0, handKey = '', rosterKey = '', seed = 42;
@@ -105,9 +105,9 @@ function start() {
   const oldCanvas = $('livingField'), canvas = oldCanvas.cloneNode(false); oldCanvas.replaceWith(canvas);
   selectedId = null; cardIndex = null; order = null; handKey = ''; rosterKey = '';
   world = createTabletop(seed); view = new WorldView(canvas, world, place);
-  $('graphics').textContent = view.renderer ? 'Animated 3D tabletop · 144 × 144' : 'Map graphics · WebGL2 unavailable';
+  $('graphics').textContent = view.renderer ? 'Animated 3D tabletop · 288 × 288' : 'Map graphics · WebGL2 unavailable';
   $('selectedName').textContent = 'A world in motion.';
-  $('selectedDescription').textContent = 'Pigs search for food. Sheep flock, cows tend their herd, and bulls charge. Select a miniature to inspect its needs and orders.';
+  $('selectedDescription').textContent = 'The Farmer tends crops; crows raid them, scarecrows repel crows, sheep empower the barn, and wolves hunt in packs. Select a miniature to inspect its needs and orders.';
   message('Paused for planning. Run the world to watch both kingdoms act.'); render(true);
 }
 $('run').onclick = () => { world.paused = !world.paused; message(world.paused ? 'World paused. Plan, place cards, or issue orders.' : 'World running. You can still place cards or pause to plan.'); render(true); };
