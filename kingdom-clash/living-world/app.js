@@ -1,5 +1,5 @@
-import { createTabletop } from './scenario.js?v=world9';
-import { WorldView } from './view.js?v=world9';
+import { createTabletop } from './scenario.js?v=farmer3d9';
+import { WorldView } from './view.js?v=farmer3d9';
 import { CARDS, RECRUITS } from './catalog.js?v=world9';
 import { playCard, cardLock } from './card-actions.js?v=world9b';
 
@@ -65,6 +65,9 @@ function renderSelection(rebuild = false) {
   if (!rebuild) return;
   $('orders').replaceChildren(); $('recruits').replaceChildren();
   if (entity.side || entity.hp <= 0) return;
+  if(entity.card.id==='farmer'&&entity.card.type==='commander'){
+    for(const [label,kind] of [['Move Farmer','move'],['Hold position','hold'],['Auto-tend fields','auto']])$('orders').append(actionButton(label,kind));
+  }
   if (entity.card.type === 'creature') {
     for (const [label, kind] of [['Move / hold', 'move'], ['Auto', 'auto'], ['Seek shelter', 'rest'], ['Study', 'study']]) $('orders').append(actionButton(label, kind));
     if (entity.card.behavior === 'pig') $('orders').append(actionButton('Brave raid · 15 sec', 'raid'));
@@ -85,6 +88,8 @@ function render(rebuild = false) {
   $('worldTime').textContent = String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
   $('weather').textContent = world.weather === 'rain' ? 'Rain · fire extinguishes' : world.paused ? 'Paused · plan your move' : 'Clear skies';
   $('ownHealth').textContent = Math.ceil(world.entities[0].hp); $('enemyHealth').textContent = Math.ceil(world.entities[1].hp);
+  $('focusFarmer').textContent = view?.followFarmer ? 'Stop following Farmer' : 'Watch Farmer in 3D';
+  $('focusFarmer').setAttribute('aria-pressed',String(!!view?.followFarmer));
   $('run').textContent = world.ended ? (world.winner === 0 ? 'Your kingdom wins' : 'Your Farmer has fallen') : world.paused ? 'Run world' : 'Pause world';
   $('run').disabled = world.ended; $('run').setAttribute('aria-pressed', String(!world.paused));
   $('speed').textContent = world.speed + '× speed'; $('energy').textContent = world.energy[0].toFixed(1) + ' / 10 energy';
@@ -111,6 +116,11 @@ function start() {
   message('Paused for planning. Run the world to watch both kingdoms act.'); render(true);
 }
 $('run').onclick = () => { world.paused = !world.paused; message(world.paused ? 'World paused. Plan, place cards, or issue orders.' : 'World running. You can still place cards or pause to plan.'); render(true); };
+$('focusFarmer').onclick=()=>{
+  if(view.followFarmer){view.followFarmer=false;view.target.set(0,0,0);view.zoom=1.12;view.controls.sync();message('Showing the full living table.');render(true);return;}
+  const farmer=view.focusFarmer();if(!farmer){message('The Farmer is not on the table.');return;}
+  select(farmer);message('Farmer in 3D: move, tend crops, swing the carrot staff and react to attacks. Run world to watch the animation.');render(true);
+};
 $('speed').onclick = () => { world.speed = world.speed === 1 ? 2 : 1; render(); };
 $('cancel').onclick = () => { cardIndex = null; order = null; handKey = ''; message('Selection cleared.'); render(true); };
 $('restart').onclick = () => { seed++; start(); };
