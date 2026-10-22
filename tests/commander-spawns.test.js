@@ -42,7 +42,7 @@ test('each arrival set and building has a visible 3D silhouette; Prince sits on 
    assert.equal(leader.userData.customFarmer,true);
    assert.ok(leader.userData.head&&leader.userData.hat&&leader.userData.carrotCompanion);
    animateModel(leader,{clock:2,program:{stride:6,phase:0},moving:false,vx:0,vy:0,activity:.5,action:'harvest',state:'tending crops'},false);
-   assert.ok(leader.userData.freeArm.rotation.x<-.1);
+   assert.ok(leader.userData.rig.arms[1].rotation.x<-.1);
   }
   disposeModel(building);disposeModel(leader);
  }

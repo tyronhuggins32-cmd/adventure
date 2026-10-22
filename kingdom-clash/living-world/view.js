@@ -1,8 +1,8 @@
 import * as T from '../vendor/three.js';
 import { CameraControls } from '../camera-controls.js?v=world10';
-import { createModel, animateModel, disposeModel } from '../model-3d.js?v=commander13';
+import { createModel, animateModel, disposeModel } from '../model-3d.js?v=commander14';
 import { programFor } from '../entity-programs.js?v=episode7';
-import {createCornlandBuilding,animateCornlandBuilding} from './cornland-models.js?v=commander13';
+import {createCornlandBuilding,animateCornlandBuilding} from './cornland-models.js?v=commander14';
 import { buildWorldGeometry, GROUND_COLORS } from './world-geometry.js?v=world10';
 
 const aliases = {  guard: 'ep-husker', archer: 'ep-archer', scholar: 'ep-scholar', maize: 'ep-maize', cave: 'ep-cave', school: 'ep-school', spirit: 'ep-spirit', volcano: 'ep-volcano' };
