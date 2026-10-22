@@ -1,4 +1,4 @@
-import { LivingWorld } from './simulation.js?v=world9';
+import { LivingWorld } from './simulation.js?v=farmer3d9';
 
 // A playable opening, with both kingdoms already occupying the same world.
 export function createTabletop(seed = 42) {
