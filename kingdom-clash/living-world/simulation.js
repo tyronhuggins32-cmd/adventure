@@ -28,7 +28,40 @@ export class LivingWorld{
  if(kind==='raid'&&e.card.behavior==='pig'){e.order={kind:'raid'};e.braveUntil=this.time+15;e.pathAt=0;this.note('The pig searches the rival kingdom for corn.');return {ok:true};}
  if(kind==='floop'&&e.card.type==='building'){if(this.time<e.abilityAt)return {ok:false,reason:'This building is recovering'};if(e.card.id==='spirit'){const spirit=this.closest(e,o=>o.side!==e.side&&o.card.spirit,38);if(!spirit)return {ok:false,reason:'No enemy spirit is within 38 metres'};spirit.side=e.side;spirit.order=null;spirit.pathAt=0;this.note('The Spirit Tower captures '+spirit.card.name+'.');}else if(e.card.id==='volcano'){if(!target)return {ok:false,reason:'Choose an eruption point'};this.terrain.paint(target.x,target.z,'fire',16);this.note('The volcano erupts. Fire can spread through either kingdom.');}else return {ok:false,reason:'This building works automatically'};e.abilityAt=this.time+20;this.version++;return {ok:true};}return {ok:false,reason:'This order does not apply to this miniature'};}
  updateCreature(e,dt){e.clock+=dt;e.cooldown=Math.max(0,e.cooldown-dt);e.action=Math.max(0,e.action-dt);if(e.inside){const b=this.entities.find(b=>b.id===e.inside&&b.hp>0);if(!b){e.inside=null;e.order=null;}else{e.state=e.order?.kind==='study'?'study':'rest';e.vx=e.vz=0;if(e.state==='study'){e.study+=dt;if(e.study>=20&&!this.knowledge[e.side].has('revive')){this.knowledge[e.side].add('revive');if(e.side===0&&!this.hand.includes('revive'))this.hand.push('revive');this.note(e.card.name+' learns Raise the Dead.');}}return;}}
- if(e.card.type==='commander'){e.state='command';const hurt=this.closest(e,o=>o.side===e.side&&o.hp<o.maxHp&&livestock(o),14);if(hurt&&e.cooldown<=0){hurt.hp=Math.min(hurt.maxHp,hurt.hp+2);e.cooldown=5;e.action=.5;}const enemy=this.closest(e,o=>o.side!==e.side&&!o.inside,7);if(enemy&&e.cooldown<=0){this.attack(e,enemy);return;}const farm=this.closest(e,o=>o.side===e.side&&o.card.id==='farm',90);let crop=null,best=Infinity;if(farm)for(const c of this.terrain.cells)if(c.owner===e.side&&c.kind==='corn'&&c.food<4&&distance(c,farm)<18&&distance(e,c)<40){const d=distance(e,c);if(d<best){best=d;crop=c;}}if(crop){e.state='tending crops';if(this.move(e,crop,dt,2.5)&&e.cooldown<=0){crop.food=Math.min(4,crop.food+1);this.terrain.version++;e.cooldown=2;e.action=.4;}}else if(farm&&distance(e,farm)>17){e.state='returning to farm';this.move(e,this.nearbyPoint(e,farm),dt,4);}return;}
+ if(e.card.type==='commander'){
+   // Commands use the live pathfinder and move the actual character in the world.
+   if(e.order?.kind==='move'){
+     e.state='walk';
+     if(this.move(e,e.order.target,dt,1.35)){
+       e.order={kind:'hold',target:{x:e.x,z:e.z}};
+       e.state='guard';e.vx=e.vz=0;
+     }
+     return;
+   }
+   if(e.order?.kind==='hold'){e.state='guard';e.vx=e.vz=0;return;}
+   e.state='command';
+   const hurt=this.closest(e,o=>o.side===e.side&&o.hp<o.maxHp&&livestock(o),14);
+   if(hurt&&e.cooldown<=0){hurt.hp=Math.min(hurt.maxHp,hurt.hp+2);e.cooldown=5;e.action=.5;e.state='harvest';}
+   const enemy=this.closest(e,o=>o.side!==e.side&&!o.inside,7);
+   if(enemy&&e.cooldown<=0){this.attack(e,enemy);return;}
+   // Preserve existing autonomous farmer farming: he walks to live crop patches and grows them.
+   const farm=this.closest(e,o=>o.side===e.side&&o.card.id==='farm',90);
+   let crop=null,best=Infinity;
+   if(farm)for(const c of this.terrain.cells)
+     if(c.owner===e.side&&c.kind==='corn'&&c.food<4&&distance(c,farm)<18&&distance(e,c)<40){
+       const d=distance(e,c);if(d<best){best=d;crop=c;}
+     }
+   if(crop){
+     e.state='tending crops';
+     if(this.move(e,crop,dt,2.5)&&e.cooldown<=0){
+       crop.food=Math.min(4,crop.food+1);
+       this.terrain.version++;e.cooldown=2;e.action=.4;e.state='harvest';e.vx=e.vz=0;
+     }
+   }else if(farm&&distance(e,farm)>17){
+     e.state='returning to farm';this.move(e,this.nearbyPoint(e,farm),dt,4);
+   }else{e.vx=e.vz=0;}
+   return;
+ }
  const cell=this.terrain.cell(e.x,e.z);if(e.card.behavior==='pig'&&cell.kind==='mud')e.trapped=true;if(e.trapped){e.state='trapped';e.vx=e.vz=0;return;}if(e.card.cornPowered&&!this.cornPower[e.side]){e.state='unpowered';e.vx=e.vz=0;return;}
  if(e.order?.kind==='move'){e.state='walk';if(this.move(e,e.order.target,dt,1.5)){e.state='holding';e.vx=e.vz=0;const target=this.closest(e,o=>o.side!==e.side&&!o.inside,5);if(target&&e.cooldown<=0)this.attack(e,target);}return;}
  if(['rest','study'].includes(e.order?.kind)){const b=e.order.target;if(b.hp<=0){e.order=null;}else{e.state='walk';const goal=this.nearbyPoint(e,b);if(this.move(e,goal,dt,2)){e.inside=b.id;e.x=goal.x;e.z=goal.z;}return;}}
