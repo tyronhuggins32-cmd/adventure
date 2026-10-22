@@ -56,7 +56,18 @@ export function harvestFarmer(S){
 export function animateFarmer(g,a,reduced=false){
  if(!g.userData.customFarmer)return;
  const r=g.userData.rig,t=Number.isFinite(a.clock)?a.clock:0;
- const moving=!!a.moving&&!reduced;
+ if(reduced){
+   // Explicit stable pose, including no negative-zero Euler values.
+   for(const pivot of [...r.legs,...r.arms])pivot.rotation.set(0,0,0);
+   r.head.rotation.set(0,0,0);
+   r.hat.rotation.set(0,0,-.09);
+   r.beard.rotation.set(0,0,0);
+   r.pack.rotation.set(0,0,0);
+   r.carrot.rotation.set(0,0,0);
+   g.userData.bob=0;g.userData.animationState='rest';
+   return;
+ }
+ const moving=!!a.moving;
  const state=a.action||a.state||'idle', activity=Math.max(0,Math.min(1,Number(a.activity)||0));
  const wave=moving?Math.sin(t*9+(a.program?.phase||0)):0;
  const kick=moving?Math.cos(t*9+(a.program?.phase||0)):0;
