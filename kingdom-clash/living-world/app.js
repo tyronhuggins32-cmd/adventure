@@ -1,5 +1,5 @@
-import { createTabletop } from './scenario.js?v=world9';
-import { WorldView } from './view.js?v=world9';
+import { createTabletop } from './scenario.js?v=farmer3d9';
+import { WorldView } from './view.js?v=farmer3d9';
 import { CARDS, RECRUITS } from './catalog.js?v=world9';
 import { playCard, cardLock } from './card-actions.js?v=world9';
 
