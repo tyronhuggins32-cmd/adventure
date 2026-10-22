@@ -8,8 +8,9 @@
 The homepage is a new, self-contained four-landscape game in
 `kingdom-clash/reborn`. Its deck selection, world state, autonomous decisions,
 camera, miniature models and card dock do not import the older battle engine.
-Choose Blue Plains for the episode-inspired Pig, Husker Knights, Archer Dan and
-storm cards, or choose the Farmer, Scarecrow, Prince or Glacier Shepherd. Each
+Choose Finn's Blue Plains or Jake's Cornfields for the episode-inspired Pig,
+Husker Knights, Archer Dan and storm cards, or choose the Farmer, Scarecrow,
+Prince or Glacier Shepherd. Each
 commander begins beside a different structure. Deploy cards during planning,
 then watch a 22-second live simulation before the next turn. Miniatures and
 buildings persist across turns. Pigs forage without a command or energy cost;

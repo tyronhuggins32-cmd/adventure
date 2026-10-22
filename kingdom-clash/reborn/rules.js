@@ -28,7 +28,8 @@ export const CARDS = {
 };
 
 export const LEADERS = {
-  blue:{name:'Jake',realm:'Blue Plains',starter:'school',deck:['pig','dog','scholar','archer','school','silo','mud','storm','reclaim','pig','dog','reaper','earlings','revive','volcano'],description:'The episode table: clever creatures, risky magic and a bright blue field.'},
+  blue:{name:'Finn',realm:'Blue Plains',starter:'school',deck:['pig','dog','scholar','archer','school','silo','mud','storm','reclaim','pig','dog','reaper','earlings','revive','volcano'],description:'The Pig, blue landscapes, tricky spells and the Schoolhouse.'},
+  jake:{name:'Jake',realm:'Corn Kingdom',starter:'silo',deck:['husker','maize','archer','earlings','cornfield','silo','crow','reaper','volcano','mud','storm','reclaim','husker','maize'],description:'Four cornfields feed the Husker Knights and Maize Walker.'},
   farmer:{name:'The Farmer',realm:'Cornlands',starter:'barn',deck:['pig','sheep','husker','archer','barn','cornfield','silo','cotton','reclaim','dog','sheep','maize','maze','storm'],description:'A living barn, livestock, crops and the giant Cotton Volley.'},
   scarecrow:{name:'Scarecrow',realm:'Cornlands',starter:'cornfield',deck:['crow','husker','maize','scarecrow','cornfield','maze','mud','reaper','archer','reclaim','crow','earlings','storm'],description:'Corn maze magic and a watchful defender of every harvest.'},
   prince:{name:'Exiled Prince',realm:'Knight Kingdom',starter:'throne',deck:['dog','reaper','archer','throne','school','earlings','storm','mud','reclaim','maize','revive','volcano'],description:'Starts seated on his throne; his army fights harder when hurt.'},
@@ -40,15 +41,15 @@ export const LANES=4, BOARD_WIDTH=24, BOARD_DEPTH=24;
 export function makeWorld(leaderId='blue',seed=4261){
   const leader=LEADERS[leaderId]||LEADERS.blue;
   const world={seed,t:0,round:1,phase:'plan',speed:1,paused:false,winner:null,leaderId,leader,
-    commanders:[{name:leader.name,hp:25,max:25,energy:5},{name:'Finn',hp:25,max:25,energy:5}],
-    hand:[],deck:[...leader.deck],discard:[],enemyDeck:[...ENEMY_DECK],enemyDiscard:[],units:[],buildings:[],effects:[],logs:[],lanes:[],corpses:[],nextId:1,elapsed:0,turnClock:0,aiClock:0,commanderTask:{x:-10.9,z:10.8,lane:0,action:'idle',work:0}};
-  for(let i=0;i<LANES;i++)world.lanes.push({terrain:['grass','blue','blue','grass'][i],enemyTerrain:'corn',crop: i===1?1:0,enemyCrop:.52+(i%2)*.25,fire:0,enemyFire:0,maze:0,mud:0,enemyMud:0,food:1,enemyFood:2});
+    commanders:[{name:leader.name,hp:25,max:25,energy:5},{name:leaderId==='jake'?'Finn':'Jake',hp:25,max:25,energy:5}],
+    hand:[],deck:[...leader.deck],discard:[],enemyDeck:leaderId==='jake'?[...LEADERS.blue.deck]:[...ENEMY_DECK],enemyDiscard:[],units:[],buildings:[],effects:[],logs:[],lanes:[],corpses:[],nextId:1,elapsed:0,turnClock:0,aiClock:0,commanderTask:{x:-10.9,z:10.8,lane:0,action:'idle',work:0}};
+  for(let i=0;i<LANES;i++)world.lanes.push({terrain:leaderId==='blue'?'blue':leaderId==='jake'?'corn':['grass','blue','blue','grass'][i],enemyTerrain:leaderId==='jake'?'blue':'corn',crop:leaderId==='jake'?.6:i===1?1:0,enemyCrop:leaderId==='jake'?0:.52+(i%2)*.25,fire:0,enemyFire:0,maze:0,mud:0,enemyMud:0,food:1,enemyFood:2});
   const start=addBuilding(world,0,1,leader.starter,true);
   if(leaderId==='blue')addUnit(world,0,0,'pig',true);
   if(leaderId==='wolf')addUnit(world,0,2,'wolf',true);
   if(leaderId==='farmer')addUnit(world,0,0,'sheep',true);
-  addBuilding(world,1,2,'cornfield',true);
-  addUnit(world,1,1,'husker',true);
+  addBuilding(world,1,2,leaderId==='jake'?'school':'cornfield',true);
+  addUnit(world,1,1,leaderId==='jake'?'dog':'husker',true);
   draw(world,5);note(world,`${leader.name} takes the near edge of the table. ${start.name} anchors lane 2.`);
   return world;
 }
@@ -140,7 +141,7 @@ function enemyPlay(w){
  const key=viable.map(k=>({k,s:score(k)})).sort((a,b)=>b.s-a.s)[0].k,card=CARDS[key];
  const ranking=[0,1,2,3].sort((a,b)=>{const rank=i=>w.units.filter(u=>u.team===0&&u.lane===i).length*2-w.units.filter(u=>u.team===1&&u.lane===i).length+(w.lanes[i].enemyCrop>0?.6:0);return rank(b)-rank(a)});
  let lane=ranking[0];if(card.type==='building'&&w.buildings.some(b=>b.team===1&&b.lane===lane))lane=ranking.find(i=>!w.buildings.some(b=>b.team===1&&b.lane===i));if(card.type==='creature'&&w.units.filter(u=>u.team===1&&u.lane===lane).length>=3)lane=ranking.find(i=>w.units.filter(u=>u.team===1&&u.lane===i).length<3);if(lane===undefined)return;
- p.energy-=card.cost;w.enemyDeck.splice(w.enemyDeck.indexOf(key),1);w.enemyDiscard.push(key);if(card.type==='creature')addUnit(w,1,lane,key);else if(card.type==='building')addBuilding(w,1,lane,key);else cast(w,1,lane,key);note(w,`Finn plays ${card.name} in lane ${lane+1}.`);
+ p.energy-=card.cost;w.enemyDeck.splice(w.enemyDeck.indexOf(key),1);w.enemyDiscard.push(key);if(card.type==='creature')addUnit(w,1,lane,key);else if(card.type==='building')addBuilding(w,1,lane,key);else cast(w,1,lane,key);note(w,`${w.commanders[1].name} plays ${card.name} in lane ${lane+1}.`);
 }
 function finishRound(w){w.phase='plan';w.round++;w.commanders[0].energy=5;w.commanders[1].energy=5;if(!w.enemyDeck.length)w.enemyDeck=w.enemyDiscard.splice(0);for(const u of w.units)u.flooped=false;draw(w,2);note(w,`Round ${w.round}. Place cards, Floop, then send the figures back into battle.`);}
 export function step(w,dt){if(w.paused||w.winner||w.phase!=='battle')return;dt=Math.min(.06,Math.max(0,dt))*w.speed;w.t+=dt;w.elapsed+=dt;w.aiClock+=dt;updateCrops(w,dt);tendFarm(w,dt);updateBuildings(w,dt);updateUnits(w,dt);updateEffects(w,dt);

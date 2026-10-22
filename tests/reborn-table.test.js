@@ -6,6 +6,9 @@ const advance=(w,seconds)=>{for(let i=0;i<seconds*40;i++)step(w,.025);};
 test('every new commander starts beside its signature building on the physical table',()=>{
  for(const [key,leader] of Object.entries(LEADERS)){const w=makeWorld(key);assert.equal(w.buildings.find(b=>b.team===0)?.key,leader.starter);assert.equal(w.buildings.find(b=>b.team===0)?.lane,1);assert.ok(w.hand.length===5);}
 });
+test('Finn owns Blue Plains and Jake owns four Cornfields in their episode matchup',()=>{
+ const finn=makeWorld('blue'),jake=makeWorld('jake');assert.equal(finn.commanders[0].name,'Finn');assert.equal(finn.commanders[1].name,'Jake');assert.ok(finn.lanes.every(l=>l.terrain==='blue'&&l.enemyTerrain==='corn'));assert.equal(jake.commanders[0].name,'Jake');assert.equal(jake.commanders[1].name,'Finn');assert.ok(jake.lanes.every(l=>l.terrain==='corn'&&l.enemyTerrain==='blue'));
+});
 test('cards spend energy, occupy persistent lanes, and battles return to planning',()=>{
  const w=makeWorld('farmer');w.enemyDeck=[];w.units=w.units.filter(u=>u.team===0);w.hand.unshift('cornfield');assert.equal(play(w,'cornfield',0),true);assert.equal(w.commanders[0].energy,3);assert.equal(w.buildings.find(b=>b.team===0&&b.lane===0)?.key,'cornfield');assert.equal(beginBattle(w),true);advance(w,22.1);assert.equal(w.phase,'plan');assert.equal(w.round,2);assert.equal(w.commanders[0].energy,5);assert.ok(w.buildings.some(b=>b.team===0&&b.lane===0));
 });
@@ -26,7 +29,7 @@ test('unopposed soldiers damage buildings before reaching the opposing commander
  const w=makeWorld('blue');w.units=[];w.buildings=[];w.enemyDeck=[];const b=addBuilding(w,1,0,'silo');const u=addUnit(w,0,0,'dog');u.z=-6;u.x=b.x;const hp=w.commanders[1].hp;beginBattle(w);advance(w,3);assert.ok(b.hp<b.max);assert.equal(w.commanders[1].hp,hp);
 });
 test('rival spends a finite deck and responds to active corn and the Pig',()=>{
- const w=makeWorld('blue'),start=w.enemyDeck.length;beginBattle(w);advance(w,16);assert.ok(w.enemyDeck.length<start);assert.equal(w.enemyDiscard.length,start-w.enemyDeck.length);assert.ok(w.logs.some(e=>e.text.startsWith('Finn plays')));
+ const w=makeWorld('blue'),start=w.enemyDeck.length;beginBattle(w);advance(w,16);assert.ok(w.enemyDeck.length<start);assert.equal(w.enemyDiscard.length,start-w.enemyDeck.length);assert.ok(w.logs.some(e=>e.text.startsWith('Jake plays')));
 });
 test('simulation keeps actor health and coordinates finite across multiple waves',()=>{
  for(const key of Object.keys(LEADERS)){const w=makeWorld(key);for(let n=0;n<3&&!w.winner;n++){beginBattle(w);advance(w,22.1);}for(const u of w.units)for(const value of [u.x,u.z,u.hp,u.hunger,u.fear])assert.ok(Number.isFinite(value),`${key} ${u.key}: ${value}`);for(const p of w.commanders)assert.ok(Number.isFinite(p.hp));}
