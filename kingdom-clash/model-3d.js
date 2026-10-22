@@ -1,6 +1,6 @@
 import {episodeModel} from './episode-models.js?v=episode7';
 import {farmCreatureModel} from './farm-creature-3d.js?v=episode7';
-import {harvestFarmer,animateFarmer} from './farmer-model.js?v=episode7';
+import {harvestFarmer,animateFarmer} from './farmer-model.js?v=farmer3d9';
 import {archetypeFor,detailedCreature,detailedBuilding,polishModel,animateDetails} from './model-detail.js?v=episode7';
 import * as T from './vendor/three.js';
 import {hashName} from './entity-programs.js?v=episode7';
