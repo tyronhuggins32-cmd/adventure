@@ -67,9 +67,9 @@ export function animateFarmer(g,a,reduced=false){
  const amount=reduced?0:1;
  // Legs alternate in opposite phases; both feet and shorts follow their own pivots.
  r.legs[0].rotation.x=wave*.58;
- r.legs[1].rotation.x=-wave*.58;
+ r.legs[1].rotation.x=moving?-wave*.58:0;
  r.legs[0].rotation.z=kick*.045;
- r.legs[1].rotation.z=-kick*.045;
+ r.legs[1].rotation.z=moving?-kick*.045:0;
  // Staff-bearing left arm strikes forward. Right arm counterbalances, waves and gathers crops.
  r.arms[0].rotation.x=wave*-.28-strike*1.18-pulse*.65+stoop*.2;
  r.arms[1].rotation.x=wave*.29+strike*.42-pulse*1.0+stoop*.55;
