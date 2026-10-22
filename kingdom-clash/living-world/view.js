@@ -2,7 +2,7 @@ import * as T from '../vendor/three.js';
 import { CameraControls } from '../camera-controls.js?v=episode7';
 import { createModel, animateModel, disposeModel } from '../model-3d.js?v=episode7';
 import { programFor } from '../entity-programs.js?v=episode7';
-import { buildWorldGeometry, GROUND_COLORS } from './world-geometry.js?v=world8';
+import { buildWorldGeometry, GROUND_COLORS } from './world-geometry.js?v=world8a';
 
 const aliases = { guard: 'ep-husker', archer: 'ep-archer', scholar: 'ep-scholar', maize: 'ep-maize', cave: 'ep-cave', school: 'ep-school', spirit: 'ep-spirit', volcano: 'ep-volcano' };
 export const miniatureCard = card => ({ ...card, id: aliases[card.id] || card.id });
@@ -143,7 +143,7 @@ export class WorldView {
     polygon([[-76, -2, -76], [76, -2, -76], [76, -2, 76], [-76, -2, 76]], '#815836');
     const cells = [...this.world.terrain.cells].sort((a, b) => this.project(a.x, 0, a.z).y - this.project(b.x, 0, b.z).y);
     for (const cell of cells) {
-      polygon([[cell.x - 3.02, 0, cell.z - 3.02], [cell.x + 3.02, 0, cell.z - 3.02], [cell.x + 3.02, 0, cell.z + 3.02], [cell.x - 3.02, 0, cell.z + 3.02]], '#' + (GROUND_COLORS[cell.kind] || GROUND_COLORS.meadow).toString(16).padStart(6, '0'));
+      polygon([[cell.x - 3.12, 0, cell.z - 3.12], [cell.x + 3.12, 0, cell.z - 3.12], [cell.x + 3.12, 0, cell.z + 3.12], [cell.x - 3.12, 0, cell.z + 3.12]], '#' + (GROUND_COLORS[cell.kind] || GROUND_COLORS.meadow).toString(16).padStart(6, '0'));
       const p = this.project(cell.x, 0, cell.z), size = this.canvas.clientWidth / (this.camera.right - this.camera.left) * this.camera.zoom;
       if (cell.kind === 'corn' && cell.food > 0) { ctx.fillStyle = '#edcf70'; for (const offset of [-1.4, 0, 1.4]) { const stalk = this.project(cell.x + offset, 0, cell.z); ctx.fillRect(stalk.x, stalk.y - 3 * size, Math.max(1, size * .5), 3 * size); } }
       if (cell.fire) { ctx.fillStyle = '#f79a36'; ctx.beginPath(); ctx.moveTo(p.x - 2 * size, p.y); ctx.lineTo(p.x, p.y - 6 * size); ctx.lineTo(p.x + 2 * size, p.y); ctx.fill(); }

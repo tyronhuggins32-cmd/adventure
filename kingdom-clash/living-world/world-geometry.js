@@ -17,7 +17,7 @@ export function buildWorldGeometry(terrain) {
   group.name = 'Persistent 144 by 144 tabletop';
   box(group, [153, 5, 153], 0x422d23, 0, -5, 0);
   box(group, [149, 1, 149], 0xb48c53, 0, -2.4, 0);
-  box(group, [145, 3, 145], 0x584938, 0, -1.8, 0);
+  box(group, [145, 2, 145], 0x584938, 0, -2.1, 0);
   for (const sign of [-1, 1]) {
     box(group, [155, 1.5, 2], 0x775039, 0, -1, sign * 76);
     box(group, [2, 1.5, 151], 0x775039, sign * 76, -1, 0);
@@ -26,7 +26,11 @@ export function buildWorldGeometry(terrain) {
       box(group, [1, .15, 1], 0xd4ad68, sign * 76, -.15, n);
     }
   }
-  const ground = new T.InstancedMesh(new T.BoxGeometry(6.03, 1.4, 6.03), material(0xffffff), terrain.cells.length);
+  const surface = new T.PlaneGeometry(144, 144, 48, 48);
+  surface.rotateX(-Math.PI / 2);
+  surface.setAttribute('color', new T.Float32BufferAttribute(new Float32Array(surface.attributes.position.count * 3), 3));
+  const groundMaterial = material(0xffffff); groundMaterial.vertexColors = true;
+  const ground = new T.Mesh(surface, groundMaterial);
   ground.receiveShadow = true;
   group.add(ground);
   const stalks = new T.InstancedMesh(new T.CylinderGeometry(.13, .2, 1, 5), material(0xa6a23a), terrain.cells.length * 6);
@@ -40,14 +44,18 @@ export function buildWorldGeometry(terrain) {
   function update(time = 0, reduced = false) {
     if (version !== terrain.version) {
       version = terrain.version;
-      for (const cell of terrain.cells) {
-        // No card slots or decorative grid: adjoining ground is one continuous surface.
-        dummy.position.set(cell.x, cell.height - .7, cell.z);
-        dummy.scale.set(1, 1, 1); dummy.rotation.set(0, 0, 0); dummy.updateMatrix();
-        ground.setMatrixAt(cell.i, dummy.matrix);
+      // A single connected mesh avoids separate terrain tiles and their seams.
+      const positions = surface.attributes.position, colors = surface.attributes.color;
+      for (let i = 0; i < positions.count; i++) {
+        const x = positions.getX(i), z = positions.getZ(i), cell = terrain.cell(x, z);
+        positions.setY(i, cell.kind === 'water' ? -.4 : Math.sin(x * .045) * Math.cos(z * .055) * .55);
         color.setHex(GROUND_COLORS[cell.kind] || GROUND_COLORS.meadow);
-        color.multiplyScalar(1 + Math.sin(cell.x * .11 + cell.z * .07) * .035);
-        ground.setColorAt(cell.i, color);
+        color.multiplyScalar(1 + Math.sin(x * .11 + z * .07) * .035);
+        colors.setXYZ(i, color.r, color.g, color.b);
+      }
+      positions.needsUpdate = colors.needsUpdate = true; surface.computeVertexNormals();
+      for (const cell of terrain.cells) {
+        dummy.rotation.set(0, 0, 0);
         for (let n = 0; n < 6; n++) {
           const height = cell.kind === 'corn' && cell.food > 0 ? 1.2 + cell.food * .65 : 0;
           dummy.position.set(cell.x + (n % 3 - 1) * 1.6, cell.height + height / 2, cell.z + (n < 3 ? -1.2 : 1.2));
@@ -58,8 +66,6 @@ export function buildWorldGeometry(terrain) {
           ears.setMatrixAt(cell.i * 6 + n, dummy.matrix);
         }
       }
-      ground.instanceMatrix.needsUpdate = true;
-      ground.instanceColor.needsUpdate = true;
       stalks.instanceMatrix.needsUpdate = ears.instanceMatrix.needsUpdate = true;
     }
     for (const cell of terrain.cells) {

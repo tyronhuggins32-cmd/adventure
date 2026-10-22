@@ -1,5 +1,5 @@
-import {Terrain,distance,clamp} from './terrain.js?v=world8';
-import {CARDS,card,RECRUITS} from './catalog.js?v=world8';
+import {Terrain,distance,clamp} from './terrain.js?v=world8a';
+import {CARDS,card,RECRUITS} from './catalog.js?v=world8a';
 const livestock=e=>['pig','sheep','cow','bull'].includes(e.card.behavior);
 export class LivingWorld{
  constructor({seed=42,rival=true}={}){this.seed=seed;this.rngState=seed>>>0;this.terrain=new Terrain(seed);this.entities=[];this.projectiles=[];this.graveyard=[];this.history=[];this.time=0;this.accumulator=0;this.ecologyClock=0;this.serial=0;this.version=0;this.paused=true;this.speed=1;this.ended=false;this.winner=null;this.energy=[10,10];this.knowledge=[new Set(),new Set()];this.hand=['farm','barn','pig','dog','corn','mud'];this.discard=[];this.drawSerial=0;this.rival=rival;this.nextRival=12;this.cornPower=[true,true];this.weather='clear';this.spawn('commander',0,-32,51,{id:'farmer',name:'The Farmer',type:'commander',hp:100,atk:2,speed:2.8});this.spawn('commander',1,32,-51,{id:'bannerKnight',name:'Corn King',type:'commander',hp:100,atk:3,speed:3});if(rival){this.spawn('guard',1,-19,-33);this.spawn('guard',1,22,-40);this.spawn('farm',1,-28,-52);this.spawn('tower',1,12,-54);}this.note('The tabletop is paused. Place cards anywhere on your side, then let the world run.');}

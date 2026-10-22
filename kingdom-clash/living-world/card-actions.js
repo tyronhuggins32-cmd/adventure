@@ -1,5 +1,5 @@
-import { CARDS, card } from './catalog.js?v=world8';
-import { distance } from './terrain.js?v=world8';
+import { CARDS, card } from './catalog.js?v=world8a';
+import { distance } from './terrain.js?v=world8a';
 
 export function cardLock(world, id, side = 0) {
   const definition = CARDS[id];
