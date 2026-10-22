@@ -1,28 +1,25 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#272b28"><title>The Living Table · Card Battle</title>
-<link rel="stylesheet" href="kingdom-clash/living-world/style.css?v=world10">
-</head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#213e35"><title>Card Wars · The Table</title><link rel="stylesheet" href="kingdom-clash/reborn/style.css?v=rebuild1"></head>
 <body>
-<main>
-<header><div><small>THE LIVING TABLE · CORNLANDS</small><h1>Three leaders. One living table.</h1></div><div class="header-actions"><a class="battle-route" href="episode-table.html">All 12 commanders</a><label for="commanderChoice">Your commander</label><select id="commanderChoice" aria-label="Choose a Cornlands commander"><option value="farmer">The Farmer</option><option value="scarecrow">Scarecrow</option><option value="cornDruid">Corn Druid</option></select><button id="restart">New table</button></div></header>
-<section class="command-bar" aria-label="Simulation controls">
-<div class="clock"><strong id="worldTime">00:00</strong><span id="weather">Clear skies</span></div>
-<div class="kingdom-health"><span><label id="ownCommander">Farmer</label> <b id="ownHealth">100</b></span><span>Corn King <b id="enemyHealth">100</b></span></div>
-<div class="run-controls"><button id="run" class="primary">Run world</button><button id="speed" aria-label="Simulation speed">1× speed</button><button id="focusFarmer" aria-pressed="false">Watch Farmer in 3D</button><a id="farmerStudio" href="kingdom-clash/farmer-preview.html">3D Farmer Studio</a></div>
-</section>
-<div class="play-layout">
-<section class="world-panel" aria-label="Living tabletop battlefield">
-<div id="fieldMount"><canvas id="livingField" aria-label="288 by 288 living tabletop. Pan, orbit, zoom, or tap a miniature." role="img"></canvas></div>
-<div class="field-caption"><span><i class="own-dot"></i> Your kingdom</span><span id="graphics">Animated 3D Cornlands</span><span><i class="enemy-dot"></i> Corn kingdom</span></div>
-<p id="status" role="status" aria-live="polite">Inspect a miniature or run the world. Positions persist; there are no battle waves.</p>
-</section>
-<aside class="inspector" aria-label="Selected miniature"><small>ON THE TABLE</small><h2 id="selectedName">A world in motion.</h2><p id="selectedDescription">Choose the Farmer, Scarecrow, or Corn Druid. Each has its own buildings, creatures, and field power. The living world keeps running between your moves. Warriors cross the river to fight. Select any miniature to see its needs and orders.</p><div id="selectedStats"></div><div id="orders"></div><div id="recruits"></div><div class="world-readout"><span id="population"></span><span id="grainCount"></span><span id="fireCount"></span></div></aside>
-</div>
-<section class="hand-panel" aria-label="Your cards"><div class="section-heading"><div><small>SHAPE THE WORLD</small><h2>Your hand</h2></div><div><strong id="energy">10 / 10 energy</strong><button id="cancel" hidden>Cancel selection</button></div></div><p class="hint">Select a card, then tap the ground. Summon on your side; terrain and spells can reach either kingdom.</p><div id="hand" class="hand"></div></section>
-<div class="lower-panels"><details><summary>Miniatures on the table</summary><div id="roster" class="roster"></div></details><details><summary>World journal</summary><ol id="journal"></ol></details><details><summary>How the world works</summary><p>Plan while paused, then run the simulation. Creatures keep their positions and decisions between pauses. Melee requires contact; arrows deal damage on arrival. Corn powers Husker Knights, pigs eat crops and food creatures, mud traps pigs, fire spreads through corn, and rain extinguishes it.</p><p>Select a friendly creature for orders. Move orders hold the chosen ground; Auto restores its own decisions. Barns and caves shelter frightened or injured creatures. Study at a Schoolhouse unlocks resurrection after twenty seconds inside. Buildings unlock their own recruits. Cards spend energy; your kingdom regains one energy every four seconds.</p><p>The shared world measures 288 × 288. Farm fields grow crops, barns breed animals, mills process food, Seed Slingers fire pods, pens raise livestock, and harvest carts roll into battle. The Scarecrow commands crows and straw; the Corn Druid grows guardians and roots enemies. Snow wolves gain strength by staying together. Drag, orbit, tilt and zoom to explore it. These are expanded simulation rules inspired by the tabletop concept.</p><a href="episode-table.html">Previous game</a></details></div>
-</main>
-<script type="module" src="kingdom-clash/living-world/app.js?v=commander14"></script>
+<main id="app">
+  <div class="room-light" aria-hidden="true"></div>
+  <header class="match-hud">
+    <div class="duelist player"><div class="avatar" id="playerAvatar">J</div><div class="vitals"><span class="eyebrow">YOUR DECK</span><strong id="playerName">Jake</strong><div class="life"><span id="playerLife"></span></div></div><b class="heart" id="playerHp">25</b></div>
+    <div class="round-plaque"><span>THE LIVING TABLE</span><strong id="round">ROUND 1</strong><small id="phase">PLACE YOUR CARDS</small></div>
+    <div class="duelist enemy"><b class="heart" id="enemyHp">25</b><div class="vitals"><span class="eyebrow">RIVAL DECK</span><strong>Finn</strong><div class="life"><span id="enemyLife"></span></div></div><div class="avatar rival-avatar">F</div></div>
+  </header>
+  <section class="table-frame" aria-label="Four-lane tabletop battlefield">
+    <div class="table-shell"><canvas id="table" aria-label="Animated 3D battlefield with four landscapes. Tap a landscape to place the selected card."></canvas><div class="table-title">CARD WARS <i>✦</i> THE TABLE</div><div class="lane-pickers" id="lanePickers" aria-label="Landscape targets"><button data-lane="0" aria-label="Landscape 1">1</button><button data-lane="1" aria-label="Landscape 2">2</button><button data-lane="2" aria-label="Landscape 3">3</button><button data-lane="3" aria-label="Landscape 4">4</button></div><div class="table-edge-label">RIVAL SIDE <span>◆</span> YOUR SIDE</div></div>
+    <div class="camera-bar" aria-label="Camera controls"><button id="panLeft" title="Pan left">←</button><button id="orbit" title="Orbit camera">⟳ <span>ORBIT</span></button><button id="resetCamera" title="Reset camera">⌂</button><button id="panRight" title="Pan right">→</button><button id="zoomOut" title="Zoom out">−</button><button id="zoomIn" title="Zoom in">＋</button></div>
+    <aside class="event-toast" id="toast" role="status" aria-live="polite">Select a card, then tap a landscape.</aside>
+  </section>
+  <section class="command-dock" aria-label="Your card hand and battle actions">
+    <div class="dock-top"><div class="crest"><span class="mana-orb" id="energy">5</span><div><strong>YOUR HAND</strong><small id="drawCount">5 cards</small></div></div><div class="dock-actions"><button id="draw" title="Spend 1 energy to draw">+ DRAW <span>1 ✦</span></button><button id="pause" title="Pause simulation" disabled>Ⅱ</button><button id="speed" title="Battle speed" disabled>1×</button><button id="battle" class="battle-button">BATTLE! <span>⚔</span></button></div></div>
+    <div class="hand-track" id="hand" aria-label="Cards in hand"></div>
+    <div class="dock-bottom"><span id="selectedHint">Tap a card to inspect it, then choose a lane.</span><button id="floop" disabled>FLOOP SELECTED</button><button id="rulesToggle" aria-expanded="false">HOW TO PLAY</button><button id="newGame">NEW MATCH</button></div>
+  </section>
+  <aside id="rulesPanel" class="rules-panel" hidden><button id="closeRules" aria-label="Close instructions">×</button><h2>How this table lives</h2><p>Pick a card in your hand, then tap one of the four landscapes or its numbered marker. Creatures, buildings and spells cost energy. Press Battle to let the simulation run; you can pause or speed it up. The next planning turn begins after 22 seconds.</p><p>Pigs forage for corn and edible creatures by themselves. Corn powers Husker Knights. A Barn births sheep and adds Cotton Volley. Scarecrows repel crows, and Snow Wolves strengthen nearby packmates. Buildings and damaged creatures persist between turns.</p><p>Tap one of your figures during planning and use Floop for its ability. The board can orbit, pan and zoom. Defeat Finn by bringing his health to zero.</p><h3>Battle journal</h3><ol id="journal"></ol><a href="episode-table.html">Older episode table</a></aside>
+  <div id="setup" class="setup-overlay"><div class="setup-card"><span class="eyebrow">THE LIVING TABLE · NEW BATTLE</span><h1>Choose a deck.<br><em>Make the field move.</em></h1><p>Four landscapes. Creatures think for themselves. Buildings alter the world between battles.</p><div id="leaders" class="leader-grid"></div><small class="setup-foot">The classic episode match is the Blue Plains deck. Every commander enters beside a signature building.</small></div></div>
+  <div id="result" class="result-overlay" hidden><div><span class="eyebrow">THE BATTLE IS OVER</span><h2 id="resultText"></h2><button id="again">PLAY AGAIN</button></div></div>
+</main><script type="module" src="kingdom-clash/reborn/app.js?v=rebuild1"></script>
 </body></html>

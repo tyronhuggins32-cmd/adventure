@@ -1,11 +1,26 @@
 # The Living Table
 
-[Play the living Cornlands](https://tyronhuggins32-cmd.github.io/adventure/) or open
-[the twelve commander card table](https://tyronhuggins32-cmd.github.io/adventure/episode-table.html).
+[Play the rebuilt Card Wars table](https://tyronhuggins32-cmd.github.io/adventure/) or open
+[the older twelve commander table](https://tyronhuggins32-cmd.github.io/adventure/episode-table.html).
 
-## Two battle formats
+## Rebuilt homepage
 
-The root game simulates a persistent **288 × 288** 3D world. The Farmer starts
+The homepage is a new, self-contained four-landscape game in
+`kingdom-clash/reborn`. Its deck selection, world state, autonomous decisions,
+camera, miniature models and card dock do not import the older battle engine.
+Choose Blue Plains for the episode-inspired Pig, Husker Knights, Archer Dan and
+storm cards, or choose the Farmer, Scarecrow, Prince or Glacier Shepherd. Each
+commander begins beside a different structure. Deploy cards during planning,
+then watch a 22-second live simulation before the next turn. Miniatures and
+buildings persist across turns. Pigs forage without a command or energy cost;
+barns birth sheep and Cotton Volley; scarecrows repel crows; wolves buff their
+pack. WebGL renders the dimensional tabletop with pan, orbit and zoom controls.
+A playable animated canvas fallback remains available if WebGL is unavailable.
+Run `node --test tests/reborn-table.test.js` for the new simulation rules.
+
+## Older battle formats
+
+The earlier living-world code simulates a persistent **288 × 288** 3D world. The Farmer starts
 beside a Barn and herd; the Scarecrow starts beside a producing Corn Field; the
 Corn Druid starts at a Seed Shrine. It runs at fixed .05 second simulation steps,
 with independent creature needs, paths, ecology, building production, combat and
