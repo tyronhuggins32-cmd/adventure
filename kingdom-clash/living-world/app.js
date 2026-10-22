@@ -91,9 +91,10 @@ function render(rebuild = false) {
   $('weather').textContent = world.weather === 'rain' ? 'Rain · fire extinguishes' : world.paused ? 'Paused · plan your move' : 'Clear skies';
   $('ownCommander').textContent=CORNLAND_COMMANDERS[world.commanderId].name;
   $('ownHealth').textContent = Math.ceil(world.entities[0].hp); $('enemyHealth').textContent = Math.ceil(world.entities[1].hp);
+  $('focusFarmer').hidden=world.commanderId!=='farmer';
   $('focusFarmer').textContent=view?.followFarmer?'Stop following Farmer':'Watch Farmer in 3D';
   $('focusFarmer').setAttribute('aria-pressed',String(!!view?.followFarmer));
-  $('run').textContent = world.ended ? (world.winner === 0 ? 'Your kingdom wins' : 'Your Farmer has fallen') : world.paused ? 'Run world' : 'Pause world';
+  $('run').textContent = world.ended ? (world.winner === 0 ? 'Your kingdom wins' : 'Your commander has fallen') : world.paused ? 'Run world' : 'Pause world';
   $('run').disabled = world.ended; $('run').setAttribute('aria-pressed', String(!world.paused));
   $('speed').textContent = world.speed + '× speed'; $('energy').textContent = world.energy[0].toFixed(1) + ' / 10 energy';
   $('cancel').hidden = cardIndex === null && !order;
