@@ -1,44 +1,55 @@
-# Living tabletop rules
+# Living Cornlands
 
-The root game now runs this persistent tabletop route, including a 3D renderer,
-camera controls, card placement, miniature inspection and creature orders.
-`episode-table.html` retains the previous turn-and-lane game.
+The root game is a persistent 288 × 288 world. `episode-table.html` keeps the earlier
+turn based version. The active model is independent of the renderer: fixed .05 second
+steps update terrain, creatures, projectiles, buildings and commanders. A pause stops
+all those clocks, including births and spell durations. Every player placement goes
+through `playCard` so it checks allegiance, space, ownership and energy first.
 
-`catalog.js` holds card definitions and building recruitment lists.
-`card-actions.js` exposes one validated entry point, `playCard`, and separate
-creature, building, terrain and spell effect functions. Each spell has its own
-function. UI code should call `playCard`, rather than bypassing validation with
-an effect function.
-`simulation.js` owns the continuous world, orders, projectiles,
-building work, hunger, morale, shelter, knowledge and resource regeneration.
-`creature-brains.js` gives every creature a purpose and delegates pathing/combat to the shared simulation.
-`terrain.js` owns the 288 × 288 world, terrain painting and spatial pathfinding.
+| Commander | Routine | Active order | Buildings |
+| --- | --- | --- | --- |
+| Farmer | Finds depleted corn by a live Farm; heals wounded livestock | Harvest Rally consumes 2 ripe crop food, heals and rallies nearby allies, adds 1 energy; 22s recovery | Farm Field, Barn, Harvest Mill, Seed Slinger, Livestock Pen, Harvest Cart |
+| Scarecrow | Watches the Crow Roost and frightens crows and raiders | Dread Call lowers nearby enemy morale and sends them fleeing; 20s recovery | Crow Roost, Briar Snare, Haunted Silo |
+| Corn Druid | Cultivates weakened crops and repairs creatures | Rootwake plants corn, heals allies and slows enemies; 24s recovery | Seed Shrine, Root Circle, Elder Grove |
 
-```js
-import { LivingWorld } from './simulation.js';
-import { playCard } from './card-actions.js';
+### Production and counterplay
 
-const world = new LivingWorld(); // Paused for planning.
-const result = playCard(world, 'pig', -24, 24, { handIndex: 2 });
-if (!result.ok) console.log(result.reason);
-world.paused = false;
-world.step(0.05); // Call with elapsed seconds from the browser animation loop.
-```
+- Farm Field increases nearby corn food every 6 seconds. Its crop cover supports the
+  Farmer and crop powered creatures; fire and pigs can consume those cells.
+- Barn consumes nearby food to raise sheep, pigs and cows every 26 seconds, capped at
+  six local herd creatures. A sheep born near a live Barn teaches Cotton Siege. The
+  spell needs both living sheep and a Barn; its large projectile applies damage and
+  slow on impact. Resting livestock regain health and morale.
+- Harvest Mill consumes 2 units of nearby ripe corn and creates 2 grain, capped at
+  25. Each pulse spends stored grain to feed, heal and speed allies within 28 units.
+- Seed Slinger finds an enemy within 43 units, sends a physical pod every 3 seconds,
+  damages a group within 7 units, then plants friendly corn at impact.
+- Livestock Pen consumes food to breed a rotating pig/sheep/cow/bull roster every
+  34 seconds, capped at eight. Pen born creatures gain 20% maximum health.
+- Harvest Cart consumes ripe crop to launch a rolling siege cart every 40 seconds,
+  with at most two active. It seeks enemy buildings, scatters slowing debris and
+  damages enemies gathered at its impact point.
+- Crow Roost breeds at most four crop raiders. Briar Snare slows and injures
+  trespassers in its radius. Haunted Silo raises three straw ambushers which hide
+  in corn and groves and land a stronger first hit.
+- Seed Shrine grows corn and raises Kernel Guardians to intercept pigs. Root Circle
+  heals friendly units while slowing hostiles. Elder Grove grows corn and awakens
+  slow Corn Ents that root enemies on contact.
 
-Coordinates are world units, not card lanes. Summons start in their owner's half;
-movement and fighting can cross the whole world. Card placements and continuous
-world updates share the same entity state. Pausing freezes simulation time.
+`catalog.js` defines costs and stats. `card-actions.js` validates effects, recruitment
+and placement. `commander-rules.js`, `creature-brains.js`, and `building-engine.js`
+contain separate decisions. `simulation.js` owns fixed steps, entity state, movement,
+combat, ecology and resource limits. `terrain.js` handles the 48 × 48 spatial grid,
+bridges, biomes, mazes and A* pathfinding. `scenario.js` creates each commander opening.
 
-To add a card, define its cost, type and stats in the catalogue. Terrain cards use
-the common terrain painter; new spell effects get a named function and an entry
-in the spell dispatch table. Creature decisions belong in `creature-brains.js` rather
-than in card placement functions.
+`cornland-models.js` makes the six reference inspired structures as genuine 3D
+meshes: framed wood, fencing, layered crops, waterwheel, barn loft and pens,
+canvas mill sails, a pitching seed barrel, horned livestock pen, wheeled cart and
+plow. Their pivots animate in `view.js` alongside the existing character models.
+The additional Scarecrow and Druid buildings have distinct 3D silhouettes too.
+When WebGL2 is unavailable, `view.js` draws the same authoritative world as a
+labeled map. Camera pan, orbit, tilt, zoom and fullscreen still work in either mode.
 
-Run `node --test tests/living-world*.test.js` from the repository root.
-
-`scenario.js` sets up a playable two-kingdom opening. `world-geometry.js` builds
-the continuous terrain, orchards, snow, trees, corn mazes, physical crops and fire. `view.js` animates the existing
-miniatures from simulation state and provides a labeled map fallback when WebGL2
-is unavailable. `app.js` connects the rules to the hand, orders and simulation HUD.
-
-A sheep arriving near a live Barn unlocks the Cotton Siege spell. A live Scarecrow teaches Corn Maze and repels crop-raiding crows. Snow Wolves huddle around an Ice Den, hunt as a pack and increase bite damage for nearby wolves. The Farmer repairs depleted crops when idle. Spells, recruitment and behavior are kept separate from card data.
+Run `node --test tests/*.test.js` from the repository root. The interaction tests
+exercise production caps, costs, commander recovery, projectile travel, terrain
+change, pack behavior and model geometry, as well as the older game route.

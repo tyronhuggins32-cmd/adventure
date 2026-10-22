@@ -1,4 +1,4 @@
-import {distance,clamp,HALF} from './terrain.js?v=world9';
+import {distance,clamp,HALF} from './terrain.js?v=world10';
 const crop=c=>c.kind==='corn'&&c.food>0;
 const nearby=(world,e,fn,r=Infinity)=>world.closest(e,fn,r);
 const fight=(w,e,target,dt,reach=e.card.ranged?27:target.radius+2.5)=>{
@@ -29,6 +29,27 @@ export function actCreature(w,e,dt,threat){
   if(behavior==='cow'&&e.cooldown<=0){const hurt=nearby(w,e,o=>o.side===e.side&&herd(o)&&o.hp<o.maxHp,12);if(hurt){hurt.hp=Math.min(hurt.maxHp,hurt.hp+2);e.cooldown=5;e.state='nursing';}}
   const pack=nearby(w,e,o=>o.side===e.side&&herd(o));if(pack&&distance(e,pack)>8){e.state='flock';w.move(e,pack,dt,6);}else{const barn=nearby(w,e,o=>o.side===e.side&&o.card.id==='barn',45);wander(w,e,dt,barn||e,10);}
   if(behavior==='cow'&&threat&&distance(e,threat)<4&&e.cooldown<=0)w.attack(e,threat);return true;
+ }
+ if(behavior==='cart'){
+  const target=nearby(w,e,o=>o.side!==e.side&&!o.inside&&o.card.type==='building')||nearby(w,e,o=>o.side!==e.side&&!o.inside&&o.card.type==='commander')||nearby(w,e,o=>o.side!==e.side&&!o.inside);
+  if(target){e.state='rolling charge';e.charging=distance(e,target)<20&&e.cooldown<=0;
+   if(w.time>(e.debrisAt||0)){const c=w.terrain.cell(e.x,e.z);if(c.kind!=='water'&&c.kind!=='mazeWall'){c.kind='debris';c.food=0;c.owner=e.side;w.terrain.version++;}e.debrisAt=w.time+2;}
+   fight(w,e,target,dt,target.radius+3);return true;}
+  wander(w,e,dt);return true;
+ }
+ if(behavior==='straw'){
+  const foe=nearby(w,e,o=>o.side!==e.side&&!o.inside,28);
+  if(foe){e.hidden=distance(e,foe)>6&&['corn','grove','mazeWall'].includes(w.terrain.cell(e.x,e.z).kind);e.state=e.hidden?'concealed':'ambush';fight(w,e,foe,dt);return true;}
+  const silo=nearby(w,e,o=>o.side===e.side&&o.card.id==='hauntedSilo',70);wander(w,e,dt,silo||e,12);e.state='concealed';e.hidden=true;return true;
+ }
+ if(behavior==='kernel'){
+  const pig=nearby(w,e,o=>o.side!==e.side&&o.card.behavior==='pig',25);
+  if(pig){e.state='protecting crop';fight(w,e,pig,dt);return true;}
+  const shrine=nearby(w,e,o=>o.side===e.side&&o.card.id==='seedShrine',55);wander(w,e,dt,shrine||e,13);return true;
+ }
+ if(behavior==='ent'){
+  const intruder=nearby(w,e,o=>o.side!==e.side&&!o.inside,32);if(intruder){e.state='rooting raider';fight(w,e,intruder,dt);return true;}
+  const grove=nearby(w,e,o=>o.side===e.side&&o.card.id==='elderGrove',80);wander(w,e,dt,grove||e,20);return true;
  }
  if(behavior==='wolf'){
   const pack=w.entities.filter(o=>o!==e&&o.hp>0&&o.side===e.side&&o.card.behavior==='wolf'&&!o.inside);

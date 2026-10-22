@@ -1,7 +1,7 @@
 import * as T from '../vendor/three.js';
 
 export const GROUND_COLORS = {
-  meadow: 0x71995c, corn: 0xb5ad54, water: 0x518f9f, snow:0xb9d0cf, grove:0x547955, mazeWall:0x438252,
+  meadow: 0x71995c, corn: 0xb5ad54, water: 0x518f9f, snow:0xb9d0cf, grove:0x547955, mazeWall:0x438252, debris:0xa17846,
   mud: 0x705546, ash: 0x51463b, bare: 0x99845a
 };
 const material = color => new T.MeshStandardMaterial({ color, roughness: .95, flatShading: true });

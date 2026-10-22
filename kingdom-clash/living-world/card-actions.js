@@ -1,9 +1,10 @@
-import { CARDS, card } from './catalog.js?v=world9';
-import { distance, HALF } from './terrain.js?v=world9';
+import { CARDS, card } from './catalog.js?v=world10';
+import { distance, HALF } from './terrain.js?v=world10';
 
 export function cardLock(world, id, side = 0) {
   const definition = CARDS[id];
   if (!definition) return 'Unknown card';
+  if (definition.requiresCommander && world.commanderId !== definition.requiresCommander) return CARDS[id].name + ' belongs to a different Cornlands commander';
   if (definition.requires && !world.entities.some(entity =>
     entity.side === side && entity.card.id === definition.requires && entity.hp > 0
   )) return 'Build a ' + CARDS[definition.requires].name + ' first';

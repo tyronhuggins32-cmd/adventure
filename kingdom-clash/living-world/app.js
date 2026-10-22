@@ -1,8 +1,9 @@
-import { createTabletop } from './scenario.js?v=farmer3d9';
-import { WorldView } from './view.js?v=farmer3d9';
-import { CARDS, RECRUITS } from './catalog.js?v=world9';
-import { playCard, cardLock } from './card-actions.js?v=world9b';
+import { createTabletop } from './scenario.js?v=world10';
+import { WorldView } from './view.js?v=world10';
+import { CARDS, RECRUITS } from './catalog.js?v=world10';
+import { playCard, cardLock } from './card-actions.js?v=world10';
 
+import {CORNLAND_COMMANDERS} from './commander-rules.js?v=world10';
 const $ = id => document.getElementById(id);
 let world, view, selectedId = null, cardIndex = null, order = null, last = 0, lastUI = 0, handKey = '', rosterKey = '', seed = 42;
 const message = text => { $('status').textContent = text; };
@@ -61,12 +62,13 @@ function renderSelection(rebuild = false) {
   if (!entity) { $('selectedName').textContent = 'A world in motion.'; $('selectedDescription').textContent = 'Select a miniature to inspect its decisions, needs, and orders.'; $('selectedStats').replaceChildren(); $('orders').replaceChildren(); $('recruits').replaceChildren(); return; }
   $('selectedName').textContent = entity.card.name;
   $('selectedDescription').textContent = entity.card.text || 'Your commander holds the kingdom. Protect them to keep the world alive.';
-  $('selectedStats').innerHTML = `<div class="state-line"><span>${entity.side ? 'Rival' : 'Friendly'}</span><strong>${entity.hp <= 0 ? 'fallen' : entity.state}</strong></div><label>Health <b>${Math.ceil(entity.hp)} / ${entity.maxHp}</b><meter min="0" max="${entity.maxHp}" value="${entity.hp}"></meter></label>${entity.card.type !== 'building' ? `<label>Hunger <b>${Math.round(entity.hunger)} / 100</b><meter min="0" max="100" value="${entity.hunger}"></meter></label><label>Morale <b>${Math.round(entity.morale)} / 100</b><meter min="0" max="100" value="${entity.morale}"></meter></label>` : ''}${entity.inside ? '<p>Protected inside a building.</p>' : ''}`;
-  if (!rebuild) return;
+  $('selectedStats').innerHTML = `<div class="state-line"><span>${entity.side ? 'Rival' : 'Friendly'}</span><strong>${entity.hp <= 0 ? 'fallen' : entity.state}</strong></div><label>Health <b>${Math.ceil(entity.hp)} / ${entity.maxHp}</b><meter min="0" max="${entity.maxHp}" value="${entity.hp}"></meter></label>${entity.card.type !== 'building' ? `<label>Hunger <b>${Math.round(entity.hunger)} / 100</b><meter min="0" max="100" value="${entity.hunger}"></meter></label><label>Morale <b>${Math.round(entity.morale)} / 100</b><meter min="0" max="100" value="${entity.morale}"></meter></label>` : ''}${entity.inside ? '<p>Protected inside a building.</p>' : ''}${entity.card.type==='building' && entity.productionAt>world.time ? `<p>Next production: ${Math.ceil(entity.productionAt-world.time)}s · created ${entity.births||0}</p>` : ''}`;
+  if (!rebuild) {const ability=$('orders').querySelector('[data-order=ability]');if(ability){ability.textContent=CORNLAND_COMMANDERS[world.commanderId].ability+' · '+Math.max(0,Math.ceil((entity.abilityAt||0)-world.time))+'s';ability.disabled=world.ended||entity.abilityAt>world.time;}return;}
   $('orders').replaceChildren(); $('recruits').replaceChildren();
   if (entity.side || entity.hp <= 0) return;
-  if(entity.card.id==='farmer'&&entity.card.type==='commander'){
-    for(const [label,kind] of [['Move Farmer','move'],['Hold position','hold'],['Auto-tend fields','auto']])$('orders').append(actionButton(label,kind));
+  if(entity.card.type==='commander'){
+    $('orders').append(actionButton(CORNLAND_COMMANDERS[world.commanderId].ability+' · '+Math.max(0,Math.ceil((entity.abilityAt||0)-world.time))+'s', 'ability'));
+    if(entity.card.id==='farmer')for(const [label,kind] of [['Move Farmer','move'],['Hold position','hold'],['Auto-tend fields','auto']])$('orders').append(actionButton(label,kind));
   }
   if (entity.card.type === 'creature') {
     for (const [label, kind] of [['Move / hold', 'move'], ['Auto', 'auto'], ['Seek shelter', 'rest'], ['Study', 'study']]) $('orders').append(actionButton(label, kind));
@@ -87,8 +89,9 @@ function render(rebuild = false) {
   const seconds = Math.floor(world.time);
   $('worldTime').textContent = String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
   $('weather').textContent = world.weather === 'rain' ? 'Rain · fire extinguishes' : world.paused ? 'Paused · plan your move' : 'Clear skies';
+  $('ownCommander').textContent=CORNLAND_COMMANDERS[world.commanderId].name;
   $('ownHealth').textContent = Math.ceil(world.entities[0].hp); $('enemyHealth').textContent = Math.ceil(world.entities[1].hp);
-  $('focusFarmer').textContent = view?.followFarmer ? 'Stop following Farmer' : 'Watch Farmer in 3D';
+  $('focusFarmer').textContent=view?.followFarmer?'Stop following Farmer':'Watch Farmer in 3D';
   $('focusFarmer').setAttribute('aria-pressed',String(!!view?.followFarmer));
   $('run').textContent = world.ended ? (world.winner === 0 ? 'Your kingdom wins' : 'Your Farmer has fallen') : world.paused ? 'Run world' : 'Pause world';
   $('run').disabled = world.ended; $('run').setAttribute('aria-pressed', String(!world.paused));
@@ -96,6 +99,7 @@ function render(rebuild = false) {
   $('cancel').hidden = cardIndex === null && !order;
   const creatures = world.entities.filter(e => e.hp > 0 && e.card.type === 'creature');
   $('population').textContent = creatures.filter(e => !e.side).length + ' friendly creatures · ' + creatures.filter(e => e.side).length + ' rival';
+  $('grainCount').textContent='Grain '+world.grain[0]+' / 25';
   $('fireCount').textContent = world.terrain.cells.filter(cell => cell.fire).length + ' burning patches';
   renderHand(); renderSelection(rebuild);
   const key = world.entities.filter(e => e.hp > 0).map(e => e.id + e.side).join();
@@ -109,20 +113,21 @@ function start() {
   view?.destroy();
   const oldCanvas = $('livingField'), canvas = oldCanvas.cloneNode(false); oldCanvas.replaceWith(canvas);
   selectedId = null; cardIndex = null; order = null; handKey = ''; rosterKey = '';
-  world = createTabletop(seed); view = new WorldView(canvas, world, place);
-  $('graphics').textContent = view.renderer ? 'Animated 3D tabletop · 288 × 288' : 'Map graphics · WebGL2 unavailable';
+  world = createTabletop(seed,$('commanderChoice').value); view = new WorldView(canvas, world, place);
+  $('graphics').textContent = view.renderer ? 'Animated 3D tabletop · 288 × 288' : 'Animated map · 3D unavailable in this browser';
   $('selectedName').textContent = 'A world in motion.';
-  $('selectedDescription').textContent = 'The Farmer tends crops; crows raid them, scarecrows repel crows, sheep empower the barn, and wolves hunt in packs. Select a miniature to inspect its needs and orders.';
+  $('selectedDescription').textContent = CORNLAND_COMMANDERS[world.commanderId].description+' Select a miniature to inspect its decisions.';
   message('Paused for planning. Run the world to watch both kingdoms act.'); render(true);
 }
 $('run').onclick = () => { world.paused = !world.paused; message(world.paused ? 'World paused. Plan, place cards, or issue orders.' : 'World running. You can still place cards or pause to plan.'); render(true); };
 $('focusFarmer').onclick=()=>{
   if(view.followFarmer){view.followFarmer=false;view.target.set(0,0,0);view.zoom=1.12;view.controls.sync();message('Showing the full living table.');render(true);return;}
-  const farmer=view.focusFarmer();if(!farmer){message('The Farmer is not on the table.');return;}
-  select(farmer);message('Farmer in 3D: move, tend crops, swing the carrot staff and react to attacks. Run world to watch the animation.');render(true);
+  const farmer=view.focusFarmer();if(!farmer){message('Choose The Farmer to follow this model.');return;}
+  select(farmer);message('Following the Farmer. Run the world to watch the 3D movement, crop tending, and combat.');render(true);
 };
 $('speed').onclick = () => { world.speed = world.speed === 1 ? 2 : 1; render(); };
 $('cancel').onclick = () => { cardIndex = null; order = null; handKey = ''; message('Selection cleared.'); render(true); };
+$('commanderChoice').onchange=()=>start();
 $('restart').onclick = () => { seed++; start(); };
 document.addEventListener('visibilitychange', () => { if (document.hidden) { world.paused = true; render(true); } });
 start();

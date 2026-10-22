@@ -1,8 +1,9 @@
 import * as T from '../vendor/three.js';
-import { CameraControls } from '../camera-controls.js?v=world9';
+import { CameraControls } from '../camera-controls.js?v=world10';
 import { createModel, animateModel, disposeModel } from '../model-3d.js?v=farmer3d9';
 import { programFor } from '../entity-programs.js?v=episode7';
-import { buildWorldGeometry, GROUND_COLORS } from './world-geometry.js?v=world9';
+import {createCornlandBuilding,animateCornlandBuilding} from './cornland-models.js?v=world10';
+import { buildWorldGeometry, GROUND_COLORS } from './world-geometry.js?v=world10';
 
 const aliases = {  guard: 'ep-husker', archer: 'ep-archer', scholar: 'ep-scholar', maize: 'ep-maize', cave: 'ep-cave', school: 'ep-school', spirit: 'ep-spirit', volcano: 'ep-volcano' };
 export const miniatureCard = card => ({ ...card, id: aliases[card.id] || card.id, type: card.id==='scarecrow'?'commander':card.type });
@@ -14,7 +15,7 @@ export class WorldView {
     this.canvas = canvas; this.world = world; this.onPick = onPick;
     this.listeners = []; this.models = new Map(); this.actors = new Map(); this.bolts = new Map();
     this.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.worldWidth=288;this.worldDepth=288;this.yaw = .18; this.pitch = 1; this.zoom = 1.12; this.followBattle = false; this.followFarmer = false;
+    this.worldWidth=288;this.worldDepth=288;this.yaw = .18; this.pitch = 1; this.zoom = 1.12; this.followBattle = false; this.followFarmer=false;
     this.target = new T.Vector3(); this.groundPlane = new T.Plane(new T.Vector3(0, 1, 0), 0);
     this.camera = new T.OrthographicCamera(-110, 110, 85, -85, .1, 700);
     this.scene = new T.Scene(); this.scene.background = new T.Color(0x272b28);
@@ -76,15 +77,7 @@ export class WorldView {
     const p = new T.Vector3(x, y, z).project(this.camera);
     return { x: (p.x + 1) * this.canvas.clientWidth / 2, y: (1 - p.y) * this.canvas.clientHeight / 2 };
   }
-  focusFarmer() {
-    const farmer=this.world.entities.find(e=>e.card.id==='farmer'&&e.hp>0);
-    if(!farmer)return null;
-    this.followBattle=false;this.followFarmer=true;
-    this.target.set(farmer.x,0,farmer.z);
-    this.zoom=6.2;this.pitch=.78;this.yaw=.22;
-    this.controls.sync();
-    return farmer;
-  }
+  focusFarmer(){const farmer=this.world.entities.find(e=>e.card.id==='farmer'&&e.hp>0);if(!farmer)return null;this.followBattle=false;this.followFarmer=true;this.target.set(farmer.x,0,farmer.z);this.zoom=6.2;this.pitch=.78;this.yaw=.22;this.controls.sync();return farmer;}
   syncModels() {
     const liveIds = new Set(this.world.entities.map(entity => entity.id));
     for (const [id, model] of this.models) if (!liveIds.has(id)) {
@@ -93,7 +86,7 @@ export class WorldView {
     for (const entity of this.world.entities) {
       this.actors.set(entity.id, { ...entity, worldX:entity.x,worldZ:entity.z });
       if (!this.renderer || this.models.has(entity.id) || entity.hp <= 0) continue;
-      const renderCard = miniatureCard(entity.card), model = createModel(renderCard, entity.side ? 'medieval' : 'farm');
+      const renderCard = miniatureCard(entity.card), model = createCornlandBuilding(renderCard)||createModel(renderCard, entity.side ? 'medieval' : 'farm');
       model.userData.program = programFor(renderCard);
       const bounds = new T.Box3().setFromObject(model), top = bounds.max.y;
       const health = new T.Mesh(new T.PlaneGeometry(1.8, .13), new T.MeshBasicMaterial({ color: tint(entity.side), depthTest: false }));
@@ -103,11 +96,7 @@ export class WorldView {
   }
   draw(dt) {
     this.syncModels();
-    if(this.followFarmer){
-      const farmer=this.world.entities.find(e=>e.card.id==='farmer'&&e.hp>0);
-      if(farmer)this.target.lerp(new T.Vector3(farmer.x,0,farmer.z),Math.min(1,dt*7));
-      else this.followFarmer=false;
-    }
+    if(this.followFarmer){const farmer=this.world.entities.find(e=>e.card.id==='farmer'&&e.hp>0);if(farmer)this.target.lerp(new T.Vector3(farmer.x,0,farmer.z),Math.min(1,dt*7));else this.followFarmer=false;}
     if (this.followBattle) {
       const active = this.world.entities.filter(e => e.hp > 0 && ['attack', 'shoot', 'flee'].includes(e.state));
       if (active.length) this.target.lerp(new T.Vector3(active[0].x, 0, active[0].z), .04);
@@ -130,12 +119,9 @@ export class WorldView {
         continue;
       }
       const moving = Math.hypot(entity.vx, entity.vz) > .2 && !this.world.paused;
-      // Use event windows from the authoritative simulation: attacks and harvesting last
-      // long enough to be visible at 30 FPS instead of disappearing after one world tick.
-      const action=this.world.time-(entity.lastHit??-100)>0&&this.world.time-(entity.lastHit??-100)<.38?'hit':
-        this.world.time<(entity.attackUntil||0)?'attack':
-        this.world.time<(entity.harvestUntil||0)?'harvest':entity.state;
-      animateModel(model, {clock:entity.clock,program:model.userData.program,moving,vx:entity.vx,vy:entity.vz,activity:entity.action,action,state:entity.state},this.reduced);
+      const action=this.world.time-(entity.lastHit??-100)>0&&this.world.time-(entity.lastHit??-100)<.38?'hit':this.world.time<(entity.attackUntil||0)?'attack':this.world.time<(entity.harvestUntil||0)?'harvest':entity.state;
+      animateModel(model,{clock:entity.clock,program:model.userData.program,moving,vx:entity.vx,vy:entity.vz,activity:entity.action,action,state:entity.state},this.reduced);
+      animateCornlandBuilding(model,entity.clock,this.reduced);
       model.position.set(entity.x, this.world.terrain.height(entity.x, entity.z) + (model.userData.bob || 0) + (entity.card.behavior==='crow'?3.5+Math.sin(entity.clock*6)*.8:0), entity.z);
       model.userData.health.scale.x = Math.max(.01, entity.hp / entity.maxHp);
       model.userData.health.quaternion.copy(model.quaternion).invert().multiply(this.camera.quaternion);
@@ -147,7 +133,7 @@ export class WorldView {
     for (const projectile of this.world.projectiles) {
       live.add(projectile.id);
       let bolt = this.bolts.get(projectile.id);
-      if (!bolt) { bolt = new T.Mesh(projectile.cotton?new T.IcosahedronGeometry(3.4,1):new T.OctahedronGeometry(.6), new T.MeshBasicMaterial({ color: projectile.cotton?0xf5f3e9:0xffdc86 })); this.bolts.set(projectile.id, bolt); this.scene.add(bolt); }
+      if (!bolt) { bolt = new T.Mesh(projectile.cotton?new T.IcosahedronGeometry(3.4,1):new T.OctahedronGeometry(projectile.seedPod?1.25:.6), new T.MeshBasicMaterial({ color: projectile.cotton?0xf5f3e9:projectile.seedPod?0xe7c75a:0xffdc86 })); this.bolts.set(projectile.id, bolt); this.scene.add(bolt); }
       bolt.position.set(projectile.x, 4 + Math.sin(Math.min(1, projectile.age) * Math.PI) * 3, projectile.z);
     }
     for (const [id, bolt] of this.bolts) if (!live.has(id)) { this.scene.remove(bolt); bolt.geometry.dispose(); bolt.material.dispose(); this.bolts.delete(id); }
@@ -171,7 +157,7 @@ export class WorldView {
     }
     const zoom = this.canvas.clientWidth / (this.camera.right - this.camera.left) * this.camera.zoom;
     const entities = this.world.entities.filter(e => e.hp > 0 && !e.inside).sort((a, b) => this.project(a.x, 0, a.z).y - this.project(b.x, 0, b.z).y);
-    const symbols = { pig: 'P', sheep: 'S', cow: 'C', bull: 'B',wolf:'W',crow:'↟',scarecrow:'✚',iceDen:'❄', guard: 'K', dog: 'D', archer: 'A', scholar: 'L' };
+    const symbols = {mill:'✣',seedSlinger:'◎',livestockPen:'♧',harvestCart:'▣',cart:'▣',crowRoost:'↟',briarSnare:'✳',hauntedSilo:'◈',seedShrine:'✿',rootCircle:'◉',elderGrove:'♠',kernel:'K',ent:'E',straw:'T', pig: 'P', sheep: 'S', cow: 'C', bull: 'B',wolf:'W',crow:'↟',scarecrow:'✚',iceDen:'❄', guard: 'K', dog: 'D', archer: 'A', scholar: 'L' };
     for (const entity of entities) {
       const p = this.project(entity.x,entity.card.behavior==='crow'?4:0, entity.z), building = entity.card.type === 'building', radius = Math.max(6, zoom * (building ? 4.8 : 2.5));
       ctx.fillStyle = '#16291b77'; ctx.beginPath(); ctx.ellipse(p.x + 2, p.y + 2, radius + 2, radius * .55, 0, 0, Math.PI * 2); ctx.fill();

@@ -1,14 +1,28 @@
 // Card data is separate from every card's execution function and world AI.
 export const CARDS={
- farm:{name:'Farm',type:'building',cost:2,hp:35,radius:4,text:'Grows corn and restores food around its actual location.'},
+ farm:{name:'Farm Field',type:'building',cost:2,requiresCommander:'farmer',hp:35,radius:4,text:'Grows corn and restores food around its actual location.'},
+ mill:{name:'Harvest Mill',type:'building',cost:3,hp:42,radius:4,requiresCommander:'farmer',text:'Consumes ripe corn to store rations. Its turning sails feed and quicken nearby allies.'},
+ seedSlinger:{name:'Seed Slinger',type:'building',cost:3,hp:35,radius:4,requiresCommander:'farmer',text:'Fires seed pods at enemies. Impacts damage a group and leave fresh corn.'},
+ livestockPen:{name:'Livestock Pen',type:'building',cost:3,hp:43,radius:4,requiresCommander:'farmer',text:'Breeds pigs, sheep, cows or bulls using nearby food; nourishes and strengthens the herd.'},
+ harvestCart:{name:'Harvest Cart',type:'building',cost:4,hp:48,radius:5,requiresCommander:'farmer',text:'Builds heavy rolling carts that seek enemy buildings and scatter slowing crop debris.'},
+ crowRoost:{name:'Crow Roost',type:'building',cost:2,hp:32,radius:4,requiresCommander:'scarecrow',text:'Breeds scouting crows to raid rival crops. The Scarecrow can rally them.'},
+ briarSnare:{name:'Briar Snare',type:'building',cost:2,hp:38,radius:4,requiresCommander:'scarecrow',text:'Hidden thorns slow and injure trespassers in a wide patch.'},
+ hauntedSilo:{name:'Haunted Silo',type:'building',cost:3,hp:40,radius:4,requiresCommander:'scarecrow',text:'Grows straw stalkers that wait in cover and ambush nearby enemies.'},
+ seedShrine:{name:'Seed Shrine',type:'building',cost:2,hp:33,radius:4,requiresCommander:'cornDruid',text:'Plants corn and awakens small kernel guardians from healthy roots.'},
+ rootCircle:{name:'Root Circle',type:'building',cost:3,hp:41,radius:4,requiresCommander:'cornDruid',text:'Mends rooted allies and tangles hostile feet inside its living boundary.'},
+ elderGrove:{name:'Elder Grove',type:'building',cost:4,hp:50,radius:5,requiresCommander:'cornDruid',text:'Replenishes the land and slowly awakens a mighty Corn Ent.'},
  iceDen:{name:'Ice Den',type:'building',cost:3,hp:42,radius:4,text:'Shelters a snow wolf pack and unlocks pack recruits.'},
- barn:{name:'Barn',type:'building',cost:3,hp:45,radius:4,text:'Unlocks sheep, cows and bulls. Injured or frightened livestock can seek shelter here.'},
+ barn:{name:'Barn',type:'building',cost:3,requiresCommander:'farmer',hp:45,radius:4,text:'Unlocks sheep, cows and bulls. Injured or frightened livestock can seek shelter here.'},
  school:{name:'Schoolhouse',type:'building',cost:3,hp:35,radius:4,text:'Unlocks scholars. A creature sent here can study resurrection.'},
  tower:{name:'Watchtower',type:'building',cost:3,hp:35,radius:3,text:'Unlocks archers. Fires at enemies that physically enter its range.'},
  cave:{name:'Cave of Solitude',type:'building',cost:2,hp:45,radius:4,text:'Creatures resting inside are protected until the cave is destroyed.'},
  spirit:{name:'Spirit Tower',type:'building',cost:4,hp:30,radius:3,text:'Floop: capture a nearby hostile spirit. 20-second cooldown.'},
  volcano:{name:'Volcano',type:'building',cost:4,hp:55,radius:5,text:'Floop: erupt at a chosen point. Fire harms either kingdom.'},
  scarecrow:{name:'Scarecrow Warden',type:'creature',cost:2,hp:26,atk:2,speed:2.6,behavior:'scarecrow',requires:'farm',text:'Guards crops. Frightens hostile crows and teaches Corn Maze while alive.'},
+ straw:{name:'Straw Stalker',type:'creature',cost:2,hp:19,atk:4,speed:3.7,behavior:'straw',requires:'hauntedSilo',text:'Hides by crops or hedges and strikes at passing enemies.'},
+ kernel:{name:'Kernel Guardian',type:'creature',cost:1,hp:12,atk:2,speed:3.5,behavior:'kernel',requires:'seedShrine',text:'Regrows in friendly corn and intercepts animals that try to eat the harvest.'},
+ ent:{name:'Ancient Corn Ent',type:'creature',cost:4,hp:43,atk:6,speed:2.3,behavior:'ent',requires:'elderGrove',text:'Slow guardian of the grove. Roots enemies, then strikes at close range.'},
+ cart:{name:'Harvest Juggernaut',type:'creature',cost:4,hp:30,atk:8,speed:6.2,behavior:'cart',requires:'harvestCart',text:'Rolls toward enemy buildings, crushes a group, and scatters crop debris.'},
  crow:{name:'Crop Crow',type:'creature',cost:1,hp:10,atk:1,speed:5.5,behavior:'crow',text:'Raids ripe fields, then flees from scarecrows.'},
  wolf:{name:'Snow Wolf',type:'creature',cost:2,hp:19,atk:3,speed:5.1,behavior:'wolf',requires:'iceDen',text:'Huddles with its pack in the cold. Each nearby wolf strengthens its bite.'},
  pig:{name:'Truffle Pig',type:'creature',cost:1,hp:12,atk:0,speed:4.6,behavior:'pig',text:'Eats enemy corn and food creatures automatically. Flees threats; mud can trap it.'},
@@ -30,5 +44,5 @@ export const CARDS={
  reclaim:{name:'Reclaim Landscape',type:'spell',cost:2,radius:16,text:'Regrow meadow or corn, extinguish fire, and free pigs in the area.'},
  revive:{name:'Raise the Dead',type:'spell',cost:4,requiresKnowledge:'revive',text:'Restore your last fallen creature at the target. Requires a trained scholar.'}
 };
-export const RECRUITS={barn:['pig','sheep','cow','bull'],school:['scholar'],tower:['archer'],farm:['scarecrow'],iceDen:['wolf']};
+export const RECRUITS={mill:[],seedSlinger:[],livestockPen:['pig','sheep','cow','bull'],harvestCart:['cart'],crowRoost:['crow'],hauntedSilo:['straw'],seedShrine:['kernel'],elderGrove:['ent'],barn:['pig','sheep','cow','bull'],school:['scholar'],tower:['archer'],farm:['scarecrow'],iceDen:['wolf']};
 export const card=id=>({id,...CARDS[id]});
