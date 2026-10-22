@@ -1,7 +1,7 @@
 import { createTabletop } from './scenario.js?v=world9';
 import { WorldView } from './view.js?v=world9';
 import { CARDS, RECRUITS } from './catalog.js?v=world9';
-import { playCard, cardLock } from './card-actions.js?v=world9';
+import { playCard, cardLock } from './card-actions.js?v=world9b';
 
 const $ = id => document.getElementById(id);
 let world, view, selectedId = null, cardIndex = null, order = null, last = 0, lastUI = 0, handKey = '', rosterKey = '', seed = 42;

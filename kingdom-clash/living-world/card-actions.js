@@ -79,7 +79,9 @@ export function castCotton(world, definition, point, side) {
   const target = world.entities.filter(e => e.hp > 0 && e.side !== side && distance(e, point) < definition.radius).sort((a,b) => distance(a,point)-distance(b,point))[0];
   if (!target) return null;
   world.projectiles.push({id:++world.serial,source,side,point:{x:target.x,z:target.z},x:source.x,z:source.z,age:0,damage:9,area:definition.radius,speed:24,cotton:true});
-  world.note('The barn launches a giant cotton ball.');
+  const farmer=world.entities.find(e=>e.side===side&&e.hp>0&&e.card.id==='farmer');
+  if(farmer){farmer.state='casting cotton';farmer.action=.9;}
+  world.note('The Farmer sends a giant cotton ball from the barn.');
   return {spell:true};
 }
 export function castCornMaze(world, definition, point, side) {
