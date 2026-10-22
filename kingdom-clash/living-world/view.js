@@ -1,6 +1,6 @@
 import * as T from '../vendor/three.js';
 import { CameraControls } from '../camera-controls.js?v=world9';
-import { createModel, animateModel, disposeModel } from '../model-3d.js?v=episode7';
+import { createModel, animateModel, disposeModel } from '../model-3d.js?v=farmer3d9';
 import { programFor } from '../entity-programs.js?v=episode7';
 import { buildWorldGeometry, GROUND_COLORS } from './world-geometry.js?v=world9';
 
