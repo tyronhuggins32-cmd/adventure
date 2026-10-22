@@ -22,7 +22,7 @@ export class LivingWorld{
  if(this.terrain.walkable(nx,nz,structures)){e.x=nx;e.z=nz;e.vx=vx/n*speed;e.vz=vz/n*speed;}else{e.pathAt=0;e.vx=e.vz=0;}return distance(e,goal)<=reach;
  }
  hurt(target,amount,source=null){if(target.hp<=0||target.inside)return;const armor=(target.card.behavior==='bull'?1:0)+(source?.card.ranged&&this.terrain.cell(target.x,target.z).cover?2:0),targetBefore=target.hp;target.hp=Math.max(0,target.hp-Math.max(1,amount-armor));target.action=.4;target.morale=Math.max(0,target.morale-amount*2);target.lastHit=this.time;if(target.hp<=0&&targetBefore>0){this.graveyard.push({card:{...target.card},side:target.side,hunger:target.hunger,x:target.x,z:target.z});this.note(target.card.name+' falls'+(source?' to '+source.card.name:'')+'.');for(const e of this.entities)if(e.side===target.side&&e.hp>0&&distance(e,target)<20)e.morale=Math.max(0,e.morale-12);if(target.card.type==='building'){for(const e of this.entities)if(e.inside===target.id){e.inside=null;e.order=null;this.hurt(e,Math.ceil(e.maxHp*.5));}this.terrain.version++;}if(target.card.type==='commander'){this.ended=true;this.winner=1-target.side;this.paused=true;this.note(this.winner===0?'Your kingdom holds the table.':'Your Farmer has fallen.');}}}
- attack(e,target){e.cooldown=e.card.ranged?2.7:e.card.behavior==='bull'?2.2:1.8;e.action=.6;e.state=e.card.ranged?'shoot':'attack';e.vx=target.x-e.x;e.vz=target.z-e.z;let amount=e.atk+(e.charging?3:0);if(e.card.behavior==='wolf'){const mates=this.entities.filter(o=>o!==e&&o.hp>0&&o.side===e.side&&o.card.behavior==='wolf'&&distance(e,o)<16).length;amount+=Math.min(8,mates*2);e.packBonus=Math.min(8,mates*2);}if(e.card.id==='guard'&&this.terrain.cell(e.x,e.z).kind==='corn')amount+=2;if(e.card.id==='maize'&&this.cornPower[e.side])amount*=3;e.charging=false;if(e.card.ranged||e.card.type==='building'){this.projectiles.push({id:++this.serial,source:e,target,x:e.x,z:e.z,age:0,damage:amount||3});}else this.hurt(target,amount,e);}
+ attack(e,target){e.cooldown=e.card.ranged?2.7:e.card.behavior==='bull'?2.2:1.8;e.action=.6;e.attackUntil=this.time+.60;e.state=e.card.ranged?'shoot':'attack';e.vx=target.x-e.x;e.vz=target.z-e.z;let amount=e.atk+(e.charging?3:0);if(e.card.behavior==='wolf'){const mates=this.entities.filter(o=>o!==e&&o.hp>0&&o.side===e.side&&o.card.behavior==='wolf'&&distance(e,o)<16).length;amount+=Math.min(8,mates*2);e.packBonus=Math.min(8,mates*2);}if(e.card.id==='guard'&&this.terrain.cell(e.x,e.z).kind==='corn')amount+=2;if(e.card.id==='maize'&&this.cornPower[e.side])amount*=3;e.charging=false;if(e.card.ranged||e.card.type==='building'){this.projectiles.push({id:++this.serial,source:e,target,x:e.x,z:e.z,age:0,damage:amount||3});}else this.hurt(target,amount,e);}
  command(id,kind,target=null){const e=this.entities.find(e=>e.id===id&&e.side===0&&e.hp>0);if(!e||this.ended)return {ok:false,reason:'Choose one of your living creatures'};if(kind==='auto'){e.order=null;e.inside=null;return {ok:true};}if(e.trapped)return {ok:false,reason:'Reclaim this muddy ground to free the pig'};if(kind==='move'){if(!target||!this.terrain.walkable(target.x,target.z,this.structures))return {ok:false,reason:'Choose open ground'};e.order={kind,target};e.inside=null;e.pathAt=0;return {ok:true};}
  if(['rest','study'].includes(kind)){const b=this.closest(e,o=>o.side===e.side&&o.card.type==='building'&&(kind==='study'?o.card.id==='school':['barn','cave'].includes(o.card.id)));if(!b)return {ok:false,reason:kind==='study'?'Build a Schoolhouse first':'Build a Barn or Cave first'};e.order={kind,target:b};e.inside=null;e.pathAt=0;this.note(e.card.name+' heads to '+b.card.name+'.');return {ok:true};}
  if(kind==='raid'&&e.card.behavior==='pig'){e.order={kind:'raid'};e.braveUntil=this.time+15;e.pathAt=0;this.note('The pig searches the rival kingdom for corn.');return {ok:true};}
@@ -41,7 +41,7 @@ export class LivingWorld{
    if(e.order?.kind==='hold'){e.state='guard';e.vx=e.vz=0;return;}
    e.state='command';
    const hurt=this.closest(e,o=>o.side===e.side&&o.hp<o.maxHp&&livestock(o),14);
-   if(hurt&&e.cooldown<=0){hurt.hp=Math.min(hurt.maxHp,hurt.hp+2);e.cooldown=5;e.action=.5;e.state='harvest';}
+   if(hurt&&e.cooldown<=0){hurt.hp=Math.min(hurt.maxHp,hurt.hp+2);e.cooldown=5;e.action=.5;e.harvestUntil=this.time+.50;e.state='harvest';}
    const enemy=this.closest(e,o=>o.side!==e.side&&!o.inside,7);
    if(enemy&&e.cooldown<=0){this.attack(e,enemy);return;}
    // Preserve existing autonomous farmer farming: he walks to live crop patches and grows them.
@@ -55,7 +55,7 @@ export class LivingWorld{
      e.state='tending crops';
      if(this.move(e,crop,dt,2.5)&&e.cooldown<=0){
        crop.food=Math.min(4,crop.food+1);
-       this.terrain.version++;e.cooldown=2;e.action=.4;e.state='harvest';e.vx=e.vz=0;
+       this.terrain.version++;e.cooldown=2;e.action=.4;e.harvestUntil=this.time+.40;e.state='harvest';e.vx=e.vz=0;
      }
    }else if(farm&&distance(e,farm)>17){
      e.state='returning to farm';this.move(e,this.nearbyPoint(e,farm),dt,4);
