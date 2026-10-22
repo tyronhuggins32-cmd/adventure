@@ -41,7 +41,7 @@ export function makeWorld(leaderId='blue',seed=4261){
   const leader=LEADERS[leaderId]||LEADERS.blue;
   const world={seed,t:0,round:1,phase:'plan',speed:1,paused:false,winner:null,leaderId,leader,
     commanders:[{name:leader.name,hp:25,max:25,energy:5},{name:'Finn',hp:25,max:25,energy:5}],
-    hand:[],deck:[...leader.deck],discard:[],enemyDeck:[...ENEMY_DECK],units:[],buildings:[],effects:[],logs:[],lanes:[],corpses:[],nextId:1,elapsed:0,turnClock:0,aiClock:0};
+    hand:[],deck:[...leader.deck],discard:[],enemyDeck:[...ENEMY_DECK],units:[],buildings:[],effects:[],logs:[],lanes:[],corpses:[],nextId:1,elapsed:0,turnClock:0,aiClock:0,commanderTask:{x:-10.9,z:10.8,lane:0,action:'idle',work:0}};
   for(let i=0;i<LANES;i++)world.lanes.push({terrain:['grass','blue','blue','grass'][i],enemyTerrain:'corn',crop: i===1?1:0,enemyCrop:.52+(i%2)*.25,fire:0,enemyFire:0,maze:0,mud:0,enemyMud:0,food:1,enemyFood:2});
   const start=addBuilding(world,0,1,leader.starter,true);
   if(leaderId==='blue')addUnit(world,0,0,'pig',true);
@@ -92,7 +92,12 @@ function chooseTarget(w,u){const enemies=w.units.filter(v=>v.team!==u.team&&live
  if(u.brain==='archer'){const buildings=w.buildings.filter(b=>b.team!==u.team&&live(b));if(buildings.length)return buildings.sort((a,b)=>Math.abs(a.lane-u.lane)-Math.abs(b.lane-u.lane)||dist(u,a)-dist(u,b))[0];}
  if(u.brain==='hunter'){const injured=enemies.filter(v=>v.hp<v.max);if(injured.length)return injured.sort((a,b)=>a.hp/a.max-b.hp/b.max)[0];}
  const same=enemies.filter(v=>v.lane===u.lane);if(same.length)return same.sort((a,b)=>dist(u,a)-dist(u,b))[0];
+ const structure=w.buildings.find(b=>b.team!==u.team&&b.lane===u.lane&&live(b));if(structure)return structure;
  return {base:true,x:laneX(u.lane),z:u.team?8.5:-8.5,team:1-u.team};
+}
+function tendFarm(w,dt){if(w.leaderId!=='farmer')return;const farmer=w.commanderTask;const candidates=w.lanes.map((l,i)=>({lane:i,crop:l.crop})).sort((a,b)=>a.crop-b.crop);const target=candidates[0];if(farmer.work<=0&&farmer.lane!==target.lane)farmer.lane=target.lane;const x=laneX(farmer.lane),z=6.9,d=Math.hypot(farmer.x-x,farmer.z-z);
+ if(d>.42){farmer.x+=(x-farmer.x)/d*dt*1.18;farmer.z+=(z-farmer.z)/d*dt*1.18;farmer.action='walk';}
+ else{farmer.action='harvest';farmer.work+=dt;w.lanes[farmer.lane].crop=clamp(w.lanes[farmer.lane].crop+dt*.055,0,1);if(farmer.work>=8){farmer.work=0;farmer.lane=(farmer.lane+1)%4;}}
 }
 function updateCrops(w,dt){for(let i=0;i<4;i++){const l=w.lanes[i];for(const team of [0,1]){const k=team?'enemyCrop':'crop',fire=team?'enemyFire':'fire';const growing=(team?l.enemyTerrain:l.terrain)==='corn'||w.buildings.some(b=>b.team===team&&b.lane===i&&b.key==='cornfield');l[k]=clamp(l[k]+(growing?.019:.003)*dt-l[fire]*.034*dt,0,1);l[fire]=Math.max(0,l[fire]-dt*.15);if(l[fire]>.8&&l[k]>.15&&rand(w)<dt*.11){const next=w.lanes[clamp(i+(rand(w)<.5?-1:1),0,3)];next[fire]=Math.max(next[fire],l[fire]*.65);}}l.mud=Math.max(0,l.mud-dt);l.enemyMud=Math.max(0,l.enemyMud-dt);l.maze=Math.max(0,l.maze-dt);}}
 function updateBuildings(w,dt){for(const b of w.buildings){b.age+=dt;b.cycle+=dt;const allies=w.units.filter(u=>u.team===b.team&&Math.abs(u.lane-b.lane)<=1);
@@ -130,7 +135,7 @@ function updateEffects(w,dt){for(const e of w.effects){e.life-=dt;if(e.kind==='c
  }w.effects=w.effects.filter(e=>e.life>0);}
 function enemyPlay(w){const p=w.commanders[1];if(p.energy<1)return;const viable=w.enemyDeck.filter(k=>CARDS[k].cost<=p.energy);if(!viable.length)return;const key=viable[Math.floor(rand(w)*viable.length)],card=CARDS[key];const ranking=[0,1,2,3].sort((a,b)=>{const rank=i=>w.units.filter(u=>u.team===0&&u.lane===i).length*2-w.units.filter(u=>u.team===1&&u.lane===i).length+(w.lanes[i].enemyCrop>0?.6:0);return rank(b)-rank(a)});let lane=ranking[0];if(card.type==='building'&&w.buildings.some(b=>b.team===1&&b.lane===lane))lane=ranking.find(i=>!w.buildings.some(b=>b.team===1&&b.lane===i));if(card.type==='creature'&&w.units.filter(u=>u.team===1&&u.lane===lane).length>=3)lane=ranking.find(i=>w.units.filter(u=>u.team===1&&u.lane===i).length<3);if(lane===undefined)return;p.energy-=card.cost;if(card.type==='creature')addUnit(w,1,lane,key);else if(card.type==='building')addBuilding(w,1,lane,key);else cast(w,1,lane,key);note(w,`Finn plays ${card.name} in lane ${lane+1}.`);}
 function finishRound(w){w.phase='plan';w.round++;w.commanders[0].energy=5;w.commanders[1].energy=5;for(const u of w.units)u.flooped=false;draw(w,2);note(w,`Round ${w.round}. Place cards, Floop, then send the figures back into battle.`);}
-export function step(w,dt){if(w.paused||w.winner||w.phase!=='battle')return;dt=Math.min(.06,Math.max(0,dt))*w.speed;w.t+=dt;w.elapsed+=dt;w.aiClock+=dt;updateCrops(w,dt);updateBuildings(w,dt);updateUnits(w,dt);updateEffects(w,dt);
+export function step(w,dt){if(w.paused||w.winner||w.phase!=='battle')return;dt=Math.min(.06,Math.max(0,dt))*w.speed;w.t+=dt;w.elapsed+=dt;w.aiClock+=dt;updateCrops(w,dt);tendFarm(w,dt);updateBuildings(w,dt);updateUnits(w,dt);updateEffects(w,dt);
  if(w.aiClock>5){w.aiClock=0;enemyPlay(w);}
  for(const u of w.units.filter(u=>u.hp<=0)){w.corpses.unshift({team:u.team,key:u.key});w.corpses.length=Math.min(w.corpses.length,12);note(w,`${u.name} falls on lane ${u.lane+1}.`);w.effects.push({kind:'fall',x:u.x,z:u.z,life:1.3});}
  w.units=w.units.filter(live);for(const b of w.buildings.filter(b=>b.hp<=0)){note(w,`${b.name} is destroyed.`);w.effects.push({kind:'fall',x:b.x,z:b.z,life:1.2});}w.buildings=w.buildings.filter(live);

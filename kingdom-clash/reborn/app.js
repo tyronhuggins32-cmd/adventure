@@ -1,5 +1,5 @@
-import {CARDS,LEADERS,makeWorld,play,draw,floop,beginBattle,step} from './rules.js';
-import {makeScene} from './scene.js';
+import {CARDS,LEADERS,makeWorld,play,draw,floop,beginBattle,step} from './rules.js?v=rebuild3';
+import {makeScene} from './scene.js?v=rebuild3';
 
 const $=id=>document.getElementById(id);
 const art={pig:[57,57],dog:[62,58],scholar:[38,65],husker:[14,15],archer:[20,64],maize:[7,20],earlings:[75,8],reaper:[40,6],sheep:[93,18],wolf:[29,78],crow:[46,5],barn:[40,43],cornfield:[7,17],school:[40,43],silo:[39,45],scarecrow:[45,8],throne:[84,45],den:[22,17]};

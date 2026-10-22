@@ -19,6 +19,12 @@ test('Scarecrow repels crows and wolf Floop heals its nearby pack',()=>{
  const w=makeWorld('scarecrow');w.units=[];const b=addBuilding(w,0,0,'scarecrow');const crow=addUnit(w,1,0,'crow');crow.x=b.x;crow.z=b.z-1;beginBattle(w);step(w,.05);assert.ok(crow.fear>1);assert.equal(crow.action,'flee');
  const snow=makeWorld('wolf');const a=snow.units.find(u=>u.key==='wolf');a.hp=2;const mate=addUnit(snow,0,2,'wolf');mate.hp=3;assert.equal(floop(snow,a.id),true);assert.equal(a.hp,4);assert.equal(mate.hp,5);
 });
+test('the Farmer walks to depleted crops and tends them while idle',()=>{
+ const w=makeWorld('farmer');w.units=[];w.buildings=[];w.enemyDeck=[];w.lanes.forEach(l=>{l.crop=.8;l.terrain='stone';});w.lanes[0].crop=.05;beginBattle(w);advance(w,14);assert.ok(w.commanderTask.x < -6);assert.ok(w.lanes[0].crop>.08);assert.ok(['walk','harvest'].includes(w.commanderTask.action));
+});
+test('unopposed soldiers damage buildings before reaching the opposing commander',()=>{
+ const w=makeWorld('blue');w.units=[];w.buildings=[];w.enemyDeck=[];const b=addBuilding(w,1,0,'silo');const u=addUnit(w,0,0,'dog');u.z=-6;u.x=b.x;const hp=w.commanders[1].hp;beginBattle(w);advance(w,3);assert.ok(b.hp<b.max);assert.equal(w.commanders[1].hp,hp);
+});
 test('simulation keeps actor health and coordinates finite across multiple waves',()=>{
  for(const key of Object.keys(LEADERS)){const w=makeWorld(key);for(let n=0;n<3&&!w.winner;n++){beginBattle(w);advance(w,22.1);}for(const u of w.units)for(const value of [u.x,u.z,u.hp,u.hunger,u.fear])assert.ok(Number.isFinite(value),`${key} ${u.key}: ${value}`);for(const p of w.commanders)assert.ok(Number.isFinite(p.hp));}
 });
