@@ -1,15 +1,47 @@
-# Kingdom Clash — Living landscape cards
+# The Living Table
 
-The browser game now plays across **four opposing card lanes** on a **72 × 72 meter 3D tabletop**. Raised landscape cards replace the crowded RTS map. Creatures stand on front slots, buildings on back slots, and each landscape has a distinct terrain border and visible food pips. Detailed miniatures are larger, and the default camera fits the board on mobile without jumping into a follow camera. Orbit, pinch/zoom, 16× close inspection, and expanded view remain available; advanced camera controls live below the scene.
+[Play the living Cornlands](https://tyronhuggins32-cmd.github.io/adventure/) or open
+[the twelve commander card table](https://tyronhuggins32-cmd.github.io/adventure/episode-table.html).
 
-Build → recruit → cast or Floop → **End turn**. Each ready creature attacks its opposing lane once. Opposing creatures exchange damage simultaneously; a building intercepts attacks when its creature slot is empty, and an open lane takes commander damage. The four lanes resolve in order with a short battle animation, then AP and cards refresh. Floop uses the unit’s existing power instead of its attack. Frozen units miss an exchange. Pausing stops resolution. Creatures remain anchored to their own cards between turns.
+## Two battle formats
 
-Buildings retain their exclusive recruitment rosters. Farmer branches: Farm grows food, repairs its landscape and recruits crop creatures; Barn recruits pigs, sheep, cows and bulls; Windmill recruits harvest warriors; Henhouse recruits birds. Two surviving turns unlock a veteran spell requiring its living caster and school. Pigs automatically eat opposing food creatures without AP; non-food enemies make them flee. Sheep graze, cows heal livestock in neighboring lanes, and bulls charge. Buildings can be rebuilt after destruction.
+The root game simulates a persistent **288 × 288** 3D world. The Farmer starts
+beside a Barn and herd; the Scarecrow starts beside a producing Corn Field; the
+Corn Druid starts at a Seed Shrine. It runs at fixed .05 second simulation steps,
+with independent creature needs, paths, ecology, building production, combat and
+commander decisions. Pausing freezes world time. See
+[`kingdom-clash/living-world/README.md`](kingdom-clash/living-world/README.md)
+for ranges, production intervals and counterplay.
 
-[Play the game](https://tyronhuggins32-cmd.github.io/adventure/).
+The card table in `episode-table.html` has **twelve commanders** across farm,
+ice, beach and medieval territories. Placing one starts their unique building on
+the same landscape without spending AP. It becomes a real six HP building: its
+healing, lane bonus, defense and recruitment function normally, and opponents
+can destroy it. The starting copy is removed from the opening hand while copies
+in the deck allow rebuilding. The Exiled Prince starts with a Broken Throne.
+
+| Territory | Commander → starting building |
+| --- | --- |
+| Farm | Farmer → Barn · Scarecrow → Crow Roost · Corn Druid → Seed Shrine |
+| Ice | Hearthkeeper → Snow Lodge · Frost Witch → Mirror Spire · Glacier Shepherd → Frost Pasture |
+| Beach | Castaway Captain → Driftwood Dock · Reef Oracle → Pearl Pool · Tide Collector → Undertow Bell |
+| Medieval | Banner Knight → Rally Standard · Royal Castellan → Castle Wall · Exiled Prince → Broken Throne |
+
+`commander-spawn-models.js` adds twelve distinct miniature arrival sets. The
+Prince's character mesh is moved into a seated pose within a separate throne
+hierarchy; his legs stay articulated. `starter-building-models.js` makes twelve
+building silhouettes, including the Broken Throne, for the card table. The
+Farmer keeps his straw hat, carrot beard, pumpkin pack and carrot staff, with
+refined face, fabric details, harness and crop tending motion. Shared model
+geometry remains batched for mobile rendering. The existing Cornlands structures
+and creatures keep their separate animation and AI systems.
+
+Three.js is bundled under `kingdom-clash/vendor`. WebGL2 is required for the
+3D scenes; the living Cornlands has an animated map fallback. Camera pan, orbit,
+tilt, zoom and expanded view remain available.
 
 ## Development
 
-`npm start` serves the game at http://localhost:8000. `npm test` checks card effects, all commander pairings, models, camera math, recruitment, livestock, progression, and the new tabletop resolution. `tabletop-battle.js` owns live card-lane combat; `tabletop-layout.js` owns physical slots and camera fitting; `tabletop-scene.js` owns the raised landscape geometry. The earlier continuous simulation remains available in `battle-simulation.js` for compatibility; the website no longer launches it.
-
-Three.js is bundled locally under `kingdom-clash/vendor` with its MIT license. WebGL 2 is required for the 3D scene; accessible lane controls remain available if it cannot initialize. Existing terrain shaders, detailed miniature anatomy, and card portraits share the same local models. Reduced motion suppresses cosmetic movement.
+`npm start` serves the project at `http://localhost:8000`. Run
+`node --test tests/*.test.js` for rules, all commander matchups, pathfinding,
+starter buildings and model geometry.

@@ -14,5 +14,8 @@ export const COMMANDERS = {
  exiledPrince: {territory:'medieval',name:'Exiled Prince',style:'Risk & revenge',passive:'No crown: creatures without a friendly building in their lane gain +1 attack.',perk:'exile',ability:'vengeance',power:'Lose 1 commander HP to give this creature +3 attack.',units:['Outcast Duelist','Oathbreaker','Ashen Cavalier'],buildings:['Refuge Camp','Broken Throne','Rebel Watch'],spell:'Usurper’s Challenge',spellEffect:'siphon',stats:[[3,4],[4,6],[6,9]]}
 };
 export const DEFAULT_COMMANDER={farm:'farmer',ice:'frostWitch',beach:'reefOracle',medieval:'bannerKnight'};
+// The structure that arrives with each leader. Indices refer to that leader's
+// building deck; the throne is the Prince's second card by design.
+export const COMMANDER_STARTERS={farmer:2,scarecrow:0,cornDruid:0,hearthkeeper:0,frostWitch:1,glacierShepherd:0,castawayCaptain:0,reefOracle:0,tideCollector:2,bannerKnight:1,royalCastellan:2,exiledPrince:1};
 export const commandersFor=territory=>Object.entries(COMMANDERS).filter(([,c])=>c.territory===territory);
 export const SPELL_TEXT={bolt:'Deal 3 damage to an opposing creature, or to the rival commander if that lane is empty.',fear:'Deal 2 damage and reduce the opposing creature’s attack by 1 (minimum 1). An empty lane takes 2 commander damage.',grow:'Give your creature in this lane +2 attack and restore 3 of its HP. An empty friendly lane heals your commander 3 HP.',heal:'Restore 4 commander HP and 2 HP to your creature in this lane.',freeze:'Deal 2 damage and freeze the opposing creature. An empty lane takes 2 commander damage.',siphon:'Deal 2 damage to the rival commander and heal your commander 2 HP.'};

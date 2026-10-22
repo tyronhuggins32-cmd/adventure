@@ -1,6 +1,6 @@
 // Sculpted from reusable Three.js primitives: all silhouettes, mechanisms and produce
 // live in the 3D scene and share the same material and geometry cache as characters.
-import {group,box,ball,cyl,cone,mesh,batchStaticMeshes} from '../model-3d.js?v=farmer3d9';
+import {group,box,ball,cyl,cone,mesh,batchStaticMeshes} from '../model-3d.js?v=commander13';
 const C={wood:0x775039,beam:0x9b6945,oak:0xba8756,straw:0xdfbb62,corn:0xf2cc5e,leaf:0x54864a,leaf2:0x6f9d53,red:0xa54634,roof:0x6f3429,stone:0x8f8a75,metal:0x596067,water:0x58afbb,linen:0xe9d7a7,glow:0xffce7b};
 const base=g=>{box(g,3.6,.2,3.3,0x657346,0,.05,0);for(let i=0;i<9;i++)box(g,.36,.09,.32,i%3?0xa7906a:0x8b795d,(i%3-1)*.9,.19,(Math.floor(i/3)-1)*.85);};
 const post=(g,x,z,h=1.4)=>{box(g,.17,h,.17,C.wood,x,.2+h/2,z);box(g,.24,.18,.24,C.oak,x,.25+h,z);};
