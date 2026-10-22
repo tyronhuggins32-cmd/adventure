@@ -41,7 +41,7 @@ export function makeWorld(leaderId='blue',seed=4261){
   const leader=LEADERS[leaderId]||LEADERS.blue;
   const world={seed,t:0,round:1,phase:'plan',speed:1,paused:false,winner:null,leaderId,leader,
     commanders:[{name:leader.name,hp:25,max:25,energy:5},{name:'Finn',hp:25,max:25,energy:5}],
-    hand:[],deck:[...leader.deck],discard:[],enemyDeck:[...ENEMY_DECK],units:[],buildings:[],effects:[],logs:[],lanes:[],corpses:[],nextId:1,elapsed:0,turnClock:0,aiClock:0,commanderTask:{x:-10.9,z:10.8,lane:0,action:'idle',work:0}};
+    hand:[],deck:[...leader.deck],discard:[],enemyDeck:[...ENEMY_DECK],enemyDiscard:[],units:[],buildings:[],effects:[],logs:[],lanes:[],corpses:[],nextId:1,elapsed:0,turnClock:0,aiClock:0,commanderTask:{x:-10.9,z:10.8,lane:0,action:'idle',work:0}};
   for(let i=0;i<LANES;i++)world.lanes.push({terrain:['grass','blue','blue','grass'][i],enemyTerrain:'corn',crop: i===1?1:0,enemyCrop:.52+(i%2)*.25,fire:0,enemyFire:0,maze:0,mud:0,enemyMud:0,food:1,enemyFood:2});
   const start=addBuilding(world,0,1,leader.starter,true);
   if(leaderId==='blue')addUnit(world,0,0,'pig',true);
@@ -85,7 +85,7 @@ export function beginBattle(w){if(w.phase!=='plan'||w.winner)return false;w.phas
 const damage=(w,target,amount,source)=>{target.hp-=amount;target.action='hurt';target.actionAge=0;w.effects.push({kind:'impact',x:target.x,z:target.z,life:.55,team:source.team});};
 const live=(u)=>u.hp>0;
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
-function chooseTarget(w,u){const enemies=w.units.filter(v=>v.team!==u.team&&live(v));if(u.brain==='forager'){
+function chooseTarget(w,u){const enemies=w.units.filter(v=>v.team!==u.team&&live(v));if(u.brain==='forager'||u.brain==='crow'){
    const food=enemies.filter(v=>['sheep','crow'].includes(v.key));if(food.length)return food.sort((a,b)=>dist(u,a)-dist(u,b))[0];
    const rows=w.lanes.map((l,i)=>({lane:i,value:u.team?l.crop:l.enemyCrop})).filter(v=>v.value>.1).sort((a,b)=>b.value-a.value);if(rows.length)return {crop:true,lane:rows[0].lane,x:laneX(rows[0].lane),z:u.team?5:-5};
  }
@@ -108,7 +108,7 @@ function updateBuildings(w,dt){for(const b of w.buildings){b.age+=dt;b.cycle+=dt
   if(b.key==='school')for(const u of allies.filter(u=>u.key==='scholar'&&dist(u,b)<3)){u.study=Math.min(2,u.study+dt*.08);u.action='study';}
  }}
 function updateUnits(w,dt){for(const u of w.units){u.age+=dt;u.actionAge+=dt;u.cool=Math.max(0,u.cool-dt);u.hunger=clamp(u.hunger+dt*.008,0,1);u.fear=Math.max(0,u.fear-dt*.55);const field=w.lanes[u.lane];const theirCorn=u.team?field.crop:field.enemyCrop;
-  if(u.key==='pig'&&u.z*(u.team?1:-1)>0&&theirCorn>.1&&Math.abs(u.z)>1.5){const eat=Math.min(theirCorn,dt*.19);field[u.team?'crop':'enemyCrop']-=eat;u.hunger=Math.max(0,u.hunger-eat*1.8);u.hp=Math.min(u.max,u.hp+eat*.6);u.action='eat';}
+  if(['pig','crow'].includes(u.key)&&u.z*(u.team?1:-1)>0&&theirCorn>.1&&Math.abs(u.z)>1.5){const eat=Math.min(theirCorn,dt*(u.key==='pig'?.19:.08));field[u.team?'crop':'enemyCrop']-=eat;u.hunger=Math.max(0,u.hunger-eat*1.8);u.hp=Math.min(u.max,u.hp+eat*.6);u.action='eat';}
   if(['pig','sheep'].includes(u.key)){const terror=w.units.some(v=>v.team!==u.team&&v.key==='earlings'&&dist(u,v)<4.8);if(terror)u.fear=Math.max(u.fear,3.8);}
   const mud=u.team?field.mud:field.enemyMud;if(mud>0&&u.key==='pig'&&Math.abs(u.z)<2.4){u.trapped=true;u.action='stuck';}
   if(u.trapped&&mud<=0)u.trapped=false;
@@ -133,8 +133,16 @@ function updateUnits(w,dt){for(const u of w.units){u.age+=dt;u.actionAge+=dt;u.c
 function updateEffects(w,dt){for(const e of w.effects){e.life-=dt;if(e.kind==='cotton'){e.z+=(e.team?1:-1)*dt*4.4;for(const u of w.units.filter(u=>u.team!==e.team&&u.lane===e.lane&&!e.hit.includes(u.id)&&dist(u,e)<2)){e.hit.push(u.id);damage(w,u,4,{team:e.team});}if(Math.abs(e.z)>9.2)e.life=0;}
  if(e.kind==='storm'){e.pulse+=dt;if(e.pulse>.9){e.pulse=0;for(const u of w.units.filter(u=>u.team===e.team&&u.lane===e.lane))damage(w,u,1,{team:1-e.team});}}
  }w.effects=w.effects.filter(e=>e.life>0);}
-function enemyPlay(w){const p=w.commanders[1];if(p.energy<1)return;const viable=w.enemyDeck.filter(k=>CARDS[k].cost<=p.energy);if(!viable.length)return;const key=viable[Math.floor(rand(w)*viable.length)],card=CARDS[key];const ranking=[0,1,2,3].sort((a,b)=>{const rank=i=>w.units.filter(u=>u.team===0&&u.lane===i).length*2-w.units.filter(u=>u.team===1&&u.lane===i).length+(w.lanes[i].enemyCrop>0?.6:0);return rank(b)-rank(a)});let lane=ranking[0];if(card.type==='building'&&w.buildings.some(b=>b.team===1&&b.lane===lane))lane=ranking.find(i=>!w.buildings.some(b=>b.team===1&&b.lane===i));if(card.type==='creature'&&w.units.filter(u=>u.team===1&&u.lane===lane).length>=3)lane=ranking.find(i=>w.units.filter(u=>u.team===1&&u.lane===i).length<3);if(lane===undefined)return;p.energy-=card.cost;if(card.type==='creature')addUnit(w,1,lane,key);else if(card.type==='building')addBuilding(w,1,lane,key);else cast(w,1,lane,key);note(w,`Finn plays ${card.name} in lane ${lane+1}.`);}
-function finishRound(w){w.phase='plan';w.round++;w.commanders[0].energy=5;w.commanders[1].energy=5;for(const u of w.units)u.flooped=false;draw(w,2);note(w,`Round ${w.round}. Place cards, Floop, then send the figures back into battle.`);}
+function enemyPlay(w){
+ const p=w.commanders[1];if(p.energy<1||!w.enemyDeck.length)return;
+ const viable=w.enemyDeck.filter(k=>CARDS[k].cost<=p.energy);if(!viable.length)return;
+ const score=k=>{const c=CARDS[k],pig=w.units.some(u=>u.team===0&&u.key==='pig'),corn=w.lanes.some(l=>l.enemyCrop>.22),scarecrow=w.buildings.some(b=>b.team===0&&b.key==='scarecrow');return (k==='cornfield'&&!corn?7:0)+(k==='husker'&&corn?5:0)+(k==='maize'&&corn?4:0)+(k==='mud'&&pig?4:0)+(k==='crow'&&scarecrow?-5:0)+(c.type==='creature'?3:0)+(c.type==='spell'?1:0)+rand(w)*1.5;};
+ const key=viable.map(k=>({k,s:score(k)})).sort((a,b)=>b.s-a.s)[0].k,card=CARDS[key];
+ const ranking=[0,1,2,3].sort((a,b)=>{const rank=i=>w.units.filter(u=>u.team===0&&u.lane===i).length*2-w.units.filter(u=>u.team===1&&u.lane===i).length+(w.lanes[i].enemyCrop>0?.6:0);return rank(b)-rank(a)});
+ let lane=ranking[0];if(card.type==='building'&&w.buildings.some(b=>b.team===1&&b.lane===lane))lane=ranking.find(i=>!w.buildings.some(b=>b.team===1&&b.lane===i));if(card.type==='creature'&&w.units.filter(u=>u.team===1&&u.lane===lane).length>=3)lane=ranking.find(i=>w.units.filter(u=>u.team===1&&u.lane===i).length<3);if(lane===undefined)return;
+ p.energy-=card.cost;w.enemyDeck.splice(w.enemyDeck.indexOf(key),1);w.enemyDiscard.push(key);if(card.type==='creature')addUnit(w,1,lane,key);else if(card.type==='building')addBuilding(w,1,lane,key);else cast(w,1,lane,key);note(w,`Finn plays ${card.name} in lane ${lane+1}.`);
+}
+function finishRound(w){w.phase='plan';w.round++;w.commanders[0].energy=5;w.commanders[1].energy=5;if(!w.enemyDeck.length)w.enemyDeck=w.enemyDiscard.splice(0);for(const u of w.units)u.flooped=false;draw(w,2);note(w,`Round ${w.round}. Place cards, Floop, then send the figures back into battle.`);}
 export function step(w,dt){if(w.paused||w.winner||w.phase!=='battle')return;dt=Math.min(.06,Math.max(0,dt))*w.speed;w.t+=dt;w.elapsed+=dt;w.aiClock+=dt;updateCrops(w,dt);tendFarm(w,dt);updateBuildings(w,dt);updateUnits(w,dt);updateEffects(w,dt);
  if(w.aiClock>5){w.aiClock=0;enemyPlay(w);}
  for(const u of w.units.filter(u=>u.hp<=0)){w.corpses.unshift({team:u.team,key:u.key});w.corpses.length=Math.min(w.corpses.length,12);note(w,`${u.name} falls on lane ${u.lane+1}.`);w.effects.push({kind:'fall',x:u.x,z:u.z,life:1.3});}

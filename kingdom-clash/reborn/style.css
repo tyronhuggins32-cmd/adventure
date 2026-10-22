@@ -7,3 +7,18 @@
 @media(min-width:851px){#app{height:100svh;min-height:640px;grid-template-rows:90px minmax(0,1fr) 280px}.table-shell{min-height:0}.command-dock{height:275px;margin-top:-48px;margin-bottom:4px}.hand-track{min-height:0}}
 @media(max-width:390px){.round-plaque{min-width:95px}.round-plaque strong{font-size:12px}.duelist .avatar{width:34px;height:40px;font-size:22px}.enemy .heart{display:none}.dock-actions button#draw span{display:none}.dock-bottom #newGame{display:none}.camera-bar span{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+.card-picture.sprite:before{inset:auto;width:75px;height:72px;left:50%;top:50%;transform:translate(-50%,-50%);background-size:800% 700%;filter:drop-shadow(0 2px 1px #1d382c)}
+.card-picture.building-sprite:before{background-image:url('../assets/buildings.webp');background-size:800% 600%}
+
+.avatar.blue,.rival-avatar{position:relative;font-size:0;overflow:hidden}
+.avatar.blue{background:linear-gradient(#e7c456,#cf9b38)}
+.avatar.blue:before{content:'';position:absolute;width:76%;height:68%;left:12%;top:21%;background:radial-gradient(circle at 35% 37%,#202d25 0 5%,transparent 6%),radial-gradient(circle at 65% 37%,#202d25 0 5%,transparent 6%),#f6d874;border-radius:45% 45% 39% 39%;box-shadow:-15px -3px 0 -9px #f4d275,15px -3px 0 -9px #f4d275}
+.avatar.blue:after{content:'';position:absolute;width:19%;height:13%;left:40%;top:55%;border-radius:50%;background:#393126}
+.rival-avatar{background:linear-gradient(#f3f7e5,#d5ede9)}
+.rival-avatar:before{content:'';position:absolute;width:66%;height:58%;left:17%;top:31%;border-radius:38% 38% 46% 46%;background:radial-gradient(circle at 35% 40%,#202c31 0 5%,transparent 6%),radial-gradient(circle at 64% 40%,#202c31 0 5%,transparent 6%),#edd6aa}
+.rival-avatar:after{content:'';position:absolute;left:21%;top:4%;width:58%;height:27%;border-radius:12px 12px 4px 4px;background:#f4f8ef;box-shadow:-10px 5px 0 -5px #f4f8ef,10px 5px 0 -5px #f4f8ef}
+
+/* Keep camera controls above the hand overlap at every width. */
+.camera-bar{bottom:69px}
+@media(max-width:850px){.camera-bar{bottom:45px}}
