@@ -8,3 +8,8 @@
 
 
 .camera-stage{background:#282e27;border-color:#78684b;padding:7px;border-radius:8px}.camera-controls button{background:#3b4435;color:#e8e5d3;border-color:#687158;box-shadow:none;font-size:11px}.camera-controls button[aria-pressed="true"]{color:#263523}.camera-title output{color:#bcc6ac}.camera-extra p{color:#aeb9a0;font-size:10px}.camera-extra{border-color:#596250}.camera-zoom{color:#cbd0bb}.camera-title b{color:#ded6b9}.camera-views{display:flex}.camera-views button{flex:1}.camera-stage:fullscreen,.camera-stage.camera-expanded{background:#272b28}
+
+/* Prominent access to the exact model used in the game; touch-friendly on phones. */
+.run-controls #farmerStudio{display:inline-flex;justify-content:center;align-items:center;min-height:44px;padding:8px 13px;border:1px solid #bc965b;background:#293e3f;border-radius:5px;color:#f9e9bd;text-decoration:none;font-weight:650}
+.run-controls #farmerStudio:hover{background:#405b55;border-color:#eecb7c}
+@media(max-width:560px){.run-controls #focusFarmer,.run-controls #farmerStudio{flex:1 1 42%;font-size:12px}}
