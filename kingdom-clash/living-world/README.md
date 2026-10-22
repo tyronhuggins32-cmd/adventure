@@ -1,7 +1,8 @@
 # Living tabletop rules
 
-This is the rules foundation for the new persistent tabletop route. It is not yet
-wired into the published game's renderer or hand UI.
+The root game now runs this persistent tabletop route, including a 3D renderer,
+camera controls, card placement, miniature inspection and creature orders.
+`episode-table.html` retains the previous turn-and-lane game.
 
 `catalog.js` holds card definitions and building recruitment lists.
 `card-actions.js` exposes one validated entry point, `playCard`, and separate
@@ -33,3 +34,8 @@ in the spell dispatch table. Creature decisions belong in the simulation rather
 than in card placement functions.
 
 Run `node --test tests/living-world.test.js` from the repository root.
+
+`scenario.js` sets up a playable two-kingdom opening. `world-geometry.js` builds
+the continuous terrain, physical crops and fire. `view.js` animates the existing
+miniatures from simulation state and provides a labeled map fallback when WebGL2
+is unavailable. `app.js` connects the rules to the hand, orders and simulation HUD.

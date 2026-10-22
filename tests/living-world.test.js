@@ -19,3 +19,13 @@ test('school study requires reaching shelter before knowledge accumulates',()=>{
 test('revival needs knowledge and a casualty and rejects blocked destinations',()=>{const w=world();w.knowledge[0].add('revive');assert.match(cardLock(w,'revive'),/fallen/);const dog=w.spawn('dog',0,-24,24);w.hurt(dog,100);w.spawn('barn',0,-36,24);assert.equal(playCard(w,'revive',-36,24).ok,false);assert.equal(w.graveyard.length,1);const revived=playCard(w,'revive',-24,30);assert.equal(revived.ok,true);assert.equal(revived.entity.hp,11);assert.equal(w.graveyard.length,0);});
 test('pathfinding crosses kingdoms and simulation preserves movement after thirty seconds',()=>{const w=world(),dog=w.spawn('dog',0,-48,48);assert.equal(w.command(dog.id,'move',{x:-48,z:-48}).ok,true);run(w,40);assert.ok(dog.z<-40);assert.ok(w.time>39);assert.equal(dog.order.kind,'move');});
 test('fixed steps give the same result at different frame rates',()=>{const a=world(),b=world();a.spawn('dog',0,-40,40);b.spawn('dog',0,-40,40);a.paused=b.paused=false;for(let i=0;i<100;i++)a.step(.05);for(let i=0;i<20;i++)b.step(.25);assert.deepEqual(a.entities,b.entities);assert.equal(a.time,b.time);});
+
+test('warriors reach building attack range instead of stalling at the perimeter',()=>{
+ const w=world(),dog=w.spawn('dog',0,-24,24),barn=w.spawn('barn',1,-24,0);
+ run(w,25);assert.ok(barn.hp<barn.maxHp);assert.ok(dog.z<10);
+});
+test('short movement orders reach their endpoint without losing the final waypoint',()=>{
+ const w=world(),dog=w.spawn('dog',0,-30,24);
+ w.command(dog.id,'move',{x:-28,z:24});run(w,2);
+ assert.equal(dog.state,'holding');assert.ok(Math.hypot(dog.x+28,dog.z-24)<=1.5);
+});

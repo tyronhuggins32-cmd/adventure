@@ -21,7 +21,7 @@ test("every Kingdom Commander creates its own building and starts a match only a
   }
 });
 
-test("website starts at kingdom selection with lane battle hidden",()=>{
-const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
+test("previous game starts at kingdom selection with lane battle hidden",()=>{
+const html=readFileSync(new URL("../episode-table.html",import.meta.url),"utf8");
 assert.match(html,/id="setup"/);assert.match(html,/id="game" hidden/);assert.match(html,/id="kingdoms"/);assert.match(html,/id="hand"/);
 });
