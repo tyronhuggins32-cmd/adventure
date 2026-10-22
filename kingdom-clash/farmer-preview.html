@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Adventure • Farmer 3D Animation Studio</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 30%,#205469,#102538 64%,#091924);color:#f4e7bf}
+main{max-width:1100px;margin:auto;padding:14px}a{color:#e8cc7b}header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+small{font-size:11px;letter-spacing:.18em;color:#c9d5b8}h1{font-size:clamp(21px,5vw,34px);margin:0 0 5px}p{margin:6px 0 12px;color:#d1d9d8;font-size:14px}
+.stage{position:relative;border:1px solid #78928d;border-radius:20px;overflow:hidden;background:radial-gradient(circle at 50% 52%,#35657a,#0a243d);box-shadow:0 20px 48px #0008}
+canvas{display:block;width:100%;height:min(67vh,690px);min-height:370px;touch-action:none;cursor:grab}
+canvas:active{cursor:grabbing}.stage figcaption{position:absolute;top:12px;left:16px;background:#071826c5;border-radius:12px;padding:8px 12px;font-size:12px;pointer-events:none}
+.toolbar{padding:12px 0;display:flex;gap:8px;flex-wrap:wrap}button{border:1px solid #95ac94;background:#273e3c;color:#f2edcb;border-radius:13px;padding:11px 16px;font-weight:650;min-height:45px;cursor:pointer}
+button[aria-pressed=true]{background:#e4bd68;color:#1f302f;border-color:#ffe6a8}
+.control{display:flex;align-items:center;gap:9px;padding:4px 0 14px;color:#dae7d7;font-size:13px}.control input{width:140px}
+.note{font-size:12px;color:#cfdbd7}button:focus-visible,a:focus-visible{outline:3px solid #f4cf72;outline-offset:3px}
+@media(max-width:590px){header{align-items:flex-start}main{padding:10px}canvas{height:62vh;min-height:360px}.toolbar button{flex:1 1 26%;padding:10px}.stage figcaption{font-size:10px}}
+</style></head>
+<body><main><header><div><small>THE LIVING TABLE • FARMER FACTION</small><h1>Animated Farmer • Real 3D</h1></div><a href="../index.html">Back to game</a></header>
+<p>This is the same polygonal Farmer and animation rig used inside Adventure. Drag to rotate, pinch or use zoom, and switch between real joint-driven animations.</p>
+<figure class="stage" style="margin:0"><canvas id="stage" aria-label="Interactive 3D Farmer model, orbit to inspect the mesh" role="img"></canvas><figcaption id="poseLabel">Loading 3D Farmer…</figcaption></figure>
+<div class="toolbar" aria-label="Select an animation">
+<button type="button" data-motion="showcase" aria-pressed="true">Showcase</button>
+<button type="button" data-motion="idle" aria-pressed="false">Idle</button>
+<button type="button" data-motion="walk" aria-pressed="false">Walk</button>
+<button type="button" data-motion="harvest" aria-pressed="false">Harvest</button>
+<button type="button" data-motion="attack" aria-pressed="false">Staff attack</button>
+<button type="button" data-motion="hit" aria-pressed="false">Hit reaction</button>
+</div>
+<label class="control">Camera zoom <input type="range" id="zoom" min="3.6" max="11" step=".1" value="6.7" aria-label="Camera distance"><output id="distance">6.7 m</output></label>
+<p class="note" id="stats">True Three.js 3D geometry. The Farmer walks and performs animations in the live game as well. This studio is a close-up inspection view.</p>
+</main>
+<script type="module">
+import * as T from './vendor/three.js';
+import {createModel,animateModel,disposeModel} from './model-3d.js?v=farmer3d9';
+import {programFor} from './entity-programs.js?v=episode7';
+const canvas=document.getElementById('stage'),label=document.getElementById('poseLabel'),stats=document.getElementById('stats'),zoom=document.getElementById('zoom');
+let renderer;
+try{renderer=new T.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});}
+catch(e){label.textContent='WebGL 2 is unavailable on this device';stats.textContent='Open in a browser with hardware-accelerated WebGL 2 enabled.';throw e;}
+renderer.setPixelRatio(Math.min(1.5,devicePixelRatio||1));
+renderer.outputColorSpace=T.SRGBColorSpace;
+renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.13;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+const scene=new T.Scene();scene.background=new T.Color(0x163349);
+scene.add(new T.HemisphereLight(0xffefd9,0x244d59,2.3));
+const key=new T.DirectionalLight(0xffdb98,3.3);key.position.set(4,8,5);key.castShadow=true;key.shadow.mapSize.set(1024,1024);scene.add(key);
+const fill=new T.DirectionalLight(0x96d5e4,1);fill.position.set(-4,4,-3);scene.add(fill);
+const base=new T.Mesh(new T.CylinderGeometry(1.6,1.82,.22,48),new T.MeshStandardMaterial({color:0x385b43,roughness:.96}));
+base.position.y=-.15;base.receiveShadow=true;scene.add(base);
+const card={id:'farmer',type:'commander',name:'The Farmer'};
+const model=createModel(card,'farm');scene.add(model);
+const bounds=new T.Box3().setFromObject(model),sizes=bounds.getSize(new T.Vector3());
+let vertices=0,meshes=0;model.traverse(o=>{if(o.isMesh){meshes++;vertices+=o.geometry.attributes.position.count;}});
+stats.textContent='Game asset • '+meshes+' three-dimensional meshes • '+vertices.toLocaleString()+' vertices • articulated limbs, face, hat, beard, backpack and carrot staff.';
+const camera=new T.PerspectiveCamera(34,1,.05,100),target=new T.Vector3(0,1.40,0);
+let yaw=.30,pitch=.19,dist=6.7,mode='showcase',chosenAt=0,elapsed=0,prev=performance.now();
+const pointers=new Map();
+function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+new ResizeObserver(resize).observe(canvas);resize();
+function cameraPose(){camera.position.set(target.x+dist*Math.sin(yaw)*Math.cos(pitch),target.y+dist*Math.sin(pitch),target.z+dist*Math.cos(yaw)*Math.cos(pitch));camera.lookAt(target);}
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});});
+canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;const old=pointers.get(e.pointerId);const dx=e.clientX-old.x,dy=e.clientY-old.y;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+if(pointers.size===1){yaw+=dx*.007;pitch=Math.max(-.08,Math.min(.78,pitch-dy*.006));}
+else if(pointers.size===2){const [a,b]=[...pointers.values()],other=[...pointers.entries()].find(([id])=>id!==e.pointerId)[1],before=Math.hypot(old.x-other.x,old.y-other.y),after=Math.hypot(e.clientX-other.x,e.clientY-other.y);if(before>5)dist=Math.max(3.6,Math.min(11,dist*before/Math.max(5,after)));zoom.value=String(dist);}
+});
+for(const event of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,e=>pointers.delete(e.pointerId));
+canvas.addEventListener('wheel',e=>{e.preventDefault();dist=Math.max(3.6,Math.min(11,dist+e.deltaY*.006));zoom.value=String(dist);},{passive:false});
+zoom.oninput=()=>{dist=Number(zoom.value);};
+for(const button of document.querySelectorAll('[data-motion]'))button.onclick=()=>{mode=button.dataset.motion;chosenAt=elapsed;for(const b of document.querySelectorAll('[data-motion]'))b.setAttribute('aria-pressed',String(b===button));};
+const program=programFor(card);
+function frame(now){
+ requestAnimationFrame(frame);
+ const dt=Math.min(.05,Math.max(0,(now-prev)/1000));prev=now;if(document.hidden)return;
+ elapsed+=dt;const relative=elapsed-chosenAt;
+ const auto=['idle','walk','harvest','attack','idle','hit'];const selected=mode==='showcase'?auto[Math.floor(elapsed/2.3)%auto.length]:mode;
+ let activity=0,action=selected,moving=selected==='walk';
+ if(selected==='attack'||selected==='harvest'||selected==='hit'){
+   const period=selected==='harvest'?2.0:1.5,cycle=relative%period;
+   activity=cycle<.65?.65-cycle:0;
+   if(!activity)action='command';
+ }
+ animateModel(model,{clock:elapsed,program,moving,vx:moving?.18:0,vy:moving?1:0,activity,action},false);
+ model.position.y=model.userData.bob||0;
+ document.getElementById('distance').textContent=dist.toFixed(1)+' m';
+ label.textContent=(selected==='walk'?'Walk cycle':selected==='harvest'?'Harvest and healing':selected==='attack'?'Carrot-staff attack':selected==='hit'?'Hit reaction':selected==='idle'?'Idle breathing':'Showcase')+' • '+(model.userData.animationState||'idle');
+ cameraPose();renderer.render(scene,camera);
+}
+requestAnimationFrame(frame);
+window.addEventListener('pagehide',()=>{disposeModel(model);renderer.dispose();},{once:true});
+</script></body></html>

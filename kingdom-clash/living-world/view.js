@@ -1,6 +1,6 @@
 import * as T from '../vendor/three.js';
 import { CameraControls } from '../camera-controls.js?v=world9';
-import { createModel, animateModel, disposeModel } from '../model-3d.js?v=episode7';
+import { createModel, animateModel, disposeModel } from '../model-3d.js?v=farmer3d9';
 import { programFor } from '../entity-programs.js?v=episode7';
 import { buildWorldGeometry, GROUND_COLORS } from './world-geometry.js?v=world9';
 
@@ -14,7 +14,7 @@ export class WorldView {
     this.canvas = canvas; this.world = world; this.onPick = onPick;
     this.listeners = []; this.models = new Map(); this.actors = new Map(); this.bolts = new Map();
     this.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.worldWidth=288;this.worldDepth=288;this.yaw = .18; this.pitch = 1; this.zoom = 1.12; this.followBattle = false;
+    this.worldWidth=288;this.worldDepth=288;this.yaw = .18; this.pitch = 1; this.zoom = 1.12; this.followBattle = false; this.followFarmer = false;
     this.target = new T.Vector3(); this.groundPlane = new T.Plane(new T.Vector3(0, 1, 0), 0);
     this.camera = new T.OrthographicCamera(-110, 110, 85, -85, .1, 700);
     this.scene = new T.Scene(); this.scene.background = new T.Color(0x272b28);
@@ -76,6 +76,15 @@ export class WorldView {
     const p = new T.Vector3(x, y, z).project(this.camera);
     return { x: (p.x + 1) * this.canvas.clientWidth / 2, y: (1 - p.y) * this.canvas.clientHeight / 2 };
   }
+  focusFarmer() {
+    const farmer=this.world.entities.find(e=>e.card.id==='farmer'&&e.hp>0);
+    if(!farmer)return null;
+    this.followBattle=false;this.followFarmer=true;
+    this.target.set(farmer.x,0,farmer.z);
+    this.zoom=6.2;this.pitch=.78;this.yaw=.22;
+    this.controls.sync();
+    return farmer;
+  }
   syncModels() {
     const liveIds = new Set(this.world.entities.map(entity => entity.id));
     for (const [id, model] of this.models) if (!liveIds.has(id)) {
@@ -94,6 +103,11 @@ export class WorldView {
   }
   draw(dt) {
     this.syncModels();
+    if(this.followFarmer){
+      const farmer=this.world.entities.find(e=>e.card.id==='farmer'&&e.hp>0);
+      if(farmer)this.target.lerp(new T.Vector3(farmer.x,0,farmer.z),Math.min(1,dt*7));
+      else this.followFarmer=false;
+    }
     if (this.followBattle) {
       const active = this.world.entities.filter(e => e.hp > 0 && ['attack', 'shoot', 'flee'].includes(e.state));
       if (active.length) this.target.lerp(new T.Vector3(active[0].x, 0, active[0].z), .04);
@@ -116,7 +130,12 @@ export class WorldView {
         continue;
       }
       const moving = Math.hypot(entity.vx, entity.vz) > .2 && !this.world.paused;
-      animateModel(model, { clock: entity.clock, program: model.userData.program, moving, vx: entity.vx, vy: entity.vz, activity: entity.action, action: entity.state === 'attack' || entity.state === 'shoot' ? 'attack' : entity.state }, this.reduced);
+      // Use event windows from the authoritative simulation: attacks and harvesting last
+      // long enough to be visible at 30 FPS instead of disappearing after one world tick.
+      const action=this.world.time-(entity.lastHit??-100)>0&&this.world.time-(entity.lastHit??-100)<.38?'hit':
+        this.world.time<(entity.attackUntil||0)?'attack':
+        this.world.time<(entity.harvestUntil||0)?'harvest':entity.state;
+      animateModel(model, {clock:entity.clock,program:model.userData.program,moving,vx:entity.vx,vy:entity.vz,activity:entity.action,action,state:entity.state},this.reduced);
       model.position.set(entity.x, this.world.terrain.height(entity.x, entity.z) + (model.userData.bob || 0) + (entity.card.behavior==='crow'?3.5+Math.sin(entity.clock*6)*.8:0), entity.z);
       model.userData.health.scale.x = Math.max(.01, entity.hp / entity.maxHp);
       model.userData.health.quaternion.copy(model.quaternion).invert().multiply(this.camera.quaternion);

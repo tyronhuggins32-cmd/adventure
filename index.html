@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#272b28"><title>The Living Table · Card Battle</title>
-<link rel="stylesheet" href="kingdom-clash/living-world/style.css?v=world9">
+<link rel="stylesheet" href="kingdom-clash/living-world/style.css?v=farmer3d9">
 </head>
 <body>
 <main>
@@ -11,7 +11,7 @@
 <section class="command-bar" aria-label="Simulation controls">
 <div class="clock"><strong id="worldTime">00:00</strong><span id="weather">Clear skies</span></div>
 <div class="kingdom-health"><span>Farmer <b id="ownHealth">100</b></span><span>Corn King <b id="enemyHealth">100</b></span></div>
-<div class="run-controls"><button id="run" class="primary">Run world</button><button id="speed" aria-label="Simulation speed">1× speed</button></div>
+<div class="run-controls"><button id="run" class="primary">Run world</button><button id="speed" aria-label="Simulation speed">1× speed</button><button id="focusFarmer" aria-pressed="false">Watch Farmer in 3D</button><a id="farmerStudio" href="kingdom-clash/farmer-preview.html">3D Farmer Studio</a></div>
 </section>
 <div class="play-layout">
 <section class="world-panel" aria-label="Living tabletop battlefield">
@@ -24,5 +24,5 @@
 <section class="hand-panel" aria-label="Your cards"><div class="section-heading"><div><small>SHAPE THE WORLD</small><h2>Your hand</h2></div><div><strong id="energy">10 / 10 energy</strong><button id="cancel" hidden>Cancel selection</button></div></div><p class="hint">Select a card, then tap the ground. Summon on your side; terrain and spells can reach either kingdom.</p><div id="hand" class="hand"></div></section>
 <div class="lower-panels"><details><summary>Miniatures on the table</summary><div id="roster" class="roster"></div></details><details><summary>World journal</summary><ol id="journal"></ol></details><details><summary>How the world works</summary><p>Plan while paused, then run the simulation. Creatures keep their positions and decisions between pauses. Melee requires contact; arrows deal damage on arrival. Corn powers Husker Knights, pigs eat crops and food creatures, mud traps pigs, fire spreads through corn, and rain extinguishes it.</p><p>Select a friendly creature for orders. Move orders hold the chosen ground; Auto restores its own decisions. Barns and caves shelter frightened or injured creatures. Study at a Schoolhouse unlocks resurrection after twenty seconds inside. Buildings unlock their own recruits. Cards spend energy; your kingdom regains one energy every four seconds.</p><p>The shared world measures 288 × 288. The barn unlocks Cotton Siege when sheep arrive; a living scarecrow teaches Corn Maze. Snow wolves gain strength by staying together. Drag, orbit, tilt and zoom to explore it. These are expanded simulation rules inspired by the tabletop concept.</p><a href="episode-table.html">Previous game</a></details></div>
 </main>
-<script type="module" src="kingdom-clash/living-world/app.js?v=world9b"></script>
+<script type="module" src="kingdom-clash/living-world/app.js?v=farmer3d9"></script>
 </body></html>
