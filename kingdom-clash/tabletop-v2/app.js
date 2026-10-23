@@ -1,14 +1,16 @@
 import {CARDS,makeWorld,play,draw,floop,beginBattle,step} from '../reborn/rules.js';
 import {LANDSCAPES,createFieldDeck,selectLandscape,placeLandscape,canStart,lockField,applyField} from './field-deck.js';
-import {makeBoard} from './board.js?v=field4';
+import {makeBoard} from './board.js?v=field5';
 
 const $=id=>document.getElementById(id);
 const art={pig:[57,64],dog:[71,64],scholar:[29,50],husker:[0,17],archer:[57,50],maize:[57,0],earlings:[71,0],reaper:[43,0],sheep:[100,17],wolf:[29,100],crow:[43,0]};
 const structures={barn:[57,80],cornfield:[0,0],school:[43,60],silo:[71,100],scarecrow:[71,80],throne:[29,80],den:[14,20]};
-let field=createFieldDeck(),world=null,chosen=null,selectedUnit=null,last=performance.now(),drawClock=0,logMark='',cardSignature='';
+let field=createFieldDeck(),world=null,chosen=null,selectedUnit=null,focusedLane=null,last=performance.now(),drawClock=0,logMark='',cardSignature='';
 const board=makeBoard($('board'),targetLane);
 const safe=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function say(message){$('message').textContent=message;$('hint').textContent=message;}
+function showLane(lane){focusedLane=lane;$('game').classList.add('lane-focus');$('focusTitle').textContent=`LANE ${lane+1} · ${field.slots[lane]?LANDSCAPES[field.slots[lane]].name.toUpperCase():'EMPTY FIELD'}`;board.focusLane(lane);}
+function leaveLane(){focusedLane=null;$('game').classList.remove('lane-focus');board.exitLane();}
 
 function landscapeCard(key,index){const l=LANDSCAPES[key],active=field.selected===index;return `<button class="card field ${active?'selected':''}" data-field="${index}" aria-pressed="${active}" aria-label="${safe(l.name)} landscape card. ${safe(l.detail)}"><span class="card-top"><b>◆</b><small>LANDSCAPE</small><i>${index+1}</i></span><span class="card-art field-art" data-icon="${l.icon}" style="--field-top:${l.tone};--field-bottom:${l.edge}"></span><span class="card-name">${safe(l.name)}</span><span class="card-text">${safe(l.detail)}</span><span class="card-bottom">${safe(l.family.toUpperCase())} FIELD</span></button>`;}
 function battleCard(key,index){const card=CARDS[key],sprite=card.type==='building'?structures[key]:art[card.art],active=chosen===index;return `<button class="card ${card.type==='building'?'building':card.type==='spell'?'spell':''} ${active?'selected':''}" data-battle="${index}" aria-pressed="${active}" aria-label="${safe(card.name)}. ${card.cost} energy. ${safe(card.text)}"><span class="card-top"><b>${card.cost}</b><small>${card.type.toUpperCase()}</small><i>✦</i></span><span class="card-art ${sprite?'sprite '+(card.type==='building'?'building-sprite':''):'spell-art'}" style="${sprite?`--art-x:${sprite[0]}%;--art-y:${sprite[1]}%`:''}"><span>${sprite?'':'✦'}</span></span><span class="card-name">${safe(card.name)}</span><span class="card-text">${safe(card.text)}</span><span class="card-bottom">${card.type==='creature'?`⚔ ${card.atk}　♥ ${card.hp}`:card.type==='building'?`◆ ${card.hp} HP`:'CAST ON LANE'}</span></button>`;}
@@ -19,12 +21,13 @@ function renderUI(){const lanes=$('laneButtons').children;for(let i=0;i<4;i++){l
  const latest=world.logs[0]?.text;if(latest!==logMark){logMark=latest;$('journal').innerHTML=world.logs.map(e=>`<li><b>${e.time}s</b> ${safe(e.text)}</li>`).join('');}
  renderCards();if(world.winner!==null){$('victory').hidden=false;$('winner').textContent=world.winner===0?'Your table wins.':'The rival wins.';}
 }
-function targetLane(lane){if(!world){if(field.selected===null){say(`Landscape ${lane+1} is ${field.slots[lane]?LANDSCAPES[field.slots[lane]].name:'empty'}. Pick a field card.`);return;}const kind=field.cards[field.selected],name=LANDSCAPES[kind].name;if(placeLandscape(field,lane)){board.summon(kind,lane);say(`${name} lands in slot ${lane+1}. ${field.slots.filter(Boolean).length} of 4 placed.`);renderUI();}return;}
+function targetLane(lane){if(!world){if(field.selected===null){showLane(lane);return;}const kind=field.cards[field.selected],name=LANDSCAPES[kind].name;if(placeLandscape(field,lane)){board.summon(kind,lane);say(`${name} lands in slot ${lane+1}. ${field.slots.filter(Boolean).length} of 4 placed.`);renderUI();}return;}
+ if(chosen===null){if(world.phase==='plan'){const own=world.units.find(u=>u.team===0&&u.lane===lane&&!u.flooped);selectedUnit=own?.id||null;renderUI();}showLane(lane);return;}
  if(world.phase!=='plan'){say('The figures are fighting. Wait for the next planning turn.');return;}
  if(chosen!==null){const key=world.hand[chosen];if(!key){chosen=null;renderUI();return;}if(play(world,key,lane)){board.summon(key,lane);say(`${CARDS[key].name} falls onto landscape ${lane+1} and becomes a miniature.`);chosen=null;selectedUnit=null;}else say('That card cannot be played there. Check energy and the occupied building slot.');renderUI();return;}
- const own=world.units.find(u=>u.team===0&&u.lane===lane&&!u.flooped);selectedUnit=own?.id||null;say(own?`${own.name}: ${Math.ceil(own.hp)}/${own.max} health. Press Floop for its ability.`:`${LANDSCAPES[field.slots[lane]].name} · choose a card from your hand.`);renderUI();}
+}
 function startMatch(){if(!lockField(field))return;world=applyField(makeWorld('blue'),field);world.units=[];world.buildings=[];world.corpses=[];world.effects=[];world.logs=[];world.nextId=1;world.lanes.forEach((lane,i)=>{lane.enemyTerrain='corn';lane.enemyCrop=.65+(i%2)*.08;lane.enemyFood=2;});chosen=null;selectedUnit=null;logMark='';say('Your field is built. Play a card, tap a lane, then call Battle.');renderUI();}
-function reset(){field=createFieldDeck();world=null;chosen=null;selectedUnit=null;logMark='';$('victory').hidden=true;$('helpPanel').hidden=true;board.moveCamera('reset');$('ownHealth').textContent=$('foeHealth').textContent='25';$('ownBar').style.width=$('foeBar').style.width='100%';say('Pick a landscape card, then tap a lane. Place all four fields.');renderUI();}
+function reset(){if(focusedLane!==null)leaveLane();field=createFieldDeck();world=null;chosen=null;selectedUnit=null;logMark='';$('victory').hidden=true;$('helpPanel').hidden=true;board.moveCamera('reset');$('ownHealth').textContent=$('foeHealth').textContent='25';$('ownBar').style.width=$('foeBar').style.width='100%';say('Pick a landscape card, then tap a lane. Place all four fields.');renderUI();}
 
 $('cards').addEventListener('click',event=>{const button=event.target.closest('[data-field],[data-battle]');if(!button)return;if(!world){const index=+button.dataset.field;selectLandscape(field,index);const selected=field.selected;say(selected===null?'Field card unselected.':`${LANDSCAPES[field.cards[selected]].name}: tap a numbered slot on your side.`);}else{const index=+button.dataset.battle;chosen=chosen===index?null:index;selectedUnit=null;say(chosen===null?'Card unselected.':`${CARDS[world.hand[chosen]].name}: tap a landscape to place it.`);}renderUI();});
 $('laneButtons').addEventListener('click',event=>{const button=event.target.closest('[data-lane]');if(button)targetLane(+button.dataset.lane);});
@@ -35,4 +38,8 @@ $('pause').addEventListener('click',()=>{world.paused=!world.paused;renderUI();}
 $('floop').addEventListener('click',()=>{if(floop(world,selectedUnit)){say(world.logs[0].text);selectedUnit=null;renderUI();}});
 $('help').addEventListener('click',()=>{$('helpPanel').hidden=!$('helpPanel').hidden;});$('closeHelp').addEventListener('click',()=>{$('helpPanel').hidden=true;});
 for(const button of document.querySelectorAll('[data-cam]'))button.addEventListener('click',()=>board.moveCamera(button.dataset.cam));
+$('exitLane').addEventListener('click',leaveLane);
+$('prevLane').addEventListener('click',()=>showLane((focusedLane+3)%4));
+$('nextLane').addEventListener('click',()=>showLane((focusedLane+1)%4));
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&focusedLane!==null)leaveLane();});
 function tick(now){const dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;if(world){for(let i=0;i<4;i++)if(field.slots[i]==='swamp'&&world.phase==='battle')world.lanes[i].mud=Math.max(world.lanes[i].mud,.18);step(world,dt);}board.render(field,world,dt);drawClock+=dt;if(world&&drawClock>.35){drawClock=0;renderUI();}requestAnimationFrame(tick);}renderUI();requestAnimationFrame(tick);

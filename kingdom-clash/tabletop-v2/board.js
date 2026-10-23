@@ -3,14 +3,15 @@ import {LANDSCAPES} from './field-deck.js';
 import {makeMiniature,animateMiniature} from './miniatures.js';
 
 const X=i=>(i-1.5)*5.65;
+export const TABLE_SCALE=2;
 const colors={corn:0x8ea948,blue:0x4a9fb4,swamp:0x617956,ice:0xbadce3,sand:0xcfad70,stone:0x96998e,blank:0x393c36};
 const tableCorners=[];
-for(const x of[-13.8,13.8])for(const y of[-.75,1.4])for(const z of[-12.5,12.5])tableCorners.push(new T.Vector3(x,y,z));
+for(const x of[-13.8,13.8])for(const y of[-.75,1.4])for(const z of[-12.5,12.5])tableCorners.push(new T.Vector3(x,y,z).multiplyScalar(TABLE_SCALE));
 // Fit the whole tabletop to the actual canvas aspect, including its raised edge and miniatures.
 export function fitTableDistance(width,height,yaw=0,pitch=.69){
- const camera=new T.PerspectiveCamera(height>width?56:46,width/height,.1,240);
+ const camera=new T.PerspectiveCamera(height>width?56:46,width/height,.1,500);
  const direction=new T.Vector3(Math.sin(yaw)*.32,Math.sin(pitch),Math.cos(yaw)*.86).normalize();
- let lo=10,hi=240;
+ let lo=10,hi=480;
  for(let i=0;i<18;i++){
   const distance=(lo+hi)/2;camera.position.copy(direction).multiplyScalar(distance);camera.lookAt(0,0,0);camera.updateMatrixWorld();
   const fits=tableCorners.every(corner=>{const point=corner.clone().project(camera);return point.z<1&&Math.abs(point.x)<.86&&Math.abs(point.y)<.86;});
@@ -56,22 +57,36 @@ function landscape(parent,kind,lane,team){const g=new T.Group();parent.add(g);g.
 
 function fallingCard(scene,kind,lane,team){const g=new T.Group();scene.add(g);g.position.set(X(lane),4,team?-5.65:5.65);cube(g,0xf1d8a5,0,0,0,4.1,.09,6.1);cube(g,colors[kind]||0xc6a36b,0,.07,0,3.72,.025,5.72);return g;}
 
-export function makeBoard(canvas,onLane){let renderer=null,scene,table,camera,raycaster,plane,ctx=null;const cameraState={yaw:0,pitch:.69,zoom:36,x:0,z:0};let frameKey='',frameDistance=36,dragging=null,clock=0;const terrain=new Map(),actors=new Map(),summons=[],bursts=[];const events=new AbortController();
+export function makeBoard(canvas,onLane){let renderer=null,scene,table,camera,raycaster,plane,ctx=null;const cameraState={yaw:0,pitch:.69,zoom:36,x:0,z:0};let focusedLane=null,frameKey='',frameDistance=72,dragging=null,pinching=false,clock=0;const pointers=new Map(),terrain=new Map(),actors=new Map(),summons=[],bursts=[];const events=new AbortController();
  try{
   renderer=new T.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;
-  scene=new T.Scene();scene.background=new T.Color(0x253b34);scene.fog=new T.Fog(0x253b34,110,190);camera=new T.PerspectiveCamera(46,1,.1,240);
+  scene=new T.Scene();scene.background=new T.Color(0x253b34);scene.fog=new T.Fog(0x253b34,220,380);camera=new T.PerspectiveCamera(46,1,.1,500);
   scene.add(new T.HemisphereLight(0xddeacb,0x513a2e,2));const sun=new T.DirectionalLight(0xffdfa5,2.65);sun.position.set(-9,19,9);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=18;sun.shadow.camera.bottom=-18;scene.add(sun);
-  table=tabletop(scene);raycaster=new T.Raycaster();plane=new T.Plane(new T.Vector3(0,1,0),-.39);
+  table=tabletop(scene);table.scale.setScalar(TABLE_SCALE);raycaster=new T.Raycaster();plane=new T.Plane(new T.Vector3(0,1,0),-.39*TABLE_SCALE);
  }catch(_){renderer?.dispose();renderer=null;ctx=canvas.getContext('2d');}
- function moveCamera(action){if(action==='left')cameraState.x=Math.max(-8,cameraState.x-1.8);if(action==='right')cameraState.x=Math.min(8,cameraState.x+1.8);if(action==='orbit')cameraState.yaw=cameraState.yaw>.45?0:cameraState.yaw+.19;if(action==='zoomIn')cameraState.zoom=Math.max(20,cameraState.zoom-3);if(action==='zoomOut')cameraState.zoom=Math.min(49,cameraState.zoom+3);if(action==='reset')Object.assign(cameraState,{yaw:0,pitch:.69,zoom:36,x:0,z:0});updateCamera();}
- function updateCamera(){if(!camera)return;const s=cameraState,key=`${camera.aspect}/${s.yaw}/${s.pitch}`;if(key!==frameKey){frameDistance=fitTableDistance(camera.aspect,1,s.yaw,s.pitch);frameKey=key;}const distance=frameDistance*s.zoom/36,direction=new T.Vector3(Math.sin(s.yaw)*.32,Math.sin(s.pitch),Math.cos(s.yaw)*.86).normalize();camera.position.copy(direction.multiplyScalar(distance)).add(new T.Vector3(s.x,0,s.z));camera.lookAt(s.x,0,s.z);camera.updateProjectionMatrix();}
+ function focusLane(lane){focusedLane=lane;Object.assign(cameraState,{x:X(lane),z:0,yaw:0,pitch:.42,zoom:12});updateCamera();}
+ function exitLane(){focusedLane=null;Object.assign(cameraState,{x:0,z:0,yaw:0,pitch:.69,zoom:36});updateCamera();}
+ function moveCamera(action){const s=cameraState;
+  if(action==='left')s.x=Math.max(-10,Math.min(10,s.x-1.5));
+  if(action==='right')s.x=Math.max(-10,Math.min(10,s.x+1.5));
+  if(action==='orbit')s.yaw=s.yaw>.55?-.55:s.yaw+.18;
+  if(action==='tiltUp')s.pitch=Math.min(1.14,s.pitch+.12);
+  if(action==='tiltDown')s.pitch=Math.max(.24,s.pitch-.12);
+  if(action==='zoomIn')s.zoom=Math.max(focusedLane===null?20:8,s.zoom-2);
+  if(action==='zoomOut')s.zoom=Math.min(focusedLane===null?49:28,s.zoom+2);
+  if(action==='reset')focusedLane===null?exitLane():focusLane(focusedLane);
+  updateCamera();
+ }
+ function updateCamera(){if(!camera)return;const s=cameraState,key=`${camera.aspect}/${s.yaw}/${s.pitch}`;if(key!==frameKey){frameDistance=fitTableDistance(camera.aspect,1,s.yaw,s.pitch);frameKey=key;}const distance=frameDistance*s.zoom/36,direction=new T.Vector3(Math.sin(s.yaw)*.32,Math.sin(s.pitch),Math.cos(s.yaw)*.86).normalize(),target=new T.Vector3(s.x*TABLE_SCALE,0,s.z*TABLE_SCALE);camera.position.copy(direction.multiplyScalar(distance)).add(target);camera.lookAt(target);camera.updateProjectionMatrix();}
  function resize(){const r=canvas.getBoundingClientRect(),d=renderer?Math.min(window.devicePixelRatio||1,1.5):1,w=Math.max(1,Math.round(r.width*d)),h=Math.max(1,Math.round(r.height*d));if(canvas.width!==w||canvas.height!==h){if(renderer){renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.fov=r.height>r.width?56:46;camera.updateProjectionMatrix();}else{canvas.width=w;canvas.height=h;}}updateCamera();}
- function pick(cx,cy){const r=canvas.getBoundingClientRect();if(renderer){raycaster.setFromCamera(new T.Vector2((cx-r.left)/r.width*2-1,-((cy-r.top)/r.height*2-1)),camera);const hit=new T.Vector3();if(raycaster.ray.intersectPlane(plane,hit)&&Math.abs(hit.x)<11.4&&Math.abs(hit.z)<11.8)return Math.max(0,Math.min(3,Math.round(hit.x/5.65+1.5)));return null;}
+ function pick(cx,cy){const r=canvas.getBoundingClientRect();if(renderer){raycaster.setFromCamera(new T.Vector2((cx-r.left)/r.width*2-1,-((cy-r.top)/r.height*2-1)),camera);const hit=new T.Vector3();if(raycaster.ray.intersectPlane(plane,hit)&&Math.abs(hit.x)<11.4*TABLE_SCALE&&Math.abs(hit.z)<11.8*TABLE_SCALE)return Math.max(0,Math.min(3,Math.round(hit.x/(5.65*TABLE_SCALE)+1.5)));return null;}
   return pickCanvasLane((cx-r.left)*canvas.width/r.width,(cy-r.top)*canvas.height/r.height,canvas.width,canvas.height,cameraState);}
- canvas.addEventListener('pointerdown',e=>{dragging={x:e.clientX,y:e.clientY,originX:e.clientX,originY:e.clientY,moved:false};canvas.setPointerCapture?.(e.pointerId);},{signal:events.signal});
- canvas.addEventListener('pointermove',e=>{if(!dragging)return;const dx=e.clientX-dragging.x,dy=e.clientY-dragging.y;if(Math.hypot(e.clientX-dragging.originX,e.clientY-dragging.originY)>7)dragging.moved=true;if(dragging.moved){if(e.shiftKey){cameraState.x=Math.max(-8,Math.min(8,cameraState.x-dx*.027));cameraState.z=Math.max(-6,Math.min(6,cameraState.z+dy*.027));}else{cameraState.yaw=Math.max(-.8,Math.min(.8,cameraState.yaw-dx*.004));cameraState.pitch=Math.max(.42,Math.min(1.14,cameraState.pitch+dy*.003));}updateCamera();}dragging.x=e.clientX;dragging.y=e.clientY;},{signal:events.signal});
- canvas.addEventListener('pointerup',e=>{if(dragging&&!dragging.moved){const lane=pick(e.clientX,e.clientY);if(lane!==null)onLane(lane);}dragging=null;},{signal:events.signal});
- canvas.addEventListener('wheel',e=>{e.preventDefault();cameraState.zoom=Math.max(20,Math.min(49,cameraState.zoom+Math.sign(e.deltaY)*2));updateCamera();},{signal:events.signal,passive:false});
+ canvas.addEventListener('pointerdown',e=>{pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1){pinching=false;dragging={id:e.pointerId,x:e.clientX,y:e.clientY,originX:e.clientX,originY:e.clientY,moved:false};}else{pinching=true;dragging=null;}canvas.setPointerCapture?.(e.pointerId);},{signal:events.signal});
+ canvas.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;const old=[...pointers.values()],before=old.length===2?Math.hypot(old[0].x-old[1].x,old[0].y-old[1].y):0;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===2){const pair=[...pointers.values()],after=Math.hypot(pair[0].x-pair[1].x,pair[0].y-pair[1].y);if(before>5)cameraState.zoom=Math.max(focusedLane===null?20:8,Math.min(focusedLane===null?49:28,cameraState.zoom*before/after));updateCamera();return;}
+  if(!dragging||dragging.id!==e.pointerId)return;const dx=e.clientX-dragging.x,dy=e.clientY-dragging.y;if(Math.hypot(e.clientX-dragging.originX,e.clientY-dragging.originY)>7)dragging.moved=true;if(dragging.moved){if(e.shiftKey){cameraState.x=Math.max(-10,Math.min(10,cameraState.x-dx*.027));cameraState.z=Math.max(-10,Math.min(10,cameraState.z+dy*.027));}else{cameraState.yaw=Math.max(-.8,Math.min(.8,cameraState.yaw-dx*.004));cameraState.pitch=Math.max(.24,Math.min(1.14,cameraState.pitch+dy*.003));}updateCamera();}dragging.x=e.clientX;dragging.y=e.clientY;},{signal:events.signal});
+ canvas.addEventListener('pointerup',e=>{if(dragging?.id===e.pointerId&&!dragging.moved&&!pinching){const lane=pick(e.clientX,e.clientY);if(lane!==null)onLane(lane);}pointers.delete(e.pointerId);dragging=null;if(!pointers.size)pinching=false;},{signal:events.signal});
+ canvas.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);dragging=null;if(!pointers.size)pinching=false;},{signal:events.signal});
+ canvas.addEventListener('wheel',e=>{e.preventDefault();cameraState.zoom=Math.max(focusedLane===null?20:8,Math.min(focusedLane===null?49:28,cameraState.zoom+Math.sign(e.deltaY)*2));updateCamera();},{signal:events.signal,passive:false});
  function summon(key,lane,team=0){bursts.push({lane,team,age:0});if(renderer)summons.push({mesh:fallingCard(table,LANDSCAPES[key]?key:key==='cornfield'?'corn':'sand',lane,team),age:0});}
  function syncTerrain(field,world){if(!renderer)return;for(let lane=0;lane<4;lane++)for(let team=0;team<2;team++){const kind=team?(world?.lanes[lane].enemyTerrain||'corn'):(field.slots[lane]||'blank'),id=`${team}-${lane}`,old=terrain.get(id);if(old?.kind===kind)continue;if(old)table.remove(old.group);const group=landscape(table,kind,lane,team);terrain.set(id,{kind,group});}}
  function syncActors(world,dt){if(!renderer||!world)return;const active=new Set();for(const object of [...world.buildings,...world.units]){active.add(object.id);let item=actors.get(object.id);if(!item){const mesh=makeMiniature(object.key);table.add(mesh);mesh.scale.setScalar(.001);item={mesh,age:0};actors.set(object.id,item);bursts.push({lane:object.lane,team:object.team,age:0});}item.age+=dt;const rise=Math.min(1,item.age/.8),bounce=1+Math.sin(Math.min(1,item.age/.8)*Math.PI)*.32;item.mesh.scale.setScalar(rise*bounce*(world.buildings.includes(object)?1.1:1));item.mesh.position.set(object.x,.55+Math.sin(clock*3+object.id.length)*.025+Math.max(0,1-rise)*1.5,object.z);item.mesh.rotation.y=object.team?0:Math.PI;animateMiniature(item.mesh,object,clock);}
@@ -80,7 +95,7 @@ export function makeBoard(canvas,onLane){let renderer=null,scene,table,camera,ra
   syncTerrain(field,world);for(const [id,item]of terrain){if(item.kind==='corn'&&item.group.userData.details){const [team,lane]=id.split('-').map(Number),amount=world?(team?world.lanes[lane].enemyCrop:world.lanes[lane].crop):team?.75:.7;item.group.userData.details.scale.y=Math.max(.02,amount);}}syncActors(world,dt);for(let i=summons.length-1;i>=0;i--){const s=summons[i];s.age+=dt;s.mesh.position.y=4-(Math.min(1,s.age/.72)*3.54);s.mesh.rotation.y+=dt*2;s.mesh.scale.setScalar(Math.max(.001,1-s.age/.95));if(s.age>=.95){table.remove(s.mesh);summons.splice(i,1);}}
   renderer.render(scene,camera);
  }
- return {render,moveCamera,summon,mode:renderer?'3d':'canvas',dispose(){events.abort();renderer?.dispose();terrain.clear();actors.clear();}};
+ return {render,moveCamera,focusLane,exitLane,summon,mode:renderer?'3d':'canvas',dispose(){events.abort();renderer?.dispose();terrain.clear();actors.clear();}};
 }
 
 // The same card slots and state remain playable when the browser disables WebGL.

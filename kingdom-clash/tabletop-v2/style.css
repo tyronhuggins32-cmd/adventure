@@ -24,3 +24,19 @@
  .rack-head{gap:3px}
  .camera{max-width:calc(100% - 12px);white-space:nowrap}
 }
+
+.focus-head{display:none}
+.lane-focus{position:fixed;inset:0;z-index:20;height:100dvh!important;min-height:0!important;grid-template-rows:minmax(0,1fr)!important;background:#142c29}
+.lane-focus .scoreboard,.lane-focus .rack{display:none}
+.lane-focus .stage{width:100%;height:100%;padding:0;min-height:0}
+.lane-focus .board-shell{width:100%;height:100%;min-height:0;border:0;border-radius:0;box-shadow:none}
+.lane-focus .table-stamp,.lane-focus .table-sides,.lane-focus .lane-buttons{display:none}
+.lane-focus .board-message{top:calc(72px + env(safe-area-inset-top));right:12px;max-width:min(320px,60%);font-size:11px}
+.lane-focus .focus-head{position:absolute;z-index:5;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(440px,calc(100% - 24px));display:flex;align-items:center;justify-content:center;gap:8px;padding:6px;border:1px solid #d6b879;border-radius:13px;background:#18342de8;box-shadow:0 8px 22px #0b2019aa}
+.focus-head strong{flex:1;text-align:center;font:700 14px Georgia,serif;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.focus-head button{width:40px;height:39px;flex:none;border:1px solid #c8b180;border-radius:9px;background:#375b46;color:#f5e6be;font-size:24px;line-height:1}
+.focus-head #exitLane{background:#744c3c}
+.lane-focus .camera{bottom:max(12px,env(safe-area-inset-bottom));max-width:calc(100% - 16px);justify-content:center;gap:5px;padding:6px;background:#18342df2}
+.lane-focus .camera button{width:39px;height:39px;flex:none}
+.lane-focus .camera span{display:none}
+@media(max-width:400px){.camera{gap:2px;padding:3px}.camera button{width:28px}.lane-focus .camera{gap:3px;padding:5px}.lane-focus .camera button{width:37px;height:38px}.lane-focus .board-message{font-size:9px}}
