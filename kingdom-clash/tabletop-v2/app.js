@@ -1,5 +1,5 @@
 import {makeWorld,addUnit,addBuilding,cast,beginBattle,step} from '../reborn/rules.js';
-import {makeBoard} from './board.js?v=field14';
+import {makeBoard} from './board.js?v=field15';
 
 const $=id=>document.getElementById(id);
 const names=['CORN LANDS','BLUE PLAINS','FROZEN LAKE','USELESS SWAMP'];
