@@ -46,18 +46,38 @@ test('focused canvas lane shows both armies and keeps taps aligned',()=>{
   assert.ok(point[0]>0&&point[0]<375&&point[1]>90&&point[1]<690,`${z}: ${point}`);
   assert.equal(pickCanvasLane(...point,375,740,camera),1);
  }
+ const left=projectCanvasPoint(camera.x-3.3,0,375,740,camera)[0];
+ const right=projectCanvasPoint(camera.x+3.3,0,375,740,camera)[0];
+ const neighbor=projectCanvasPoint(camera.x+5.65,0,375,740,camera)[0];
+ assert.ok(left>=0&&left<25&&right>350&&right<=375,`selected lane spans ${left}..${right}`);
+ assert.ok(neighbor>375,'the next lane belongs outside the close view');
 });
 test('the 3D camera frames all four tabletop edges on phone and desktop screens',()=>{
  assert.equal(TABLE_SCALE,2);
  assert.deepEqual(FIELD_SIZE,{width:1.5,length:3});
- for(const [width,height] of [[375,740],[320,568],[768,540],[1280,680]])for(const yaw of [0,.57,-.6]){
-  const distance=fitTableDistance(width,height,yaw,.69);
+ for(const [width,height] of [[375,405],[375,740],[320,568],[768,540],[1280,680]])for(const yaw of [0,.57,-.6])for(const pitch of [.69,1.14]){
+  const distance=fitTableDistance(width,height,yaw,pitch);
   const camera=new T.PerspectiveCamera(height>width?56:46,width/height,.1,500);
-  const direction=new T.Vector3(Math.sin(yaw)*.32,Math.sin(.69),Math.cos(yaw)*.86).normalize();
+  const direction=new T.Vector3(Math.sin(yaw)*.32,Math.sin(pitch),Math.cos(pitch)*.86).normalize();
   camera.position.copy(direction.multiplyScalar(distance));camera.lookAt(0,0,0);camera.updateMatrixWorld();
   for(const x of[-13.8,13.8])for(const y of[-.75,4.4])for(const z of[-12.5,12.5]){
    const point=new T.Vector3(x*FIELD_SIZE.width,y,z*FIELD_SIZE.length).multiplyScalar(TABLE_SCALE).project(camera);
    assert.ok(Math.abs(point.x)<.861&&Math.abs(point.y)<.861,`${width}×${height} yaw ${yaw}: ${point.x}, ${point.y}`);
   }
  }
+});
+test('the selected 3D lane fits in the phone viewport without showing its neighbor',()=>{
+ const width=375,height=520,pitch=1.15,lane=1,focusX=(lane-1.5)*5.65;
+ const distance=fitTableDistance(width,height,0,pitch)*30/36;
+ const camera=new T.PerspectiveCamera(56,width/height,.1,500);
+ const direction=new T.Vector3(0,Math.sin(pitch),Math.cos(pitch)*.86).normalize();
+ const target=new T.Vector3(focusX*FIELD_SIZE.width*TABLE_SCALE,0,FIELD_SIZE.length*TABLE_SCALE);
+ camera.position.copy(direction.multiplyScalar(distance)).add(target);camera.lookAt(target);
+ camera.projectionMatrix.elements[0]*=4.8;camera.updateMatrixWorld();
+ for(const z of[-11.8,11.8])for(const side of[-2.8,2.8]){
+  const point=new T.Vector3((focusX+side)*FIELD_SIZE.width*TABLE_SCALE,0,z*FIELD_SIZE.length*TABLE_SCALE).project(camera);
+  assert.ok(Math.abs(point.x)<.9&&Math.abs(point.y)<.9,`lane edge ${side},${z}: ${point.x},${point.y}`);
+ }
+ const neighbor=new T.Vector3((focusX+5.65)*FIELD_SIZE.width*TABLE_SCALE,0,0).project(camera);
+ assert.ok(neighbor.x>1,'the neighboring lane is beyond the right edge');
 });
