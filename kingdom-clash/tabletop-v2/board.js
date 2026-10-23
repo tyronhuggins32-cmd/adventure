@@ -103,7 +103,7 @@ function paint(c,canvas,field,world,t,cam,bursts){const W=canvas.width,H=canvas.
    else if(kind==='blue'){oval(c,px,py,3*s,1*s,j%3?'#7fc3cf':'#b3e2d9');if(j%4===0){c.fillStyle='#d0e7ad';c.fillRect(px,py-4*s,2*s,4*s);}}
    else if(kind==='ice'){oval(c,px,py,4*s,1.5*s,j%3?'#ecf5ed':'#7eb6c5');}
    else oval(c,px,py,3*s,1.3*s,j%3?'#c1a975':'#718764');}
-  if(kind==='blank'){const [px,py]=project((x0+x1)/2,(z0+z1)/2);c.save();c.font=`700 ${Math.max(12,W/85)}px Georgia`;c.textAlign='center';c.fillStyle='#bca87c';c.fillText('PLACE LANDSCAPE',px,py);c.restore();}
+  if(kind==='blank'){const [px,py]=project((x0+x1)/2,(z0+z1)/2);c.save();c.font=`700 ${Math.max(10,Math.min(16,W/85))}px Georgia`;c.textAlign='center';c.fillStyle='#bca87c';c.fillText(W<700?'PLACE':'PLACE LANDSCAPE',px,py);c.restore();}
  }
  poly(c,[project(x0,0),project(x1,0),project(x1,.2),project(x0,.2)],'#e8be78','#866642',2);
  }
