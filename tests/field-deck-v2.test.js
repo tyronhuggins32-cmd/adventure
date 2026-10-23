@@ -30,6 +30,14 @@ test('camera projection maps a tapped lane back to that lane after orbit, zoom a
   }
  }
 });
+test('focused canvas lane shows both armies and keeps taps aligned',()=>{
+ const camera={yaw:0,pitch:.42,zoom:8,x:(1-1.5)*5.65,z:0,focused:1};
+ for(const z of[-5.65,5.65]){
+  const point=projectCanvasPoint(camera.x,z,375,740,camera);
+  assert.ok(point[0]>0&&point[0]<375&&point[1]>90&&point[1]<690,`${z}: ${point}`);
+  assert.equal(pickCanvasLane(...point,375,740,camera),1);
+ }
+});
 test('the 3D camera frames all four tabletop edges on phone and desktop screens',()=>{
  assert.equal(TABLE_SCALE,2);
  for(const [width,height] of [[375,740],[320,568],[768,540],[1280,680]])for(const yaw of [0,.57,-.6]){
