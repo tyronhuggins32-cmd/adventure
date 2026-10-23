@@ -1,45 +1,37 @@
-import {CARDS,makeWorld,play,draw,floop,beginBattle,step} from '../reborn/rules.js';
-import {LANDSCAPES,createFieldDeck,selectLandscape,placeLandscape,canStart,lockField,applyField} from './field-deck.js';
-import {makeBoard} from './board.js?v=field13';
+import {makeWorld,addUnit,addBuilding,cast,beginBattle,step} from '../reborn/rules.js';
+import {makeBoard} from './board.js?v=field14';
 
 const $=id=>document.getElementById(id);
-const art={pig:[57,64],dog:[71,64],scholar:[29,50],husker:[0,17],archer:[57,50],maize:[57,0],earlings:[71,0],reaper:[43,0],sheep:[100,17],wolf:[29,100],crow:[43,0]};
-const structures={barn:[57,80],cornfield:[0,0],school:[43,60],silo:[71,100],scarecrow:[71,80],throne:[29,80],den:[14,20]};
-let field=createFieldDeck(),world=null,chosen=null,selectedUnit=null,focusedLane=null,last=performance.now(),drawClock=0,logMark='',cardSignature='';
-const board=makeBoard($('board'),targetLane);
-const safe=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function say(message){$('message').textContent=message;$('hint').textContent=message;}
-function showLane(lane){focusedLane=lane;$('game').classList.add('lane-focus');$('focusTitle').textContent=`LANE ${lane+1} · ${field.slots[lane]?LANDSCAPES[field.slots[lane]].name.toUpperCase():'EMPTY FIELD'}`;board.focusLane(lane);}
-function leaveLane(){focusedLane=null;$('game').classList.remove('lane-focus');board.exitLane();}
-
-function landscapeCard(key,index){const l=LANDSCAPES[key],active=field.selected===index;return `<button class="card field ${active?'selected':''}" data-field="${index}" aria-pressed="${active}" aria-label="${safe(l.name)} landscape card. ${safe(l.detail)}"><span class="card-top"><b>◆</b><small>LANDSCAPE</small><i>${index+1}</i></span><span class="card-art field-art" data-icon="${l.icon}" style="--field-top:${l.tone};--field-bottom:${l.edge}"></span><span class="card-name">${safe(l.name)}</span><span class="card-text">${safe(l.detail)}</span><span class="card-bottom">${safe(l.family.toUpperCase())} FIELD</span></button>`;}
-function battleCard(key,index){const card=CARDS[key],sprite=card.type==='building'?structures[key]:art[card.art],active=chosen===index;return `<button class="card ${card.type==='building'?'building':card.type==='spell'?'spell':''} ${active?'selected':''}" data-battle="${index}" aria-pressed="${active}" aria-label="${safe(card.name)}. ${card.cost} energy. ${safe(card.text)}"><span class="card-top"><b>${card.cost}</b><small>${card.type.toUpperCase()}</small><i>✦</i></span><span class="card-art ${sprite?'sprite '+(card.type==='building'?'building-sprite':''):'spell-art'}" style="${sprite?`--art-x:${sprite[0]}%;--art-y:${sprite[1]}%`:''}"><span>${sprite?'':'✦'}</span></span><span class="card-name">${safe(card.name)}</span><span class="card-text">${safe(card.text)}</span><span class="card-bottom">${card.type==='creature'?`⚔ ${card.atk}　♥ ${card.hp}`:card.type==='building'?`◆ ${card.hp} HP`:'CAST ON LANE'}</span></button>`;}
-function renderCards(){const signature=world?`battle:${world.hand.join(',')}:${chosen}`:`field:${field.cards.join(',')}:${field.selected}`;if(signature===cardSignature)return;cardSignature=signature;const track=$('cards'),was=track.scrollLeft;track.innerHTML=world?world.hand.map(battleCard).join(''):field.cards.map(landscapeCard).join('');track.scrollLeft=was;}
-function renderUI(){const lanes=$('laneButtons').children;for(let i=0;i<4;i++){lanes[i].classList.toggle('target',world?chosen!==null:field.selected!==null);lanes[i].title=field.slots[i]?`Landscape ${i+1}: ${LANDSCAPES[field.slots[i]].name}`:`Empty landscape ${i+1}`;}if(focusedLane!==null)$('focusTitle').textContent=`LANE ${focusedLane+1} · ${field.slots[focusedLane]?LANDSCAPES[field.slots[focusedLane]].name.toUpperCase():'EMPTY FIELD'}`;
- if(!world){const n=field.slots.filter(Boolean).length;$('round').textContent='BUILD THE FIELD';$('phaseLabel').textContent=`${n} / 4 LANDSCAPES`;$('energy').textContent=4-n;$('deckLabel').textContent='STEP 1 · LANDSCAPE DECK';$('deckTitle').textContent='Build your side of the table';$('primary').disabled=!canStart(field);$('primary').textContent=canStart(field)?'START MATCH':'PLACE FOUR FIELDS';$('draw').hidden=$('pause').hidden=$('speed').hidden=$('floop').hidden=true;renderCards();return;}
- const a=world.commanders[0],b=world.commanders[1];$('ownHealth').textContent=Math.max(0,Math.ceil(a.hp));$('foeHealth').textContent=Math.max(0,Math.ceil(b.hp));$('ownBar').style.width=`${Math.max(0,a.hp/a.max*100)}%`;$('foeBar').style.width=`${Math.max(0,b.hp/b.max*100)}%`;$('round').textContent=`ROUND ${world.round}`;$('phaseLabel').textContent=world.phase==='battle'?`${Math.ceil(22-world.elapsed)} SEC · LIVE`:world.phase==='plan'?'PLACE CARDS':'MATCH OVER';$('deckLabel').textContent='STEP 2 · BATTLE HAND';$('deckTitle').textContent=`${world.hand.length} cards · ${world.deck.length} in deck`;$('energy').textContent=a.energy;$('primary').textContent=world.phase==='battle'?'BATTLE IN PROGRESS':'BATTLE! ⚔';$('primary').disabled=world.phase!=='plan';$('draw').hidden=$('pause').hidden=$('speed').hidden=$('floop').hidden=false;$('draw').disabled=world.phase!=='plan'||a.energy<1;$('pause').disabled=$('speed').disabled=world.phase!=='battle';$('pause').textContent=world.paused?'▶':'Ⅱ';$('speed').textContent=`${world.speed}×`;$('floop').disabled=world.phase!=='plan'||!selectedUnit||!world.units.some(u=>u.id===selectedUnit&&!u.flooped);$('floop').textContent=selectedUnit?`FLOOP ${world.units.find(u=>u.id===selectedUnit)?.name||''}`:'FLOOP';
- const latest=world.logs[0]?.text;if(latest!==logMark){logMark=latest;$('journal').innerHTML=world.logs.map(e=>`<li><b>${e.time}s</b> ${safe(e.text)}</li>`).join('');}
- renderCards();if(world.winner!==null){$('victory').hidden=false;$('winner').textContent=world.winner===0?'Your table wins.':'The rival wins.';}
+const names=['CORN LANDS','BLUE PLAINS','FROZEN LAKE','USELESS SWAMP'];
+const field={slots:['corn','blue','ice','swamp']};
+let world,focused=null,last=performance.now(),uiClock=0,between=0,lastEvent='';
+const board=makeBoard($('board'),lane=>focus(lane));
+function seed(){
+ world=makeWorld('farmer',Math.floor(Math.random()*1000000));
+ world.commanders[0].name='Farmer';world.commanders[1].name='Jake';
+ for(let i=0;i<4;i++){const l=world.lanes[i];l.terrain=field.slots[i];l.enemyTerrain=['corn','blue','ice','swamp'][i];l.crop=i===0?.9:i===3?.15:0;l.enemyCrop=i===0?.8:i===3?.2:0;l.food=i===0?4:1;l.enemyFood=i===0?3:1;l.mud=i===3?3:0;}
+ addBuilding(world,0,0,'scarecrow',true);addBuilding(world,0,2,'den',true);addBuilding(world,1,3,'silo',true);
+ for(const [team,lane,key]of [[0,0,'pig'],[0,1,'dog'],[0,2,'wolf'],[0,2,'wolf'],[0,3,'archer'],[1,0,'crow'],[1,1,'dog'],[1,2,'wolf'],[1,3,'archer']])addUnit(world,team,lane,key,true);
+ beginBattle(world);between=0;lastEvent='';update();
 }
-function targetLane(lane){if(!world){if(field.selected===null){if(focusedLane!==lane)showLane(lane);return;}const kind=field.cards[field.selected],name=LANDSCAPES[kind].name;if(placeLandscape(field,lane)){board.summon(kind,lane);say(`${name} lands in slot ${lane+1}. ${field.slots.filter(Boolean).length} of 4 placed.`);renderUI();}return;}
- if(chosen===null){if(world.phase==='plan'){const own=world.units.find(u=>u.team===0&&u.lane===lane&&!u.flooped);selectedUnit=own?.id||null;renderUI();}if(focusedLane!==lane)showLane(lane);return;}
- if(world.phase!=='plan'){say('The figures are fighting. Wait for the next planning turn.');return;}
- if(chosen!==null){const key=world.hand[chosen];if(!key){chosen=null;renderUI();return;}if(play(world,key,lane)){board.summon(key,lane);say(`${CARDS[key].name} falls onto landscape ${lane+1} and becomes a miniature.`);chosen=null;selectedUnit=null;}else say('That card cannot be played there. Check energy and the occupied building slot.');renderUI();return;}
+function focus(lane){focused=lane;board.focusLane(lane);$('game').classList.add('focused');$('viewTitle').textContent=`LANE ${lane+1} · ${names[lane]}`;$('sceneInfo').textContent='A miniature battlefield with its own terrain and creatures.';for(const [i,b]of [...document.querySelectorAll('[data-lane]')].entries())b.setAttribute('aria-current',i===lane?'true':'false');}
+function overview(){focused=null;board.exitLane();$('game').classList.remove('focused');$('viewTitle').textContent='FOUR LIVING LANDSCAPES';$('sceneInfo').textContent='Miniatures think, move and fight on the table.';for(const b of document.querySelectorAll('[data-lane]'))b.removeAttribute('aria-current');}
+function reinforce(){
+ const round=world.round;
+ const own=[['sheep',0],['husker',0],['scholar',1],['wolf',2],['pig',0],['archer',3]][(round-2)%6];
+ const foe=[['earlings',0],['maize',0],['reaper',1],['wolf',2],['crow',3],['husker',0]][(round-2)%6];
+ for(const [team,choice]of [[0,own],[1,foe]]){const [key,lane]=choice;if(world.units.filter(u=>u.team===team&&u.lane===lane).length<3){addUnit(world,team,lane,key,true);board.summon(key,lane,team);}}
+ if(round%3===0){cast(world,round%2,round%2?0:2,round%2?'maze':'cotton');}
+ beginBattle(world);
 }
-function startMatch(){if(!lockField(field))return;world=applyField(makeWorld('blue'),field);world.units=[];world.buildings=[];world.corpses=[];world.effects=[];world.logs=[];world.nextId=1;world.lanes.forEach((lane,i)=>{lane.enemyTerrain='corn';lane.enemyCrop=.65+(i%2)*.08;lane.enemyFood=2;});chosen=null;selectedUnit=null;logMark='';say('Your field is built. Play a card, tap a lane, then call Battle.');renderUI();}
-function reset(){if(focusedLane!==null)leaveLane();field=createFieldDeck();world=null;chosen=null;selectedUnit=null;logMark='';$('victory').hidden=true;$('helpPanel').hidden=true;board.moveCamera('reset');$('ownHealth').textContent=$('foeHealth').textContent='25';$('ownBar').style.width=$('foeBar').style.width='100%';say('Pick a landscape card, then tap a lane. Place all four fields.');renderUI();}
-
-$('cards').addEventListener('click',event=>{const button=event.target.closest('[data-field],[data-battle]');if(!button)return;if(!world){const index=+button.dataset.field;selectLandscape(field,index);const selected=field.selected;say(selected===null?'Field card unselected.':`${LANDSCAPES[field.cards[selected]].name}: tap a numbered slot on your side.`);}else{const index=+button.dataset.battle;chosen=chosen===index?null:index;selectedUnit=null;say(chosen===null?'Card unselected.':`${CARDS[world.hand[chosen]].name}: tap a landscape to place it.`);}renderUI();});
-$('laneButtons').addEventListener('click',event=>{const button=event.target.closest('[data-lane]');if(button)targetLane(+button.dataset.lane);});
-$('primary').addEventListener('click',()=>{if(!world){startMatch();return;}if(beginBattle(world)){chosen=null;say('Battle is live. Your miniatures make their own decisions.');renderUI();}});
-$('restart').addEventListener('click',reset);$('again').addEventListener('click',reset);
-$('draw').addEventListener('click',()=>{if(world?.phase!=='plan'||world.commanders[0].energy<1)return;world.commanders[0].energy--;draw(world,1);say('You drew a card for one energy.');renderUI();});
-$('pause').addEventListener('click',()=>{world.paused=!world.paused;renderUI();});$('speed').addEventListener('click',()=>{world.speed=world.speed===1?2:world.speed===2?3:1;renderUI();});
-$('floop').addEventListener('click',()=>{if(floop(world,selectedUnit)){say(world.logs[0].text);selectedUnit=null;renderUI();}});
-$('help').addEventListener('click',()=>{$('helpPanel').hidden=!$('helpPanel').hidden;});$('closeHelp').addEventListener('click',()=>{$('helpPanel').hidden=true;});
-for(const button of document.querySelectorAll('[data-cam]'))button.addEventListener('click',()=>board.moveCamera(button.dataset.cam));
-$('exitLane').addEventListener('click',leaveLane);
-$('prevLane').addEventListener('click',()=>showLane((focusedLane+3)%4));
-$('nextLane').addEventListener('click',()=>showLane((focusedLane+1)%4));
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&focusedLane!==null)leaveLane();});
-function tick(now){const dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;if(world){for(let i=0;i<4;i++)if(field.slots[i]==='swamp'&&world.phase==='battle')world.lanes[i].mud=Math.max(world.lanes[i].mud,.18);step(world,dt);}board.render(field,world,dt);drawClock+=dt;if(world&&drawClock>.35){drawClock=0;renderUI();}requestAnimationFrame(tick);}renderUI();requestAnimationFrame(tick);
+function update(){const own=world.commanders[0],foe=world.commanders[1];$('ownHealth').textContent=Math.max(0,Math.ceil(own.hp));$('foeHealth').textContent=Math.max(0,Math.ceil(foe.hp));$('ownBar').style.width=`${Math.max(0,own.hp/own.max*100)}%`;$('foeBar').style.width=`${Math.max(0,foe.hp/foe.max*100)}%`;$('round').textContent=`ROUND ${world.round}`;$('phaseLabel').textContent=world.winner!==null?'BATTLE ENDED':world.paused?'PAUSED':world.phase==='plan'?'REINFORCEMENTS':'BATTLE LIVE';$('battleMark').textContent=world.winner!==null?'◆ MATCH COMPLETE':world.paused?'Ⅱ SIMULATION PAUSED':'● LIVE SIMULATION';$('clock').textContent=`${String(Math.floor(world.t/60)).padStart(2,'0')}:${String(Math.floor(world.t%60)).padStart(2,'0')} · ROUND ${world.round}`;$('pause').textContent=world.paused?'▶':'Ⅱ';$('speed').textContent=`${world.speed}×`;const entry=world.logs[0]?.text;if(entry&&entry!==lastEvent){lastEvent=entry;$('event').textContent=entry;}if(world.winner!==null)$('event').textContent=`${world.winner===0?'Farmer':'Jake'} wins the living table. Start a new battle to play again.`;}
+function tick(now){const dt=Math.max(0,Math.min(.05,(now-last)/1000));last=now;if(world){step(world,dt);if(world.phase==='plan'&&!world.paused&&!world.winner){between+=dt;if(between>1.4)reinforce();}else between=0;board.render(field,world,dt);uiClock+=dt;if(uiClock>.24){uiClock=0;update();}}requestAnimationFrame(tick);}
+for(const b of document.querySelectorAll('[data-lane]'))b.addEventListener('click',()=>focus(Number(b.dataset.lane)));
+$('allLanes').addEventListener('click',overview);
+$('prevLane').addEventListener('click',()=>focus((focused+3)%4));$('nextLane').addEventListener('click',()=>focus((focused+1)%4));
+for(const b of document.querySelectorAll('[data-cam]'))b.addEventListener('click',()=>board.moveCamera(b.dataset.cam));
+$('pause').addEventListener('click',()=>{if(world.winner!==null)return;world.paused=!world.paused;update();});
+$('speed').addEventListener('click',()=>{world.speed=world.speed===1?2:world.speed===2?3:1;update();});
+$('restart').addEventListener('click',()=>{overview();seed();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&focused!==null)overview();});
+seed();requestAnimationFrame(tick);

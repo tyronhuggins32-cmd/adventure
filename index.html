@@ -1,19 +1,33 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#192c27"><title>Card Wars — Tabletop</title><link rel="stylesheet" href="kingdom-clash/tabletop-v2/style.css?v=field13"></head>
-<body><main id="game">
-  <header class="scoreboard">
-    <div class="side own"><div class="portrait">✦</div><div class="identity"><small>YOUR TABLE</small><strong>Player</strong><div class="health-track"><span id="ownBar"></span></div></div><b id="ownHealth">25</b></div>
-    <div class="match-title"><small>THE TABLETOP</small><strong id="round">BUILD THE FIELD</strong><em id="phaseLabel">PLACE 4 LANDSCAPES</em></div>
-    <div class="side foe"><b id="foeHealth">25</b><div class="identity"><small>RIVAL TABLE</small><strong>Rival</strong><div class="health-track"><span id="foeBar"></span></div></div><div class="portrait foe-portrait">◆</div></div>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#151d20">
+  <title>Card Wars · Living Table</title>
+  <link rel="stylesheet" href="kingdom-clash/tabletop-v2/battle.css?v=field14">
+</head>
+<body>
+<main id="game">
+  <header class="heads-up">
+    <div class="combatant"><span class="crest">✦</span><div><small>THE CORNLANDS</small><strong>Farmer</strong><span class="life"><i id="ownBar"></i></span></div><b id="ownHealth">25</b></div>
+    <div class="round"><small>CARD WARS · LIVING TABLE</small><strong id="round">ROUND 1</strong><span id="phaseLabel">BATTLE LIVE</span></div>
+    <div class="combatant rival"><b id="foeHealth">25</b><div><small>RIVAL FIELD</small><strong>Jake</strong><span class="life"><i id="foeBar"></i></span></div><span class="crest">◆</span></div>
   </header>
-  <section class="stage" aria-label="Card Wars battlefield"><div class="board-shell"><canvas id="board" aria-label="Dimensional tabletop with four long landscapes. Choose a card to place it, or tap a lane for a close view."></canvas><div class="table-stamp">CARD WARS <span>✦</span> THE TABLE</div><div class="table-sides"><span>RIVAL LANDSCAPES</span><span>YOUR LANDSCAPES</span></div><div id="laneButtons" class="lane-buttons" aria-label="Landscape slots"><button data-lane="0" aria-label="Landscape 1">1</button><button data-lane="1" aria-label="Landscape 2">2</button><button data-lane="2" aria-label="Landscape 3">3</button><button data-lane="3" aria-label="Landscape 4">4</button></div><div class="board-message" id="message" role="status" aria-live="polite">Pick a landscape card, then tap a lane.</div></div>
-    <div class="focus-head" aria-label="Lane view"><button id="prevLane" title="Previous lane" aria-label="Previous lane">‹</button><strong id="focusTitle">LANDSCAPE 1</strong><button id="nextLane" title="Next lane" aria-label="Next lane">›</button><button id="exitLane" title="Return to table" aria-label="Return to full table">×</button></div>
-    <div class="camera" aria-label="Camera controls"><span>CAMERA</span><button data-cam="left" title="Pan left" aria-label="Pan left">←</button><button data-cam="orbit" title="Orbit" aria-label="Orbit">⟳</button><button data-cam="right" title="Pan right" aria-label="Pan right">→</button><button data-cam="tiltDown" title="Lower camera" aria-label="Lower camera">↘</button><button data-cam="tiltUp" title="Raise camera" aria-label="Raise camera">↗</button><button data-cam="zoomOut" title="Zoom out" aria-label="Zoom out">−</button><button data-cam="zoomIn" title="Zoom in" aria-label="Zoom in">＋</button><button data-cam="reset" title="Reset camera" aria-label="Reset camera">⌂</button></div>
+  <section class="viewport" aria-label="Living tabletop battlefield">
+    <canvas id="board" aria-label="Four living battlefield lanes. Tap a lane for a close view; drag to move the camera."></canvas>
+    <div class="scene-title"><small>THE TABLETOP</small><strong id="viewTitle">FOUR LIVING LANDSCAPES</strong><span id="sceneInfo">Miniatures think, move and fight on the table.</span></div>
+    <div class="battle-mark" id="battleMark">● LIVE SIMULATION</div>
+    <div class="lane-rail" aria-label="Inspect landscapes">
+      <button data-lane="0"><span>01</span><strong>Cornlands</strong></button>
+      <button data-lane="1"><span>02</span><strong>Blue Plains</strong></button>
+      <button data-lane="2"><span>03</span><strong>Frozen Lake</strong></button>
+      <button data-lane="3"><span>04</span><strong>Swamp</strong></button>
+    </div>
+    <div class="view-control"><button id="prevLane" aria-label="Previous lane">‹</button><button id="allLanes">ALL LANES</button><button id="nextLane" aria-label="Next lane">›</button></div>
+    <div class="camera" aria-label="Camera controls"><button data-cam="left" aria-label="Pan left">←</button><button data-cam="orbit" aria-label="Orbit">⟳</button><button data-cam="right" aria-label="Pan right">→</button><button data-cam="tiltDown" aria-label="Lower camera">↘</button><button data-cam="tiltUp" aria-label="Raise camera">↗</button><button data-cam="zoomOut" aria-label="Zoom out">−</button><button data-cam="zoomIn" aria-label="Zoom in">＋</button><button data-cam="reset" aria-label="Reset camera">⌂</button></div>
   </section>
-  <section class="rack" aria-label="Deck and battle actions"><div class="rack-head"><div class="rack-label"><span class="energy" id="energy">4</span><div><small id="deckLabel">STEP 1 · LANDSCAPE DECK</small><strong id="deckTitle">Build your side of the table</strong></div></div><div class="actions"><button id="restart" title="Rebuild the field">RESET</button><button id="draw" hidden>DRAW · 1</button><button id="pause" hidden title="Pause battle">Ⅱ</button><button id="speed" hidden title="Battle speed">1×</button><button id="primary" disabled>PLACE FOUR FIELDS</button></div></div>
-    <div class="rack-body"><div id="cards" class="cards" aria-label="Cards in your deck"></div></div>
-    <div class="rack-foot"><span id="hint">The field is your first deck. Pick four landscape cards; each one becomes a real tile.</span><button id="floop" hidden disabled>FLOOP</button><button id="help">RULES</button></div>
-  </section>
-  <aside class="help" id="helpPanel" hidden><button id="closeHelp" aria-label="Close rules">×</button><h2>Build the field. Play the cards. Watch the fight.</h2><p>Choose four landscape cards and tap the numbered slots or the table to lay them down. A selected field can replace a slot before you start. Press <b>START MATCH</b> to deal the battle hand.</p><p>During planning, select a creature, building, or spell and tap a landscape. Cards land and become raised miniatures. Battle runs as a live simulation: figures choose where to go, find food, flee, fight, and damage buildings. The next planning turn begins after 22 seconds.</p><p>With no card selected, tap a lane to open its full-screen view. Use the arrows to switch lanes and × to return. On the whole table, drag to orbit and tilt. In a lane, drag to travel along it, use Orbit or Alt-drag to turn, and pinch or use +/− to zoom. Select a creature during planning, then press Floop for its ability.</p><h3>Table journal</h3><ol id="journal"></ol></aside>
-  <div class="victory" id="victory" hidden><div><small>MATCH COMPLETE</small><h2 id="winner"></h2><button id="again">BUILD A NEW FIELD</button></div></div>
-</main><script type="module" src="kingdom-clash/tabletop-v2/app.js?v=field13"></script></body></html>
+  <footer class="battle-bar"><div class="live-readout"><small id="clock">00:00 · ROUND 1</small><strong id="event">The battlefield is alive.</strong></div><div class="sim-actions"><button id="pause" aria-label="Pause battle">Ⅱ</button><button id="speed" aria-label="Simulation speed">1×</button><button id="restart">NEW BATTLE</button></div></footer>
+</main>
+<script type="module" src="kingdom-clash/tabletop-v2/app.js?v=field14"></script>
+</body></html>
