@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createFieldDeck,selectLandscape,placeLandscape,canStart,lockField,applyField,LANDSCAPES} from '../kingdom-clash/tabletop-v2/field-deck.js';
 import {makeWorld} from '../kingdom-clash/reborn/rules.js';
 import {makeMiniature} from '../kingdom-clash/tabletop-v2/miniatures.js';
+import {projectCanvasPoint,pickCanvasLane} from '../kingdom-clash/tabletop-v2/board.js';
 
 test('four physical landscape slots consume cards and permit replacement before lock',()=>{
  const field=createFieldDeck();assert.equal(canStart(field),false);assert.equal(lockField(field),false);
@@ -19,4 +20,12 @@ test('placed terrain changes the simulation field and leaves the rival field ind
 test('the new miniature factory returns dimensional pig and distinct battle figures',()=>{
  for(const key of ['pig','dog','wolf','sheep','husker','archer','barn','cornfield','silo']){const model=makeMiniature(key);assert.ok(model.children.length>0,key);assert.ok(model.children.some(child=>child.isMesh||child.children.length),key);}
  const pig=makeMiniature('pig');assert.ok(pig.children.length>=15);assert.equal(pig.userData.legs.length,4);assert.ok(pig.userData.head);assert.ok(pig.userData.tail);
+});
+test('camera projection maps a tapped lane back to that lane after orbit, zoom and pan',()=>{
+ for(const yaw of [0,.2,-.6,.78])for(const zoom of [22,36,49]){
+  const camera={yaw,pitch:.69,zoom,x:2.4,z:-1};for(let lane=0;lane<4;lane++){
+   const point=projectCanvasPoint((lane-1.5)*5.65,5.6,1360,610,camera);
+   assert.equal(pickCanvasLane(...point,1360,610,camera),lane,`${yaw} ${zoom} ${lane}`);
+  }
+ }
 });
