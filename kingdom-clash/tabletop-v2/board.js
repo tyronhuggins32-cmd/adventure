@@ -4,6 +4,20 @@ import {makeMiniature,animateMiniature} from './miniatures.js';
 
 const X=i=>(i-1.5)*5.65;
 const colors={corn:0x8ea948,blue:0x4a9fb4,swamp:0x617956,ice:0xbadce3,sand:0xcfad70,stone:0x96998e,blank:0x393c36};
+const tableCorners=[];
+for(const x of[-13.8,13.8])for(const y of[-.75,1.4])for(const z of[-12.5,12.5])tableCorners.push(new T.Vector3(x,y,z));
+// Fit the whole tabletop to the actual canvas aspect, including its raised edge and miniatures.
+export function fitTableDistance(width,height,yaw=0,pitch=.69){
+ const camera=new T.PerspectiveCamera(height>width?56:46,width/height,.1,240);
+ const direction=new T.Vector3(Math.sin(yaw)*.32,Math.sin(pitch),Math.cos(yaw)*.86).normalize();
+ let lo=10,hi=240;
+ for(let i=0;i<18;i++){
+  const distance=(lo+hi)/2;camera.position.copy(direction).multiplyScalar(distance);camera.lookAt(0,0,0);camera.updateMatrixWorld();
+  const fits=tableCorners.every(corner=>{const point=corner.clone().project(camera);return point.z<1&&Math.abs(point.x)<.86&&Math.abs(point.y)<.86;});
+  if(fits)hi=distance;else lo=distance;
+ }
+ return hi;
+}
 export function projectCanvasPoint(x,z,W,H,cam){const zoom=36/cam.zoom,fit=1-Math.abs(cam.yaw)*.25,rx=(x-cam.x)*Math.cos(cam.yaw)+(z-cam.z)*Math.sin(cam.yaw)*.75,rz=(z-cam.z)*Math.cos(cam.yaw)-(x-cam.x)*Math.sin(cam.yaw)*.45,p=(rz+11.7)/23.4;return [W*.5+rx*W*.037*(.70+p*.31)*zoom*fit,H*(.15+p*.72)*zoom+(1-zoom)*H*.49];}
 export function pickCanvasLane(px,py,W,H,cam){const zoom=36/cam.zoom,fit=1-Math.abs(cam.yaw)*.25,progress=((py-(1-zoom)*H*.49)/zoom/H-.15)/.72,rz=progress*23.4-11.7,rx=(px-W*.5)/(W*.037*(.70+progress*.31)*zoom*fit),cos=Math.cos(cam.yaw),sin=Math.sin(cam.yaw),det=cos*cos+sin*sin*.3375,dx=(rx*cos-rz*sin*.75)/det,dz=(rz*cos+rx*sin*.45)/det,x=dx+cam.x,z=dz+cam.z;return Math.abs(x)<11.4&&Math.abs(z)<11.8?Math.max(0,Math.min(3,Math.round(x/5.65+1.5))):null;}
 const mats=new Map();
@@ -42,15 +56,15 @@ function landscape(parent,kind,lane,team){const g=new T.Group();parent.add(g);g.
 
 function fallingCard(scene,kind,lane,team){const g=new T.Group();scene.add(g);g.position.set(X(lane),4,team?-5.65:5.65);cube(g,0xf1d8a5,0,0,0,4.1,.09,6.1);cube(g,colors[kind]||0xc6a36b,0,.07,0,3.72,.025,5.72);return g;}
 
-export function makeBoard(canvas,onLane){let renderer=null,scene,table,camera,raycaster,plane,ctx=null;const cameraState={yaw:0,pitch:.69,zoom:36,x:0,z:0};let dragging=null,clock=0;const terrain=new Map(),actors=new Map(),summons=[],bursts=[];const events=new AbortController();
+export function makeBoard(canvas,onLane){let renderer=null,scene,table,camera,raycaster,plane,ctx=null;const cameraState={yaw:0,pitch:.69,zoom:36,x:0,z:0};let frameKey='',frameDistance=36,dragging=null,clock=0;const terrain=new Map(),actors=new Map(),summons=[],bursts=[];const events=new AbortController();
  try{
   renderer=new T.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;
-  scene=new T.Scene();scene.background=new T.Color(0x253b34);scene.fog=new T.Fog(0x253b34,51,75);camera=new T.PerspectiveCamera(46,1,.1,120);
+  scene=new T.Scene();scene.background=new T.Color(0x253b34);scene.fog=new T.Fog(0x253b34,110,190);camera=new T.PerspectiveCamera(46,1,.1,240);
   scene.add(new T.HemisphereLight(0xddeacb,0x513a2e,2));const sun=new T.DirectionalLight(0xffdfa5,2.65);sun.position.set(-9,19,9);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=18;sun.shadow.camera.bottom=-18;scene.add(sun);
   table=tabletop(scene);raycaster=new T.Raycaster();plane=new T.Plane(new T.Vector3(0,1,0),-.39);
  }catch(_){renderer?.dispose();renderer=null;ctx=canvas.getContext('2d');}
  function moveCamera(action){if(action==='left')cameraState.x=Math.max(-8,cameraState.x-1.8);if(action==='right')cameraState.x=Math.min(8,cameraState.x+1.8);if(action==='orbit')cameraState.yaw=cameraState.yaw>.45?0:cameraState.yaw+.19;if(action==='zoomIn')cameraState.zoom=Math.max(20,cameraState.zoom-3);if(action==='zoomOut')cameraState.zoom=Math.min(49,cameraState.zoom+3);if(action==='reset')Object.assign(cameraState,{yaw:0,pitch:.69,zoom:36,x:0,z:0});updateCamera();}
- function updateCamera(){if(!camera)return;const s=cameraState;camera.position.set(s.x+Math.sin(s.yaw)*s.zoom*.32,s.zoom*Math.sin(s.pitch),s.z+Math.cos(s.yaw)*s.zoom*.86);camera.lookAt(s.x,0,s.z);camera.updateProjectionMatrix();}
+ function updateCamera(){if(!camera)return;const s=cameraState,key=`${camera.aspect}/${s.yaw}/${s.pitch}`;if(key!==frameKey){frameDistance=fitTableDistance(camera.aspect,1,s.yaw,s.pitch);frameKey=key;}const distance=frameDistance*s.zoom/36,direction=new T.Vector3(Math.sin(s.yaw)*.32,Math.sin(s.pitch),Math.cos(s.yaw)*.86).normalize();camera.position.copy(direction.multiplyScalar(distance)).add(new T.Vector3(s.x,0,s.z));camera.lookAt(s.x,0,s.z);camera.updateProjectionMatrix();}
  function resize(){const r=canvas.getBoundingClientRect(),d=renderer?Math.min(window.devicePixelRatio||1,1.5):1,w=Math.max(1,Math.round(r.width*d)),h=Math.max(1,Math.round(r.height*d));if(canvas.width!==w||canvas.height!==h){if(renderer){renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.fov=r.height>r.width?56:46;camera.updateProjectionMatrix();}else{canvas.width=w;canvas.height=h;}}updateCamera();}
  function pick(cx,cy){const r=canvas.getBoundingClientRect();if(renderer){raycaster.setFromCamera(new T.Vector2((cx-r.left)/r.width*2-1,-((cy-r.top)/r.height*2-1)),camera);const hit=new T.Vector3();if(raycaster.ray.intersectPlane(plane,hit)&&Math.abs(hit.x)<11.4&&Math.abs(hit.z)<11.8)return Math.max(0,Math.min(3,Math.round(hit.x/5.65+1.5)));return null;}
   return pickCanvasLane((cx-r.left)*canvas.width/r.width,(cy-r.top)*canvas.height/r.height,canvas.width,canvas.height,cameraState);}
