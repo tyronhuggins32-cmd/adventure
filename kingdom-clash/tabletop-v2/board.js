@@ -6,7 +6,7 @@ const X=i=>(i-1.5)*5.65;
 export const TABLE_SCALE=2;
 const colors={corn:0x8ea948,blue:0x4a9fb4,swamp:0x617956,ice:0xbadce3,sand:0xcfad70,stone:0x96998e,blank:0x393c36};
 const tableCorners=[];
-for(const x of[-13.8,13.8])for(const y of[-.75,1.4])for(const z of[-12.5,12.5])tableCorners.push(new T.Vector3(x,y,z).multiplyScalar(TABLE_SCALE));
+for(const x of[-13.8,13.8])for(const y of[-.75,4.4])for(const z of[-12.5,12.5])tableCorners.push(new T.Vector3(x,y,z).multiplyScalar(TABLE_SCALE));
 // Fit the whole tabletop to the actual canvas aspect, including its raised edge and miniatures.
 export function fitTableDistance(width,height,yaw=0,pitch=.69){
  const camera=new T.PerspectiveCamera(height>width?56:46,width/height,.1,500);
@@ -61,7 +61,7 @@ export function makeBoard(canvas,onLane){let renderer=null,scene,table,camera,ra
  try{
   renderer=new T.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;
   scene=new T.Scene();scene.background=new T.Color(0x253b34);scene.fog=new T.Fog(0x253b34,220,380);camera=new T.PerspectiveCamera(46,1,.1,500);
-  scene.add(new T.HemisphereLight(0xddeacb,0x513a2e,2));const sun=new T.DirectionalLight(0xffdfa5,2.65);sun.position.set(-9,19,9);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=18;sun.shadow.camera.bottom=-18;scene.add(sun);
+  scene.add(new T.HemisphereLight(0xddeacb,0x513a2e,2));const sun=new T.DirectionalLight(0xffdfa5,2.65);sun.position.set(-18,38,18);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-36;sun.shadow.camera.right=36;sun.shadow.camera.top=36;sun.shadow.camera.bottom=-36;scene.add(sun);
   table=tabletop(scene);table.scale.setScalar(TABLE_SCALE);raycaster=new T.Raycaster();plane=new T.Plane(new T.Vector3(0,1,0),-.39*TABLE_SCALE);
  }catch(_){renderer?.dispose();renderer=null;ctx=canvas.getContext('2d');}
  function focusLane(lane){focusedLane=lane;Object.assign(cameraState,{x:X(lane),z:0,yaw:0,pitch:.42,zoom:8});updateCamera();}
@@ -89,7 +89,7 @@ export function makeBoard(canvas,onLane){let renderer=null,scene,table,camera,ra
  canvas.addEventListener('wheel',e=>{e.preventDefault();cameraState.zoom=Math.max(focusedLane===null?20:5,Math.min(focusedLane===null?49:28,cameraState.zoom+Math.sign(e.deltaY)*2));updateCamera();},{signal:events.signal,passive:false});
  function summon(key,lane,team=0){bursts.push({lane,team,age:0});if(renderer)summons.push({mesh:fallingCard(table,LANDSCAPES[key]?key:key==='cornfield'?'corn':'sand',lane,team),age:0});}
  function syncTerrain(field,world){if(!renderer)return;for(let lane=0;lane<4;lane++)for(let team=0;team<2;team++){const kind=team?(world?.lanes[lane].enemyTerrain||'corn'):(field.slots[lane]||'blank'),id=`${team}-${lane}`,old=terrain.get(id);if(old?.kind===kind)continue;if(old)table.remove(old.group);const group=landscape(table,kind,lane,team);terrain.set(id,{kind,group});}}
- function syncActors(world,dt){if(!renderer||!world)return;const active=new Set();for(const object of [...world.buildings,...world.units]){active.add(object.id);let item=actors.get(object.id);if(!item){const mesh=makeMiniature(object.key);table.add(mesh);mesh.scale.setScalar(.001);item={mesh,age:0};actors.set(object.id,item);bursts.push({lane:object.lane,team:object.team,age:0});}item.age+=dt;const rise=Math.min(1,item.age/.8),bounce=1+Math.sin(Math.min(1,item.age/.8)*Math.PI)*.32;item.mesh.scale.setScalar(rise*bounce*(world.buildings.includes(object)?1.1:1));item.mesh.position.set(object.x,.55+Math.sin(clock*3+object.id.length)*.025+Math.max(0,1-rise)*1.5,object.z);item.mesh.rotation.y=object.team?0:Math.PI;animateMiniature(item.mesh,object,clock);}
+ function syncActors(world,dt){if(!renderer||!world)return;const active=new Set();for(const object of [...world.buildings,...world.units]){active.add(object.id);let item=actors.get(object.id);if(!item){const mesh=makeMiniature(object.key);table.add(mesh);mesh.scale.setScalar(.001);item={mesh,age:0};actors.set(object.id,item);bursts.push({lane:object.lane,team:object.team,age:0});}item.age+=dt;const rise=Math.min(1,item.age/.8),bounce=1+Math.sin(Math.min(1,item.age/.8)*Math.PI)*.32;item.mesh.scale.setScalar(rise*bounce*(world.buildings.includes(object)?1.28:1.55));item.mesh.position.set(object.x,.55+Math.sin(clock*3+object.id.length)*.025+Math.max(0,1-rise)*1.5,object.z);item.mesh.rotation.y=object.team?0:Math.PI;animateMiniature(item.mesh,object,clock);}
  for(const [id,item]of actors)if(!active.has(id)){table.remove(item.mesh);actors.delete(id);}}
  function render(field,world,dt){resize();clock+=Math.min(.07,dt);for(const burst of bursts)burst.age+=dt;for(let i=bursts.length-1;i>=0;i--)if(bursts[i].age>1.1)bursts.splice(i,1);if(!renderer){paint(ctx,canvas,field,world,clock,cameraState,bursts);return;}
   syncTerrain(field,world);for(const [id,item]of terrain){if(item.kind==='corn'&&item.group.userData.details){const [team,lane]=id.split('-').map(Number),amount=world?(team?world.lanes[lane].enemyCrop:world.lanes[lane].crop):team?.75:.7;item.group.userData.details.scale.y=Math.max(.02,amount);}}syncActors(world,dt);for(let i=summons.length-1;i>=0;i--){const s=summons[i];s.age+=dt;s.mesh.position.y=4-(Math.min(1,s.age/.72)*3.54);s.mesh.rotation.y+=dt*2;s.mesh.scale.setScalar(Math.max(.001,1-s.age/.95));if(s.age>=.95){table.remove(s.mesh);summons.splice(i,1);}}
@@ -123,6 +123,6 @@ function paint(c,canvas,field,world,t,cam,bursts){const W=canvas.width,H=canvas.
  poly(c,[project(x0,0),project(x1,0),project(x1,.2),project(x0,.2)],'#e8be78','#866642',2);
  }
  for(const z of[-11.4,11.4])for(let j=0;j<18;j++){const [x,y]=project(-12.3+j*1.45,z);c.fillStyle='#7d5a3c';c.fillRect(x-2,y-9,4,10);}
- if(world){for(const o of [...world.buildings,...world.units].sort((a,b)=>a.z-b.z)){const [x,y]=project(o.x,o.z);figure(c,o,x,y,Math.max(.53,Math.min(1.3,W/1150))*(.8+(o.z+11)/45),t);}}
+ if(world){for(const o of [...world.buildings,...world.units].sort((a,b)=>a.z-b.z)){const [x,y]=project(o.x,o.z),close=cam.zoom<20?Math.min(2.6,36/cam.zoom*.72):1;figure(c,o,x,y,Math.max(.53,Math.min(1.3,W/1150))*(.8+(o.z+11)/45)*close,t);}}
  for(const b of bursts){const [x,y]=project(X(b.lane),b.team?-5.65:5.65),age=b.age;c.save();c.globalAlpha=1-age;oval(c,x,y,8+age*62,3+age*22,'#ffe79b88');c.strokeStyle='#ffe8a8';c.lineWidth=3;c.beginPath();c.ellipse(x,y,10+age*45,4+age*17,0,0,Math.PI*2);c.stroke();c.restore();}
 }

@@ -37,7 +37,7 @@ test('the 3D camera frames all four tabletop edges on phone and desktop screens'
   const camera=new T.PerspectiveCamera(height>width?56:46,width/height,.1,500);
   const direction=new T.Vector3(Math.sin(yaw)*.32,Math.sin(.69),Math.cos(yaw)*.86).normalize();
   camera.position.copy(direction.multiplyScalar(distance));camera.lookAt(0,0,0);camera.updateMatrixWorld();
-  for(const x of[-13.8,13.8])for(const y of[-.75,1.4])for(const z of[-12.5,12.5]){
+  for(const x of[-13.8,13.8])for(const y of[-.75,4.4])for(const z of[-12.5,12.5]){
    const point=new T.Vector3(x,y,z).multiplyScalar(TABLE_SCALE).project(camera);
    assert.ok(Math.abs(point.x)<.861&&Math.abs(point.y)<.861,`${width}×${height} yaw ${yaw}: ${point.x}, ${point.y}`);
   }
