@@ -4,7 +4,7 @@ import {createFieldDeck,selectLandscape,placeLandscape,canStart,lockField,applyF
 import {makeWorld} from '../kingdom-clash/reborn/rules.js';
 import {makeMiniature} from '../kingdom-clash/tabletop-v2/miniatures.js';
 import * as T from '../kingdom-clash/vendor/three.js';
-import {projectCanvasPoint,pickCanvasLane,fitTableDistance,TABLE_SCALE} from '../kingdom-clash/tabletop-v2/board.js';
+import {projectCanvasPoint,pickCanvasLane,fitTableDistance,TABLE_SCALE,MODEL_SCALE} from '../kingdom-clash/tabletop-v2/board.js';
 
 test('four physical landscape slots consume cards and permit replacement before lock',()=>{
  const field=createFieldDeck();assert.equal(canStart(field),false);assert.equal(lockField(field),false);
@@ -21,6 +21,15 @@ test('placed terrain changes the simulation field and leaves the rival field ind
 test('the new miniature factory returns dimensional pig and distinct battle figures',()=>{
  for(const key of ['pig','dog','wolf','sheep','husker','archer','barn','cornfield','silo']){const model=makeMiniature(key);assert.ok(model.children.length>0,key);assert.ok(model.children.some(child=>child.isMesh||child.children.length),key);}
  const pig=makeMiniature('pig');assert.ok(pig.children.length>=15);assert.equal(pig.userData.legs.length,4);assert.ok(pig.userData.head);assert.ok(pig.userData.tail);
+});
+test('a placed pig stays near crop height while its mesh detail remains intact',()=>{
+ const pig=makeMiniature('pig'),barn=makeMiniature('barn');
+ const pigHeight=new T.Box3().setFromObject(pig).getSize(new T.Vector3()).y*MODEL_SCALE.creature;
+ const barnHeight=new T.Box3().setFromObject(barn).getSize(new T.Vector3()).y*MODEL_SCALE.building;
+ // The authored corn stalk and cob reach about .9 local units at full growth.
+ assert.ok(pigHeight<.9,`pig ${pigHeight} must be shorter than mature corn`);
+ assert.ok(barnHeight>pigHeight*2,`barn ${barnHeight} should read as a building`);
+ assert.ok(pig.children.length>=15,'scaling must preserve the modeled details');
 });
 test('camera projection maps a tapped lane back to that lane after orbit, zoom and pan',()=>{
  for(const yaw of [0,.2,-.6,.78])for(const zoom of [22,36,49]){
