@@ -1,6 +1,6 @@
 import {CARDS,makeWorld,play,draw,floop,beginBattle,step} from '../reborn/rules.js';
 import {LANDSCAPES,createFieldDeck,selectLandscape,placeLandscape,canStart,lockField,applyField} from './field-deck.js';
-import {makeBoard} from './board.js?v=field9';
+import {makeBoard} from './board.js?v=field10';
 
 const $=id=>document.getElementById(id);
 const art={pig:[57,64],dog:[71,64],scholar:[29,50],husker:[0,17],archer:[57,50],maize:[57,0],earlings:[71,0],reaper:[43,0],sheep:[100,17],wolf:[29,100],crow:[43,0]};

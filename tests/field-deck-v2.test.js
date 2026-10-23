@@ -4,7 +4,7 @@ import {createFieldDeck,selectLandscape,placeLandscape,canStart,lockField,applyF
 import {makeWorld} from '../kingdom-clash/reborn/rules.js';
 import {makeMiniature} from '../kingdom-clash/tabletop-v2/miniatures.js';
 import * as T from '../kingdom-clash/vendor/three.js';
-import {projectCanvasPoint,pickCanvasLane,fitTableDistance,TABLE_SCALE,MODEL_SCALE} from '../kingdom-clash/tabletop-v2/board.js';
+import {projectCanvasPoint,pickCanvasLane,fitTableDistance,TABLE_SCALE,FIELD_SIZE,MODEL_SCALE} from '../kingdom-clash/tabletop-v2/board.js';
 
 test('four physical landscape slots consume cards and permit replacement before lock',()=>{
  const field=createFieldDeck();assert.equal(canStart(field),false);assert.equal(lockField(field),false);
@@ -49,13 +49,14 @@ test('focused canvas lane shows both armies and keeps taps aligned',()=>{
 });
 test('the 3D camera frames all four tabletop edges on phone and desktop screens',()=>{
  assert.equal(TABLE_SCALE,2);
+ assert.deepEqual(FIELD_SIZE,{width:1.5,length:3});
  for(const [width,height] of [[375,740],[320,568],[768,540],[1280,680]])for(const yaw of [0,.57,-.6]){
   const distance=fitTableDistance(width,height,yaw,.69);
   const camera=new T.PerspectiveCamera(height>width?56:46,width/height,.1,500);
   const direction=new T.Vector3(Math.sin(yaw)*.32,Math.sin(.69),Math.cos(yaw)*.86).normalize();
   camera.position.copy(direction.multiplyScalar(distance));camera.lookAt(0,0,0);camera.updateMatrixWorld();
   for(const x of[-13.8,13.8])for(const y of[-.75,4.4])for(const z of[-12.5,12.5]){
-   const point=new T.Vector3(x,y,z).multiplyScalar(TABLE_SCALE).project(camera);
+   const point=new T.Vector3(x*FIELD_SIZE.width,y,z*FIELD_SIZE.length).multiplyScalar(TABLE_SCALE).project(camera);
    assert.ok(Math.abs(point.x)<.861&&Math.abs(point.y)<.861,`${width}×${height} yaw ${yaw}: ${point.x}, ${point.y}`);
   }
  }
