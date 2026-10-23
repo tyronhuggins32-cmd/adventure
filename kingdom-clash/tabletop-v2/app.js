@@ -1,6 +1,6 @@
 import {CARDS,makeWorld,play,draw,floop,beginBattle,step} from '../reborn/rules.js';
 import {LANDSCAPES,createFieldDeck,selectLandscape,placeLandscape,canStart,lockField,applyField} from './field-deck.js';
-import {makeBoard} from './board.js?v=field5';
+import {makeBoard} from './board.js?v=field6';
 
 const $=id=>document.getElementById(id);
 const art={pig:[57,64],dog:[71,64],scholar:[29,50],husker:[0,17],archer:[57,50],maize:[57,0],earlings:[71,0],reaper:[43,0],sheep:[100,17],wolf:[29,100],crow:[43,0]};
@@ -21,8 +21,8 @@ function renderUI(){const lanes=$('laneButtons').children;for(let i=0;i<4;i++){l
  const latest=world.logs[0]?.text;if(latest!==logMark){logMark=latest;$('journal').innerHTML=world.logs.map(e=>`<li><b>${e.time}s</b> ${safe(e.text)}</li>`).join('');}
  renderCards();if(world.winner!==null){$('victory').hidden=false;$('winner').textContent=world.winner===0?'Your table wins.':'The rival wins.';}
 }
-function targetLane(lane){if(!world){if(field.selected===null){showLane(lane);return;}const kind=field.cards[field.selected],name=LANDSCAPES[kind].name;if(placeLandscape(field,lane)){board.summon(kind,lane);say(`${name} lands in slot ${lane+1}. ${field.slots.filter(Boolean).length} of 4 placed.`);renderUI();}return;}
- if(chosen===null){if(world.phase==='plan'){const own=world.units.find(u=>u.team===0&&u.lane===lane&&!u.flooped);selectedUnit=own?.id||null;renderUI();}showLane(lane);return;}
+function targetLane(lane){if(!world){if(field.selected===null){if(focusedLane!==lane)showLane(lane);return;}const kind=field.cards[field.selected],name=LANDSCAPES[kind].name;if(placeLandscape(field,lane)){board.summon(kind,lane);say(`${name} lands in slot ${lane+1}. ${field.slots.filter(Boolean).length} of 4 placed.`);renderUI();}return;}
+ if(chosen===null){if(world.phase==='plan'){const own=world.units.find(u=>u.team===0&&u.lane===lane&&!u.flooped);selectedUnit=own?.id||null;renderUI();}if(focusedLane!==lane)showLane(lane);return;}
  if(world.phase!=='plan'){say('The figures are fighting. Wait for the next planning turn.');return;}
  if(chosen!==null){const key=world.hand[chosen];if(!key){chosen=null;renderUI();return;}if(play(world,key,lane)){board.summon(key,lane);say(`${CARDS[key].name} falls onto landscape ${lane+1} and becomes a miniature.`);chosen=null;selectedUnit=null;}else say('That card cannot be played there. Check energy and the occupied building slot.');renderUI();return;}
 }
