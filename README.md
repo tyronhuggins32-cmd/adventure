@@ -1,9 +1,26 @@
-# The Living Table
+# Card Wars — Tabletop
 
-[Play the rebuilt Card Wars table](https://tyronhuggins32-cmd.github.io/adventure/) or open
+[Play the new field deck](https://tyronhuggins32-cmd.github.io/adventure/) or open
 [the older twelve commander table](https://tyronhuggins32-cmd.github.io/adventure/episode-table.html).
 
-## Rebuilt homepage
+## Field deck rebuild
+
+The homepage now starts with eight landscape cards. Place four into the four
+long slots before the first battle. A card replaces an occupied slot before
+locking the field. Cornfields grow finite edible crops, swamps apply mud,
+and other terrains give the table distinct surfaces. The rival side has its
+own cornfields. Then deploy battle cards: a falling card becomes a dimensional
+creature or building miniature, and the live battle runs for 22 seconds. The
+table retains pan, orbit and zoom controls, with a playable dimensional canvas
+renderer on browsers that disable WebGL. The Pig miniature has its own sculpted
+head, four articulated legs, ears, snout, eyes, coat and curled tail. This first
+stage concentrates on the field and deck; commander abilities are the next pass.
+
+`kingdom-clash/tabletop-v2` is the new field deck, miniature, board, and UI
+implementation. It currently uses the existing autonomous battle rules in
+`kingdom-clash/reborn/rules.js` while the commander systems are rebuilt.
+
+## Previous homepage implementation
 
 The homepage is a new, self-contained four-landscape game in
 `kingdom-clash/reborn`. Its deck selection, world state, autonomous decisions,

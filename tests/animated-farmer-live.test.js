@@ -74,13 +74,13 @@ test('live Farmer command moves his actual position and holds without teleportin
  assert.equal(world.command(farmer.id,'auto').ok,true);
  assert.equal(farmer.order,null);
 });
-test('new production homepage loads the rebuilt game while the older Living World retains Farmer focus controls',()=>{
+test('new production homepage loads the field deck while older scenes retain Farmer focus controls',()=>{
  const home=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const app=fs.readFileSync(new URL('../kingdom-clash/living-world/app.js',import.meta.url),'utf8');
  const view=fs.readFileSync(new URL('../kingdom-clash/living-world/view.js',import.meta.url),'utf8');
  const scene=fs.readFileSync(new URL('../kingdom-clash/reborn/scene.js',import.meta.url),'utf8');
- assert.match(home,/kingdom-clash\/reborn\/app\.js/);
- assert.match(home,/id="table"/);
+ assert.match(home,/kingdom-clash\/tabletop-v2\/app\.js/);
+ assert.match(home,/id="board"/);
  assert.match(scene,/harvestFarmer\(farmerS\)/);
  assert.match(scene,/animateFarmer\(/);
  assert.match(app,/focusFarmer\(\)/);
