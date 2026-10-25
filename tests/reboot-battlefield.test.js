@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from '../kingdom-clash/vendor/three.js';
 import {createWorld,stepWorld,BIOMES} from '../kingdom-clash/reboot/world.js';
-import {fitDistance} from '../kingdom-clash/reboot/table.js';
+import {fitDistance,makeScene} from '../kingdom-clash/reboot/table.js';
+import {makeActor,makeBuilding} from '../kingdom-clash/reboot/models.js';
 
 test('the reboot opens with four populated, distinct physical lanes',()=>{
  const w=createWorld();assert.deepEqual(w.lanes.map(l=>l.biome),BIOMES.map(b=>b.id));
@@ -30,4 +31,12 @@ test('lane camera fits its raised terrain and buildings on a phone',()=>{
    assert.ok(Math.abs(p.x)<.915&&Math.abs(p.y)<.875,`lane ${lane}: ${p.x},${p.y}`);
   }
  }
+});
+test('the independent 3D scene and every initial miniature construct',()=>{
+ const {scene,lands}=makeScene(),world=createWorld();
+ assert.equal(lands.length,8);
+ for(const unit of world.units)assert.ok(makeActor(unit.kind).children.length>0,unit.kind);
+ for(const building of world.buildings)assert.ok(makeBuilding(building.kind).children.length>0,building.kind);
+ let meshes=0;scene.traverse(object=>{if(object.isMesh||object.isInstancedMesh)meshes++;});
+ assert.ok(meshes>500);
 });
