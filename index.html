@@ -1,33 +1,7 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#151d20">
-  <title>Card Wars · Living Table</title>
-  <link rel="stylesheet" href="kingdom-clash/tabletop-v2/battle.css?v=field15">
-</head>
-<body>
-<main id="game">
-  <header class="heads-up">
-    <div class="combatant"><span class="crest">✦</span><div><small>THE CORNLANDS</small><strong>Farmer</strong><span class="life"><i id="ownBar"></i></span></div><b id="ownHealth">25</b></div>
-    <div class="round"><small>CARD WARS · LIVING TABLE</small><strong id="round">ROUND 1</strong><span id="phaseLabel">BATTLE LIVE</span></div>
-    <div class="combatant rival"><b id="foeHealth">25</b><div><small>RIVAL FIELD</small><strong>Jake</strong><span class="life"><i id="foeBar"></i></span></div><span class="crest">◆</span></div>
-  </header>
-  <section class="viewport" aria-label="Living tabletop battlefield">
-    <canvas id="board" aria-label="Four living battlefield lanes. Tap a lane for a close view; drag to move the camera."></canvas>
-    <div class="scene-title"><small>THE TABLETOP</small><strong id="viewTitle">FOUR LIVING LANDSCAPES</strong><span id="sceneInfo">Miniatures think, move and fight on the table.</span></div>
-    <div class="battle-mark" id="battleMark">● LIVE SIMULATION</div>
-    <div class="lane-rail" aria-label="Inspect landscapes">
-      <button data-lane="0"><span>01</span><strong>Cornlands</strong></button>
-      <button data-lane="1"><span>02</span><strong>Blue Plains</strong></button>
-      <button data-lane="2"><span>03</span><strong>Frozen Lake</strong></button>
-      <button data-lane="3"><span>04</span><strong>Swamp</strong></button>
-    </div>
-    <div class="view-control"><button id="prevLane" aria-label="Previous lane">‹</button><button id="allLanes">ALL LANES</button><button id="nextLane" aria-label="Next lane">›</button></div>
-    <div class="camera" aria-label="Camera controls"><button data-cam="left" aria-label="Pan left">←</button><button data-cam="orbit" aria-label="Orbit">⟳</button><button data-cam="right" aria-label="Pan right">→</button><button data-cam="tiltDown" aria-label="Lower camera">↘</button><button data-cam="tiltUp" aria-label="Raise camera">↗</button><button data-cam="zoomOut" aria-label="Zoom out">−</button><button data-cam="zoomIn" aria-label="Zoom in">＋</button><button data-cam="reset" aria-label="Reset camera">⌂</button></div>
-  </section>
-  <footer class="battle-bar"><div class="live-readout"><small id="clock">00:00 · ROUND 1</small><strong id="event">The battlefield is alive.</strong></div><div class="sim-actions"><button id="pause" aria-label="Pause battle">Ⅱ</button><button id="speed" aria-label="Simulation speed">1×</button><button id="restart">NEW BATTLE</button></div></footer>
-</main>
-<script type="module" src="kingdom-clash/tabletop-v2/app.js?v=field15"></script>
-</body></html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#182c29"><title>Card Wars · Battlefield</title><link rel="stylesheet" href="kingdom-clash/reboot/style.css?v=reboot1"></head>
+<body><main id="game">
+<header class="status"><div class="side"><span class="emblem">✦</span><div class="person"><small>YOUR FIELD</small><strong>Farmer</strong><i><span id="bar0"></span></i></div><b id="hp0">25</b></div><div class="center"><small>CARD WARS</small><strong id="round">WAVE 1</strong><em id="state">LIVE BATTLE</em></div><div class="side foe"><b id="hp1">25</b><div class="person"><small>RIVAL FIELD</small><strong>Jake</strong><i><span id="bar1"></span></i></div><span class="emblem">◆</span></div></header>
+<section class="world" aria-label="Living 3D battlefield"><canvas id="battlefield" aria-label="Four physical landscape lanes with autonomous miniatures. Drag to orbit, tap a landscape to inspect it."></canvas><div class="scene-label"><small>THE TABLE</small><strong id="viewName">THE FOUR FIELDS</strong></div><button id="overview" hidden>← WHOLE TABLE</button></section>
+<footer class="hud"><nav class="lane-picker" aria-label="View a lane"><button data-lane="0" aria-pressed="false"><b>01</b> CORN</button><button data-lane="1" aria-pressed="false"><b>02</b> BLUE</button><button data-lane="2" aria-pressed="false"><b>03</b> ICE</button><button data-lane="3" aria-pressed="false"><b>04</b> SWAMP</button></nav><div class="control-line"><div class="camera" aria-label="Camera"><button data-cam="left" aria-label="Orbit left">↶</button><button data-cam="right" aria-label="Orbit right">↷</button><button data-cam="down" aria-label="Lower camera">↘</button><button data-cam="up" aria-label="Raise camera">↗</button><button data-cam="out" aria-label="Zoom out">−</button><button data-cam="in" aria-label="Zoom in">＋</button><button data-cam="reset" aria-label="Reset camera">⌂</button></div><div class="sim"><button id="pause" aria-label="Pause simulation">Ⅱ</button><button id="speed" aria-label="Simulation speed">1×</button><button id="restart" aria-label="Restart battle">↺</button></div></div><div class="chronicle"><span id="time">00:00</span><strong id="event">The living battlefield wakes.</strong></div></footer>
+</main><script type="module" src="kingdom-clash/reboot/main.js?v=reboot1"></script></body></html>
