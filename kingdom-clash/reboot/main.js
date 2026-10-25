@@ -1,5 +1,5 @@
 import {BIOMES,createWorld,stepWorld} from './world.js';
-import {createTable} from './table.js';
+import {createTable} from './table.js?v=reboot2';
 const $=id=>document.getElementById(id);
 let world=createWorld(),lane=null,last=performance.now(),uiElapsed=0,eventText='';
 const table=createTable($('battlefield'));
