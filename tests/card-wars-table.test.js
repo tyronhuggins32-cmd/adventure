@@ -16,6 +16,13 @@ test('placement spends action points and creates a miniature only on matching te
  const s=setup();choose(s,{kind:'card',id:'pig',index:0});assert.equal(canPlay(s,'pig',1),false);assert.equal(playCard(s,1),false);assert.equal(s.ap,3);assert.equal(playCard(s,0),true);assert.equal(s.ap,2);assert.equal(s.units.some(u=>u.card==='pig'&&u.side===0),true);
  cast(s,'wingedPig',0);assert.equal(s.units.find(u=>u.card==='pig').wings,true);assert.equal(s.effects.some(e=>e.type==='wing'),true);
 });
+test('a corn field supports a farmer, pig, and sheep beside a barn',()=>{
+ const s=setup();cast(s,'farmer',0);cast(s,'barn',0);cast(s,'pig',0);cast(s,'sheep',0);
+ const crew=s.units.filter(u=>u.side===0&&u.lane===0);
+ assert.deepEqual(crew.map(u=>u.card),['farmer','pig','sheep']);
+ assert.equal(new Set(crew.map(u=>u.x)).size,3);
+ s.hand.push('scarecrow');s.ap=3;assert.equal(canPlay(s,'scarecrow',0),false);
+});
 test('barn sheep spell, scarecrow maze, and wolf packs require their exact board state',()=>{
  const s=setup();s.hand.push('cotton');assert.equal(canPlay(s,'cotton',0),false);cast(s,'barn',0);assert.equal(canPlay(s,'cotton',0),false);cast(s,'sheep',0);assert.equal(canPlay(s,'cotton',0),true);cast(s,'cotton',0);assert.equal(s.effects.some(e=>e.type==='cotton'),true);
  const other=setup();other.hand.push('maze');assert.equal(canPlay(other,'maze',0),false);cast(other,'scarecrow',0);other.ap=3;assert.equal(canPlay(other,'maze',0),true);cast(other,'maze',0);assert.equal(other.hazards[0],2);
