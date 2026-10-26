@@ -11,7 +11,7 @@ test('homepage loads the card driven living tabletop',()=>{
  assert.match(home,/class="field-tabs"/);
  assert.match(home,/id="table"/);
  assert.match(home,/id="cards"/);
- for(const filename of ['engine.js','scene.js','app.js']){
+ for(const filename of ['engine.js','scene.js','theater.js','app.js']){
   const file=fileURLToPath(new URL('kingdom-clash/card-wars/'+filename,root));
   execFileSync(process.execPath,['--check',file],{stdio:'pipe'});
  }

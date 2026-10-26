@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as THREE from '../kingdom-clash/vendor/three.js';
 import {createGame,choose,placeLandscape,canPlay,playCard,battle,tick,CARDS} from '../kingdom-clash/card-wars/engine.js';
 import {createWorld3D,miniature,fit} from '../kingdom-clash/card-wars/scene.js';
+import {theaterProjection} from '../kingdom-clash/card-wars/theater.js';
 function setup(){const s=createGame();for(let lane=0;lane<4;lane++){choose(s,{kind:'land',id:['corn','blue','ice','swamp'][lane],index:0});assert.equal(placeLandscape(s,lane),true);}return s;}
 function cast(s,id,lane){s.hand.push(id);s.ap=3;choose(s,{kind:'card',id,index:s.hand.length-1});assert.equal(playCard(s,lane),true,id);}
 test('landscape cards create the four physical fields before any battle cards can be played',()=>{
@@ -26,4 +27,11 @@ test('battle advances the simulation and returns a fresh hand and points',()=>{
 test('3D landscape and miniature geometry build and fit a mobile camera',()=>{
  const {scene,lands}=createWorld3D();assert.equal(lands.length,8);let meshCount=0;scene.traverse(o=>{if(o.isMesh)meshCount++;});assert.ok(meshCount>400);for(const c of Object.values(CARDS))if(c.type==='creature')assert.ok(miniature(c.art).children.length>0,c.name);
  const aspect=375/410,cam=new THREE.PerspectiveCamera(54,aspect,.1,250);for(const lane of[null,0,1,2,3])assert.ok(fit(cam,lane,aspect,.17,.82)>9);
+});
+test('table projection gives the near card a larger footprint and taps map to the right lane',()=>{
+ const view=theaterProjection(375,410,null,.08,1);
+ const far=view.point(-4,-10),farRight=view.point(4,-10),near=view.point(-4,10),nearRight=view.point(4,10);
+ assert.ok(nearRight[0]-near[0]>(farRight[0]-far[0])*1.5);
+ for(let lane=0;lane<4;lane++){const x=(lane-1.5)*8,[px,py]=view.point(x,6);const hit=view.unproject(px/375,py/410);assert.ok(Math.abs(hit.x-x)<.001);}
+ const farmer=miniature('farmer');let parts=0;farmer.traverse(o=>{if(o.isMesh)parts++;});assert.ok(parts>50);
 });
