@@ -2,7 +2,7 @@ import * as THREE from '../vendor/three.js';
 import {LANDS,CARDS} from './engine.js';
 import {createModel} from '../model-3d.js';
 import {animateFarmer} from '../farmer-model.js';
-import {paintTheater,theaterProjection} from './theater.js';
+import {paintTheater,theaterProjection} from './theater.js?v=table6';
 const X=i=>(i-1.5)*8;
 const mat=(color,roughness=.83,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
 const wood=mat(0x6c412a),gold=mat(0xc79b54,.45,.28),dark=mat(0x342b26),stone=mat(0x7a8270),corn=mat(0xe5ba53),leaf=mat(0x54713b),snow=mat(0xcce2df),water=mat(0x4e9aa9,.31,.22);
