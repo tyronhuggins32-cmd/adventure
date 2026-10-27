@@ -79,7 +79,7 @@ test('production homepage loads the card table while older scenes retain Farmer 
  const app=fs.readFileSync(new URL('../kingdom-clash/living-world/app.js',import.meta.url),'utf8');
  const view=fs.readFileSync(new URL('../kingdom-clash/living-world/view.js',import.meta.url),'utf8');
  const scene=fs.readFileSync(new URL('../kingdom-clash/reborn/scene.js',import.meta.url),'utf8');
- assert.match(home,/kingdom-clash\/card-wars\/app\.js/);
+ assert.match(home,/kingdom-clash\/card-wars\/field-app\.js/);
  assert.match(home,/id="table"/);
  assert.match(scene,/harvestFarmer\(farmerS\)/);
  assert.match(scene,/animateFarmer\(/);
